@@ -60,6 +60,10 @@ class AdminController extends Controller
         ]);
     }
 
+    public function apartments () {
+        
+    }
+
     public function courses () {
         $courses = Course::with('cohorts.assignments', 'cohorts.tutor', 'cohorts.students', 'cohorts.files.user', 'modules')->get();
         return Inertia::render('Admin/Courses/Index', [

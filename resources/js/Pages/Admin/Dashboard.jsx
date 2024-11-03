@@ -1,9 +1,9 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import ProfilePhoto from '@/Components/ProfilePhoto';
+import LgaSelect from '@/Components/LgaSelect';
 
 export default function Dashboard({ auth, courses, tutors, students, admins }) {
-    // console.log(courses)
     return (
         <AdminLayout
             user={auth.user}
@@ -59,10 +59,8 @@ export default function Dashboard({ auth, courses, tutors, students, admins }) {
                                 </svg>
                             </div>
                         </div>
-                        
-                    </div>
 
-                    
+                    </div>
                 </div>
             </div>
         </AdminLayout>

@@ -60,9 +60,7 @@ Route::get('/', function () {
 })->middleware(['auth', 'verified'])->name('home');
 
 Route::prefix('/company')->middleware(['auth', 'checkcompany'])->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('Company/Dashboard');
-    })->name('company.dashboard');
+    Route::get('/', [AdminController::class, 'index'])->name('company.dashboard');
 
     Route::post('/update', [CompanyController::class, 'update'])->name('company.update');
 
@@ -78,8 +76,15 @@ Route::prefix('/admin')->middleware(['auth', 'checkadmin'])->group(function () {
     Route::post('/update-user/{user}', [AdminController::class, 'updateUser'])->name('admin.update-user');
     Route::delete('/delete-user/{user}', [AdminController::class, 'deleteUser'])->name('admin.delete-user');
 
+    Route::group(['middleware' => ['can:upload apartments']], function () {
+        Route::get('/apartments', [AdminController::class, 'apartments'])->name('admin.apartments');
+        Route::post('/create-apartment', [AdminController::class, 'createApartment'])->name('admin.create-apartment');
+        Route::post('/update-apartment/{apartment}', [AdminController::class, 'updateApartment'])->name('admin.update-apartment');
+        Route::delete('/apartment/{apartment}', [AdminController::class, 'deleteApartment'])->name('admin.delete-apartment');
+    });
+    
     // Courses
-    Route::group(['middleware' => ['can:manage courses']], function () {
+    Route::group(['middleware' => ['can:manage all data']], function () {
         Route::get('/courses', [AdminController::class, 'courses'])->name('admin.courses');
         // Route::get('/course/view/{course}', [AdminController::class, 'viewCourse'])->name('admin.view-course');
         Route::post('/create-course', [AdminController::class, 'createCourse'])->name('admin.create-course');
