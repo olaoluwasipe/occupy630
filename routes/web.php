@@ -5,6 +5,7 @@ use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentSubmissionController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MeetingController;
@@ -57,6 +58,16 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 })->middleware(['auth', 'verified'])->name('home');
+
+Route::prefix('/company')->middleware(['auth', 'checkcompany'])->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Company/Dashboard');
+    })->name('company.dashboard');
+
+    Route::post('/update', [CompanyController::class, 'update'])->name('company.update');
+
+    Route::get('/register', [CompanyController::class, 'create'])->name('company.register');
+});
 
 Route::prefix('/admin')->middleware(['auth', 'checkadmin'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin');

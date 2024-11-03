@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import TextInput from './TextInput'
 import SecondaryButton from './SecondaryButton'
+import {FaEye, FaEyeSlash} from 'react-icons/fa'
 
 const PasswordInput = ({value, name = 'password', placeholder, style, onChange}) => {
     const [hidden, setHidden] = useState(true)
@@ -12,7 +13,7 @@ const PasswordInput = ({value, name = 'password', placeholder, style, onChange})
     };
 
   return (
-    <div className='flex justify-space-between gap-1'>
+    <div className='flex justify-space-between gap-1 relative'>
         <TextInput
             id="password"
             type={hidden ? 'password' : 'text'}
@@ -25,7 +26,13 @@ const PasswordInput = ({value, name = 'password', placeholder, style, onChange})
             onChange={onChange}
             required
         />
-        <SecondaryButton onClick={togglePasswordVisibility}>{hidden ? 'Show' : 'Hide'}</SecondaryButton>
+
+        <div
+            onClick={togglePasswordVisibility}
+            className='absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer z-10'
+        >
+            {hidden ? <FaEyeSlash /> : <FaEye />}
+        </div>
     </div>
   )
 }

@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'checktype' => \App\Http\Middleware\CheckRole::class,
             'checkuser' => \App\Http\Middleware\CheckUser::class,
             'checkadmin' => \App\Http\Middleware\CheckAdmin::class,
+            'checkcompany' => \App\Http\Middleware\CheckCompany::class,
             'checksuperadmin' => \App\Http\Middleware\CheckSuperAdmin::class,
         ]);
 

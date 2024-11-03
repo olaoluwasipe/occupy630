@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const ImageInput = ({ onFileChange, preselected }) => {
+const ImageInput = ({ onFileChange, preselected, width=10, height=10, rounded=true, profile=true }) => {
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
-    const [previewUrls, setPreviewUrls] = useState('https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png');
+    const [previewUrls, setPreviewUrls] = useState(profile ? 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png' : 'https://www.adaptivewfs.com/wp-content/uploads/2020/07/logo-placeholder-image.png');
 
     const handleDivClick = () => {
         // Trigger the click event on the hidden file input
@@ -42,7 +42,7 @@ const ImageInput = ({ onFileChange, preselected }) => {
 
     return (
         <div className="file-input">
-            <img onClick={handleDivClick} className="w-10 h-10 rounded-full" src={previewUrls} alt="Rounded avatar" />
+            <img onClick={handleDivClick} className={`w-${width} h-${height} ${rounded ? 'rounded-full' : ''}`} src={previewUrls} alt="Rounded avatar" />
             <input
                 type='file'
                 name='attachment'

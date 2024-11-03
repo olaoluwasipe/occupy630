@@ -1,30 +1,56 @@
 <?php
-
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
         // Create Permissions
-        $permissions = ['manage learners', 'manage sessions', 'manage tutors', 'manage courses', 'manage notifications'];
+        $permissions = [
+            'upload apartments',
+            'manage tenants',
+            'approve rentals',
+            'view rental history',
+            'manage employees',
+            'manage own profile',
+            'manage all data'
+        ];
+
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission]);
         }
 
-        // Create Roles and assign existing permissions
-        $role = Role::create(['name' => 'admin']);
-        // $role->givePermissionTo('');
+        // Create Roles and assign permissions
+        // Landlord Role
+        $landlordRole = Role::create(['name' => 'landlord']);
+        $landlordRole->givePermissionTo([
+            'upload apartments',
+            'view rental history',
+            'manage own profile'
+        ]);
 
-        $role = Role::create(['name' => 'superadmin']);
-        $role->givePermissionTo(Permission::all());
+        // Employer/Company Role
+        $employerRole = Role::create(['name' => 'employer']);
+        $employerRole->givePermissionTo([
+            'manage employees',
+            'view rental history',
+            'approve rentals',
+            'manage own profile'
+        ]);
+
+        // Employee Role
+        $employeeRole = Role::create(['name' => 'employee']);
+        $employeeRole->givePermissionTo([
+            'view rental history',
+            'manage own profile'
+        ]);
+
+        // Superadmin Role with all permissions
+        $superAdminRole = Role::create(['name' => 'superadmin']);
+        $superAdminRole->givePermissionTo(Permission::all());
     }
 }
