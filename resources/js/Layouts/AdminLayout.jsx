@@ -5,6 +5,7 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link } from '@inertiajs/react';
 import IconTextInput from '@/Components/IconTextInput';
+import { FaHouse } from 'react-icons/fa6';
 
 export default function Admin({ user, title, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -43,6 +44,11 @@ export default function Admin({ user, title, children }) {
                                         </svg>
 
                                         User Management
+                                    </NavLink>
+                                    <NavLink style={{margin: 0, marginLeft: '10px', padding: '15px', justifyContent: 'start'}} className='border-b-gray-300 gap-5 m-l-3 border-2' href={route('admin.apartments')} active={route().current('admin.apartments')}>
+                                        <FaHouse size={20} />
+
+                                        Property Management
                                     </NavLink>
                                     <NavLink style={{margin: 0, marginLeft: '10px', padding: '15px', justifyContent: 'start'}} className='border-b-gray-300 gap-5 m-l-3 border-2' href={route('admin.courses')} active={route().current('admin.courses')}>
                                         <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">

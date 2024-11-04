@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Apartment;
+use App\Models\ApartmentAttribute;
+use App\Models\ApartmentCategory;
 use App\Models\Cohort;
 use App\Models\Course;
 use App\Models\CourseModule;
@@ -61,7 +64,14 @@ class AdminController extends Controller
     }
 
     public function apartments () {
-        
+        $apartments = Apartment::with('images', 'attributes', 'category')->get();;
+        $apartmentAttributes = ApartmentAttribute::all();
+        $apartmentCategories = ApartmentCategory::all();
+        return Inertia::render('Admin/Apartments/Index', [
+            'apartments' => $apartments,
+            'attributes' => $apartmentAttributes,
+            'categories' => $apartmentCategories,
+        ]);
     }
 
     public function courses () {

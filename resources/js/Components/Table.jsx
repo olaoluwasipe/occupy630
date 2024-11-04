@@ -18,7 +18,7 @@ const Table = ({ data, columnsToShow = [], actions, rowsPerPage = 10, searchable
     if (data.length === 0) {
         return (
             <div className="relative overflow-x-auto sm:rounded-lg">
-                <p className="text-gray-500 dark:text-gray-400 text-center">There is no {actions.type} in this table</p>
+                <p className="text-gray-500 dark:text-gray-400 text-center">There are no {actions.type} in this table</p>
             </div>
         );
     }

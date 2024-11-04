@@ -61,11 +61,11 @@ class Apartment extends Model
         'amenities' => 'array',
     ];
 
-    public function apartmentCategory() {
+    public function category() {
         return $this->belongsTo(ApartmentCategory::class);
     }
 
-    public function apartmentImages() {
+    public function images() {
         return $this->hasMany(ApartmentImage::class);
     }
 
@@ -77,8 +77,8 @@ class Apartment extends Model
         return $this->belongsTo(User::class, 'tenant_id');
     }
 
-    public function apartmentAttributes () {
-        return $this->hasMany(ApartmentAttribute::class, 'id', 'attributes');
+    public function attributes () {
+        return $this->hasMany(ApartmentAttribute::class, 'id', 'amenities');
     }
 
     // public function rentalHistory() {
