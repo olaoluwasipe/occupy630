@@ -35,7 +35,8 @@ const MultipleImageInput = ({ onFileChange, preselected, rounded = true, title, 
         }
     }, [preselected]);
 
-    const handleRemoveFile = (index) => {
+    const handleRemoveFile = (e, index) => {
+        e.preventDefault();
         const newSelectedFiles = selectedFiles.filter((_, i) => i !== index);
         const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
         setSelectedFiles(newSelectedFiles);
@@ -65,16 +66,16 @@ const MultipleImageInput = ({ onFileChange, preselected, rounded = true, title, 
             </div>
             {(previewUrls.length > 0 && showImages) && (
                 <div className="flex w-full mt-4 p-3 border-2 border rounded-md flex-wrap gap-3">
-                    {previewUrls.map((url, index) => (
+                    {previewUrls.map((image, index) => (
                         <div key={index} className="relative">
                             <img
-                                src={url}
+                                src={'/' + image.url || image}
                                 alt={`Preview ${index}`}
                                 className={`w-24 h-24 object-cover ${rounded ? 'rounded-md' : ''}`}
                             />
                             <button
                                 className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 rounded-full"
-                                onClick={() => handleRemoveFile(index)}
+                                onClick={(e) => handleRemoveFile(e, index)}
                             >
                                 X
                             </button>

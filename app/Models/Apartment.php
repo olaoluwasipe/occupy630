@@ -50,7 +50,7 @@ class Apartment extends Model
         $count = 1;
 
         // Check for existing slugs and adjust if necessary
-        while (Course::where('slug', $slug)->exists()) {
+        while (Apartment::where('slug', $slug)->exists()) {
             $slug = $originalSlug . '-' . $count++;
         }
 

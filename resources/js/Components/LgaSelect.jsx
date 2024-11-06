@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import SelectInput from './SelectInput'
 import lgaList from '@/lga'
 
-const LgaSelect = ({ direction = 'col', onChange, className, ...props }) => {
-    const [lga, setLga] = useState([]);
-    const [conLga, setConLga] = useState('');
-    const [conState, setConState] = useState('');
+const LgaSelect = ({ direction = 'col', onChange, className, location, ...props }) => {
+    const [lga, setLga] = useState(lgaList.filter((lga) => lga.state === location?.state)[0]);
+    const [conLga, setConLga] = useState(location?.city);
+    const [conState, setConState] = useState(location?.state);
 
     const state = lgaList.map((lga, index) => {
         return (

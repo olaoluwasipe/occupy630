@@ -31,7 +31,9 @@ const Table = ({ data, columnsToShow = [], actions, rowsPerPage = 10, searchable
     const endIndex = startIndex + rowsPerPage;
     const currentData = data.slice(startIndex, endIndex);
     const filteredData = currentData.filter((data) =>
-        data?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        columnsToShow.some((column) =>
+            data[column]?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+        )
     );
     const totalPages = Math.ceil(data.length / rowsPerPage);
 

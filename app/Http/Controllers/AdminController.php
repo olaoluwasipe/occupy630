@@ -64,9 +64,10 @@ class AdminController extends Controller
     }
 
     public function apartments () {
-        $apartments = Apartment::with('images', 'attributes', 'category')->get();;
+        $apartments = Apartment::orderBy('id', 'desc');
         $apartmentAttributes = ApartmentAttribute::all();
         $apartmentCategories = ApartmentCategory::all();
+        $apartments = $apartments->with('images', 'category')->get();
         return Inertia::render('Admin/Apartments/Index', [
             'apartments' => $apartments,
             'attributes' => $apartmentAttributes,

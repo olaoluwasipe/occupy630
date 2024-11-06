@@ -13,20 +13,21 @@ import LgaSelect from '@/Components/LgaSelect';
 import Checkbox from '@/Components/Checkbox';
 
 const ApartmentAddForm = ({ categories, attributes, apartment }) => {
+    console.log(apartment)
     attributes = ['parking', 'wifi', 'tv', 'ac', 'gym', 'pool', 'laundry', 'security']
     const { data, setData, post, processing, errors, reset } = useForm({
-        title: '',
-        description: '',
-        attachments: [],
-        dueDate: '',
-        address: '',
-        price: '',
-        category: '',
-        state: '',
-        city: '',
-        bathrooms: '',
-        bedrooms: '',
-        amenities: [],
+        title: apartment?.title,
+        description: apartment?.description,
+        attachments: apartment?.images,
+        address: apartment?.address,
+        price: apartment?.price,
+        category: apartment?.category_id,
+        location: {state: apartment?.state, city: apartment?.lga},
+        // city: '',
+        bathrooms: apartment?.bathrooms,
+        bedrooms: apartment?.bedrooms,
+        amenities: apartment?.amenities,
+        availability: apartment?.availability,
         // cohort_id: cohort
     });
     const wizardRef = useRef(null);
@@ -76,6 +77,11 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
     setData('description', content)
   }
 
+  const handleImagesChange = (files) => {
+    setData('attachments', files)
+    console.log(files);
+  }
+
   const handlePriceChange = (e) => {
     var price = e.target.value
 
@@ -106,8 +112,8 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
 
   const handleStateChange = (location) => {
     console.log(location)
-    setData('state', location.state)
-    setData('city', location.lga)
+    setData('location', location)
+    console.log(location.state);
     // setData('dueDate', e.target.value)
   }
 
@@ -121,7 +127,9 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
     <form onSubmit={handleSubmit}>
 
         <div>
-            <MultipleImageInput title={`Images`} />
+            <MultipleImageInput title={`Images`} preselected={data.attachments} onFileChange={handleImagesChange} />
+
+            <InputError message={errors?.attachments} className='mt-2' />
         </div>
         <div className='mt-3'>
             <InputLabel htmlFor="title" value="Apartment Title" />
@@ -154,7 +162,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
                 name="price"
                 multiple
                 placeholder="Rent"
-                // value={data.attachment}
+                value={data.price}
                 className="mt-1 block w-full"
                 onChange={handlePriceChange}
             />
@@ -172,7 +180,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
                 required
             >
                 <option value="">Select Category</option>
-                <option value="0">Test Category</option>
+                <option value="1">Test Category</option>
                 {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                         {category.name} {/* Display the category name here */}
@@ -208,11 +216,12 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
                 <LgaSelect
                     direction='row'
                     className='w-full block'
+                    location={data.location}
                     onChange={handleStateChange}
                 />
 
-                <InputError message={errors?.state} className='mt-2' />
-                <InputError message={errors?.city} className='mt-2' />
+                <InputError message={errors?.location?.state} className='mt-2' />
+                <InputError message={errors?.location?.lga} className='mt-2' />
             </div>
         </div>
       </div>
@@ -229,7 +238,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
                         id="bedrooms"
                         type="number"
                         name="bedrooms"
-                        value={data.bedroom}
+                        value={data.bedrooms}
                         className='mt-1 block w-full'
                         onChange={(e) => setData('bedrooms', e.target.value)}
                         required
@@ -265,6 +274,8 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
                     <option value="available">Available</option>
                     <option value="unavailable">Not Available</option>
                 </SelectInput>
+
+                <InputError message={errors?.availability} className='mt-2' />
             </div>
         </div>
       </div>
@@ -278,6 +289,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
                     <Checkbox
                         id={amenity}
                         name={amenity}
+                        checked={data.amenities.includes(amenity)}
                         value={amenity}
                         onChange={handleAmenitiesChange}
                     />
@@ -288,7 +300,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
       </div>
 
         <div className='mt-3 gap-3'>
-            <PrimaryButton className='mt-5 w-full flex items-center justify-c enter gap-3' processing={processing} >
+            <PrimaryButton onclick={handleSubmit} className='mt-5 w-full flex items-center justify-c enter gap-3' processing={processing} >
                 Submit Apartment
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M0.5 13C0.5 16.3152 1.81696 19.4946 4.16117 21.8388C6.50537 24.183 9.68479 25.5 13 25.5C16.3152 25.5 19.4946 24.183 21.8388 21.8388C24.183 19.4946 25.5 16.3152 25.5 13C25.5 9.68479 24.183 6.50537 21.8388 4.16117C19.4946 1.81696 16.3152 0.5 13 0.5C9.68479 0.5 6.50537 1.81696 4.16117 4.16117C1.81696 6.50537 0.5 9.68479 0.5 13ZM14.8848 7.09668L19.7627 12.3262C19.9336 12.5117 20.0312 12.751 20.0312 13C20.0312 13.249 19.9336 13.4932 19.7627 13.6738L14.8848 18.9033C14.6797 19.123 14.3916 19.25 14.0889 19.25C13.4883 19.25 13 18.7617 13 18.1611V15.3438H8.3125C7.44824 15.3438 6.75 14.6455 6.75 13.7812V12.2188C6.75 11.3545 7.44824 10.6562 8.3125 10.6562H13V7.83887C13 7.23828 13.4883 6.75 14.0889 6.75C14.3916 6.75 14.6797 6.87695 14.8848 7.09668Z" fill="white"/>
