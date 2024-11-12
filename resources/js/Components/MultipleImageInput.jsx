@@ -69,7 +69,7 @@ const MultipleImageInput = ({ onFileChange, preselected, rounded = true, title, 
                     {previewUrls.map((image, index) => (
                         <div key={index} className="relative">
                             <img
-                                src={'/' + image.url || image}
+                                src={image.url || image}
                                 alt={`Preview ${index}`}
                                 className={`w-24 h-24 object-cover ${rounded ? 'rounded-md' : ''}`}
                             />

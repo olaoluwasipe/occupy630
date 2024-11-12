@@ -16,7 +16,7 @@ class CheckUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || (Auth::user()->type !== 'learner' && Auth::user()->type !== 'tutor')) {
+        if (!Auth::check() || (Auth::user()->type !== 'employee' && Auth::user()->type !== 'employer')) {
             return redirect('/unauthorized');
         }
 

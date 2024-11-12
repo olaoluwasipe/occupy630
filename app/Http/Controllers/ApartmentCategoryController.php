@@ -29,7 +29,18 @@ class ApartmentCategoryController extends Controller
      */
     public function store(StoreApartmentCategoryRequest $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+        ]);
+        $category = ApartmentCategory::create([
+           'name' => $request->name,
+           'description' => $request->description,
+        ]);
+        if(!$category) {
+            return redirect()->back()->with('error', 'Failed to create category');
+        }
+        return redirect()->route('admin.apartments');
     }
 
     /**
@@ -53,7 +64,18 @@ class ApartmentCategoryController extends Controller
      */
     public function update(UpdateApartmentCategoryRequest $request, ApartmentCategory $apartmentCategory)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+        ]);
+        $category = ApartmentCategory::where('id', $apartmentCategory->id)->update([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+        if(!$category) {
+            return redirect()->back()->with('error', 'Failed to update category');
+        }
+        return redirect()->route('admin.apartments');
     }
 
     /**

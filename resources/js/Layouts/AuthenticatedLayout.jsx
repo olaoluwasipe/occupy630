@@ -33,9 +33,9 @@ export default function Authenticated({ user, header, children, docslink='' }) {
                                 <NavLink href={route('home')} active={route().current('home')}>
                                     Home
                                 </NavLink>
-                                {user.type == 'learner' ? (
+                                {user.type == 'employee' ? (
                                     <>
-                                    <NavLink href={route('courses')} active={route().current('courses')}>
+                                    <NavLink href={route('apartments')} active={route().current('apartments')}>
                                         My Courses
                                     </NavLink>
                                     <NavLink href={route('tutors')} active={route().current('tutors')}>
@@ -47,8 +47,8 @@ export default function Authenticated({ user, header, children, docslink='' }) {
                                         </>
                                 ) : (
                                     <>
-                                    <NavLink href={route('courses')} active={route().current('courses')}>
-                                        Courses
+                                    <NavLink href={route('apartments')} active={route().current('apartments')}>
+                                        Apartments
                                     </NavLink>
                                     <NavLink href={route('assignments')} active={route().current('assignments')}>
                                         Assignments

@@ -4,6 +4,8 @@ import SecondaryButton from '@/Components/SecondaryButton';
 import Table from '@/Components/Table';
 import TabsHorizontal from '@/Components/TabsHorizontal';
 import ApartmentAddForm from '@/Forms/ApartmentAddForm';
+import AttributeAddForm from '@/Forms/AttributeAddForm';
+import CategoryAddForm from '@/Forms/CategoryAddForm';
 import CreateUserForm from '@/Forms/CreateUserForm';
 import Admin from '@/Layouts/AdminLayout'
 import { Head, Link } from '@inertiajs/react'
@@ -15,9 +17,15 @@ const Users = ({auth, users, apartments, attributes, categories,}) => {
 
     const [currentTab, setCurrentTab] = useState(null);
     const [createApartment, setCreateApartment] = useState(false)
+    const [createAttribute, setCreateAttribute] = useState(false)
+    const [createCategory, setCreateCategory] = useState(false)
     const [deleteApartment, setDeleteApartment] = useState(false)
     const [editApartment, setEditApartment] = useState(false)
+    const [editAttribute, setEditAttribute] = useState(false)
+    const [editCategory, setEditCategory] = useState(false)
     const [apartment, setApartment] = useState({id: 0})
+    const [attribute, setAttribute] = useState({id: 0})
+    const [category, setCategory] = useState({id: 0})
 
     const handleChangeTab = (label) => {
         setCurrentTab(label)
@@ -43,7 +51,7 @@ const Users = ({auth, users, apartments, attributes, categories,}) => {
                     color: 'bg-blue-500',
                     icon: <FaPlus />
                     ,
-                    action: () => {setCreateApartment(!createApartment)},
+                    action: () => {setCreateAttribute(!createAttribute)},
                     content: ''
                 }
             case 'categories':
@@ -52,7 +60,7 @@ const Users = ({auth, users, apartments, attributes, categories,}) => {
                     color: 'bg-blue-500',
                     icon: <FaPlus />
                     ,
-                    action: () => {setCreateApartment(!createApartment)},
+                    action: () => {setCreateCategory(!createCategory)},
                     content: ''
                 }
             default:
@@ -65,6 +73,15 @@ const Users = ({auth, users, apartments, attributes, categories,}) => {
                     content: ''
                 }
         }
+    }
+
+    const modalAttribute = () => {
+        setCreateAttribute(!createAttribute)
+    }
+
+    const modalCategory = () => {
+        setEditCategory(false)
+        setCreateCategory(!createCategory)
     }
 
     const modalApartment = () => {
@@ -93,38 +110,29 @@ const Users = ({auth, users, apartments, attributes, categories,}) => {
           val: attributes.length,
           content: <Table data={attributes} actions={{
             type: 'attributes',
-            // editFunction: (user) => {setCreateUser(true); setEditUser(true); setUser(user); console.log(user)},
+            editFunction: (attribute) => {setCreateAttribute(true); setEditAttribute(true); setAttribute(attribute); console.log(attribute)},
             // deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId)},
             active: ['view', 'edit', 'delete']
           }}
           searchable
-          columnsToShow={['id', 'name', 'email']} />
+          columnsToShow={['id', 'name']} />
         },
         {
             label: 'Categories',
             val: categories.length,
             content: <Table data={categories} actions={{
               type: 'categories',
-            //   editFunction: (user) => {setCreateUser(true); setEditUser(true); setUser(user); console.log(user)},
+              editFunction: (category) => {setCreateCategory(true); setEditCategory(true); setCategory(category); console.log(category)},
             //   deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId)},
               active: ['view', 'edit', 'delete']
             }}
             searchable
-            columnsToShow={['id', 'name', 'email']} />
+            columnsToShow={['id', 'name', 'description']} />
         },
       ];
 
     const actions = [
         buttonSwitch(currentTab)
-        // {
-        //     label: 'Delete User',
-        //     color: 'bg-red-600',
-        //     icon: <svg width="11" height="15" viewBox="0 0 11 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-        //     <path fill-rule="evenodd" clip-rule="evenodd" d="M8.22233 1.27778H10.9446V2.83333H0.0556641V1.27778H2.77789L3.55566 0.5H7.44455L8.22233 1.27778ZM2.38902 14.5C1.53347 14.5 0.833466 13.8 0.833466 12.9444V3.6111H10.1668V12.9444C10.1668 13.8 9.4668 14.5 8.61124 14.5H2.38902Z" fill="white"/>
-        //     </svg>
-        //     ,
-        //     content: ''
-        // }
     ]
   return (
     <Admin
@@ -141,11 +149,33 @@ const Users = ({auth, users, apartments, attributes, categories,}) => {
         <Modal maxWidth='7xl' minHeight='[80vh]' show={createApartment} >
             <div className='p-10'>
                 <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
-                    <p className='text-xl text-blue-800 font-semibold'>{editApartment ? 'Update' : 'Add'} User</p>
+                    <p className='text-xl text-blue-800 font-semibold'>{editApartment ? 'Update' : 'Add'} Apartment</p>
                     <DangerButton onClick={modalApartment}>Close</DangerButton>
                 </div>
 
                 <ApartmentAddForm categories={categories} attributes={attributes} apartment={editApartment ? apartment : []} modalClose={() => setCreateUser(false)} />
+            </div>
+        </Modal>
+
+        <Modal show={createAttribute} >
+            <div className='p-10'>
+                <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                    <p className='text-xl text-blue-800 font-semibold'>{editAttribute ? 'Update' : 'Add'} Property Attribute</p>
+                    <DangerButton onClick={modalAttribute}>Close</DangerButton>
+                </div>
+
+                <AttributeAddForm attribute={editAttribute ? attribute : []} modalClose={() => setCreateAttribute(false)} />
+            </div>
+        </Modal>
+
+        <Modal show={createCategory} >
+            <div className='p-10'>
+                <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                    <p className='text-xl text-blue-800 font-semibold'>{editCategory ? 'Update' : 'Add'} Property Category</p>
+                    <DangerButton onClick={modalCategory}>Close</DangerButton>
+                </div>
+
+                <CategoryAddForm category={editCategory ? category : []} modalClose={() => setCreateCategory(false)} />
             </div>
         </Modal>
 

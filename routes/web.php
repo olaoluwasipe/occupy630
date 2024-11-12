@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ApartmentAttributeController;
+use App\Http\Controllers\ApartmentCategoryController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentSubmissionController;
@@ -13,10 +15,12 @@ use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TutorController;
+use App\Models\ApartmentCategory;
 use App\Models\AssignmentSubmission;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -69,6 +73,12 @@ Route::prefix('/company')->middleware(['auth', 'checkcompany'])->group(function 
 });
 
 Route::post('/create-apartment', [ApartmentController::class, 'store'])->name('apartment.store');
+Route::post('/update-apartment/{apartment}', [ApartmentController::class, 'update'])->name('apartment.update');
+Route::post('/send-inquiry', [ApartmentController::class, 'saveInquiry'])->name('apartment.send-inquiry');
+Route::post('/create-attribute', [ApartmentAttributeController::class, 'store'])->name('apartment.attributes.store');
+Route::post('/update-attribute', [ApartmentAttributeController::class, 'edit'])->name('apartment.attributes.update');
+Route::post('/create-category', [ApartmentCategoryController::class, 'store'])->name('apartment.categories.store');
+Route::post('/update-category', [ApartmentCategoryController::class, 'edit'])->name('apartment.categories.update');
 
 Route::prefix('/admin')->middleware(['auth', 'checkadmin'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin');
@@ -110,9 +120,23 @@ Route::middleware(['auth', 'checksuperadmin'])->group(function () {
 });
 
 Route::middleware(['auth', 'checkuser'])->group(function () {
+
+    Route::get('/staff', function (Request $request) {
+        $company =  Auth::user()->company;
+        $staff = $company->users()->where('type', 'employee')->get();
+        return $staff;
+    })->name('api.staff.index');
+
+    Route::post('/register-staff', [CompanyController::class, 'registerStaff'])->name('company.register-staff');
+
     // Courses
     Route::get('/courses', [CourseController::class, 'index'])->name('courses');
     Route::get('/course/{slug}', [CourseController::class,'show'])->name('course.show');
+
+    // Apartments
+    Route::post('/make-initial-payment', [ApartmentController::class, 'makeInitialPayment'])->name('payment.initial');
+    Route::get('/apartments', [ApartmentController::class, 'index'])->name('apartments');
+    Route::get('/apartment/{slug}', [ApartmentController::class,'show'])->name('apartment.show');
 
     // Assignments
     Route::get('/assignments/{assignment}', [AssignmentController::class,'show'])->name('assignment.show');

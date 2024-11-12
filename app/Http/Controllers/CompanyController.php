@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 class CompanyController extends Controller
 {
@@ -96,6 +99,28 @@ class CompanyController extends Controller
         $path = $file->move(public_path($directory), $name);
 
         return '/images/logo/' . $name; // Return the relative URL to the logo
+    }
+
+    public function registerStaff (Request  $request) {
+        $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+        ]);
+
+        $companyUrl = $request->user()->company->url;
+        $registerCode = Str::random(10);
+        $user = User::create([
+            'fname' => uniqid(),
+            'lname' => uniqid(),
+            'email' => $request->email,
+            'password' => bcrypt($registerCode),
+            'company_id' => $request->user()->company->id,
+            'register_code' => $registerCode,
+            'type' => 'employee',
+        ]);
+
+        $user->assignRole('employee');
+
+        return redirect()->back()->with('success', 'Request sent successfully');
     }
 
 

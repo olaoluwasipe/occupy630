@@ -29,7 +29,19 @@ class ApartmentAttributeController extends Controller
      */
     public function store(StoreApartmentAttributeRequest $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+        $attribute = ApartmentAttribute::create([
+           'name' => $request->name,
+        ]);
+
+        if(!$attribute) {
+            return redirect()->back()->with('error', 'Failed to create attribute');
+        }
+
+        return redirect()->route('admin.apartments');
+
     }
 
     /**
@@ -53,7 +65,18 @@ class ApartmentAttributeController extends Controller
      */
     public function update(UpdateApartmentAttributeRequest $request, ApartmentAttribute $apartmentAttribute)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+        $attribute = $apartmentAttribute->update([
+           'name' => $request->name,
+        ]);
+
+        if(!$attribute) {
+            return redirect()->back()->with('error', 'Failed to create attribute');
+        }
+
+        return redirect()->route('admin.apartments');
     }
 
     /**

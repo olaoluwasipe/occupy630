@@ -101,7 +101,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
 
   const formatPrice = (price) => {
       if (!price) return '';
-      return new Intl.NumberFormat('en-US', {
+      return new Intl.NumberFormat('en-NG', {
         style: 'currency',
         currency: 'NGN',
         minimumFractionDigits: 0,
@@ -120,7 +120,12 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    post(route('apartment.store'))
+    // Reset form data
+    if(apartment?.id) {
+        post(route('apartment.update', apartment.id))
+    } else {
+        post(route('apartment.store'))
+    }
   }
 
   return (
@@ -289,7 +294,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
                     <Checkbox
                         id={amenity}
                         name={amenity}
-                        checked={data.amenities.includes(amenity)}
+                        checked={data.amenities?.includes(amenity)}
                         value={amenity}
                         onChange={handleAmenitiesChange}
                     />

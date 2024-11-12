@@ -33,7 +33,6 @@ class RegisterUserRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
-                'unique:users,email',
                 new UniqueIf('users', 'email', 'register_code', null),
                 new CompanyEmail,
             ],

@@ -5,8 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Apartment;
 use App\Http\Requests\StoreApartmentRequest;
 use App\Http\Requests\UpdateApartmentRequest;
+use App\Models\ApartmentAttribute;
+use App\Models\Inquiry;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
 
 class ApartmentController extends Controller
 {
@@ -15,7 +21,14 @@ class ApartmentController extends Controller
      */
     public function index()
     {
-        //
+        $company = Auth::user()->company;
+        $employees = User::where('type', 'employee')->where('company_id', $company->id)->pluck('id');
+        $apartments = Apartment::whereNull('tenant_id')->with('landlord','images', 'category')->get();
+        $newApartments = Apartment::whereIn('tenant_id', $employees)->with('tenant','images', 'category')->get();
+        return inertia('Apartments/Index', [
+            'apartments' => $apartments,
+            'newApartments' => $newApartments,
+        ]);
     }
 
     /**
@@ -60,11 +73,11 @@ class ApartmentController extends Controller
 
                 // Push each attachment's data to the array
                 $attachments[] = [
-                    'path' => $path,
+                    'path' => '/storage/'.$path,
                     'name' => $name,
                     'type' => $file->getClientOriginalExtension(),
                     'size' => $file->getSize(),
-                    'url' => $path,
+                    'url' => env('APP_URL').'/storage/'.$path,
                     'main' => false,
                 ];
             }
@@ -72,7 +85,7 @@ class ApartmentController extends Controller
             // Save all attachments to the apartment's images relationship
             $apartment->images()->createMany($attachments);
         }
-        
+
         return redirect()->route('admin.apartments');
     }
 
@@ -92,7 +105,6 @@ class ApartmentController extends Controller
 
         return '/images/property_images/' . $name; // Return the relative URL to the image
     }
-
     public function uploadImg($file) {
         $path = $file->store('attachments', 'public');
         return $path;
@@ -102,9 +114,56 @@ class ApartmentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Apartment $apartment)
+    public function show($slug)
     {
-        //
+        $apartment = Apartment::where('slug', $slug)->with('landlord', 'category', 'images')->first();
+        return Inertia::render('Apartments/Single', [
+            'apartment' => $apartment,
+        ]);
+    }
+
+    public function saveInquiry(Request $request) {
+        $request->validate([
+            'inquiry_type' => 'required|string|in:inquiry,schedule_inspection',
+            'schedule_date' => 'required_if:inquiry_type,schedule_inspection|date',
+            'message' => 'required_if:inquiry_type,inquiry|string',
+            'apartment_id' => 'required|exists:apartments,id',
+        ]);
+        $type = $request->input('inquiry_type');
+        $date = $request->input('schedule_date');
+        $message = $request->input('message');
+
+        $inquiry = Inquiry::create([
+            'type' => $type,
+            'schedule_date' => $date,
+            'message' => $message,
+            'apartment_id' => $request->apartment_id
+        ]);
+
+        // if(!$inquiry) return redirect()->back()->withErrors();
+        // $inquiry->apartment()->associate($request->apartment_id);
+         return redirect()->back()->with('success', 'Message sent successfully');
+
+    }
+
+    public function makeInitialPayment (Request $request) {
+        // $request->validate([
+        //     'apartment_id' => 'required|exists:apartments,id',
+        //     'amount' => 'required|numeric|min:1',
+        //     'payment_method' => 'required|string|in:card,bank_transfer,paystack',
+        //     'payment_reference' => 'required_if:payment_method,bank_transfer|string',
+        // ]);
+        dd($request);
+    }
+
+    public function makePayment (Request $request) {
+        dd($request);
+        $request->validate([
+            'apartment_id' => 'required|exists:apartments,id',
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|string|in:card,bank_transfer,paystack',
+            'payment_reference' => 'required_if:payment_method,bank_transfer|string',
+        ]);
     }
 
     /**
@@ -120,7 +179,55 @@ class ApartmentController extends Controller
      */
     public function update(UpdateApartmentRequest $request, Apartment $apartment)
     {
-        //
+        $data = array_merge(
+            $request->validated(),
+            [
+                'state' => $request->location['state'] ?? null,
+                'city' => $request->location['lga'] ?? null,
+                'country' => 'Nigeria',
+                'status' => 'pending',
+                'category_id' => $request->category,
+                'cg_price' => $request->price + ($request->price * 0.3),
+                'monthly_price' => ($request->price + ($request->price * 0.3)) / 12,
+            ]
+        );
+
+                // Handle image uploads if present
+                if ($request->has('images')) {
+                    // Get existing image IDs from the request
+                    $existingImageIds = collect($request->input('images'))
+                        ->filter(fn($image) => is_array($image) && isset($image['id']))
+                        ->pluck('id')
+                        ->toArray();
+
+                    // Delete images that are no longer present
+                    $apartment->images()
+                        ->whereNotIn('id', $existingImageIds)
+                        ->delete();
+
+                    // Handle new image uploads
+                    $newImages = collect($request->file('images'))
+                        ->filter(fn($image) => is_object($image) && $image instanceof \Illuminate\Http\UploadedFile);
+
+                    foreach ($newImages as $image) {
+                        $path = $this->uploadImg($image);
+                        $name = basename($path); // Get the filename
+                        $apartment->images()->create([
+                            'path' => '/storage/'.$path,
+                            'name' => $name,
+                            'type' => $image->getClientOriginalExtension(),
+                            'size' => $image->getSize(),
+                            'url' => env('APP_URL').'/storage/'.$path,
+                            'main' => false,
+                        ]);
+                    }
+                }
+                // Update apartment details
+                $apartment->update($data);
+                dd($data);
+
+                return redirect()->route('admin.apartments')->with('success', 'Apartment updated successfully');
+
     }
 
     /**

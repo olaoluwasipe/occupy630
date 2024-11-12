@@ -40,7 +40,6 @@ class RegisteredUserController extends Controller
 
         try {
             $user = $this->findOrCreateUser($request);
-
             if ($user->type === 'employer') {
                 $this->createCompanyForEmployer($user);
             }
@@ -52,9 +51,9 @@ class RegisteredUserController extends Controller
 
             Auth::login($user);
 
-            $link = $this->getRedirectLink($user);
-
             DB::commit();
+
+            $link = $this->getRedirectLink($user);
 
             return redirect($link);
         } catch (\Exception $e) {
@@ -84,7 +83,7 @@ class RegisteredUserController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if ($user && $request->code) {
-            $this->validateEmployeeCode($user, $request->code);
+            $user = $this->validateEmployeeCode($request, $user, $request->code);
         } else {
             $company = $this->getCompanyFromEmail($request->email);
             $user = User::create([
@@ -100,15 +99,24 @@ class RegisteredUserController extends Controller
         return $user;
     }
 
-    private function validateEmployeeCode(User $user, string $code): void
+    private function validateEmployeeCode(RegisterUserRequest $request, User $user, string $code): User
     {
         if ($user->register_code !== $code) {
             throw new \Exception('Invalid code.');
         }
 
+        $user->update([
+            'register_code' => null,
+            'fname' => $request->fname,
+            'lname' => $request->lname,
+            'password' => Hash::make($request->password),
+            'last_logged_in' => now(),
+        ]);
+        // dd($user);
+
         $user->assignRole('employee');
-        $user->last_logged_in = now();
-        $user->save();
+
+        return $user;
     }
 
     private function getCompanyFromEmail(string $email): ?Company
