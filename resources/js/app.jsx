@@ -20,7 +20,6 @@ createInertiaApp({
         root.render(
             <>
                 <App {...props} />
-                <Toaster /> {/* Make Toaster available across all pages */}
             </>
         );
     },
