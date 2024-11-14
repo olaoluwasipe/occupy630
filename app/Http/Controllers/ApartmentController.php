@@ -24,7 +24,7 @@ class ApartmentController extends Controller
     public function index()
     {
         $company = Auth::user()->company;
-        $employees = User::where('type', 'employee')->where('company_id', $company->id)->pluck('id');
+        $employees = User::where('type', 'employee')->where('company_id', $company?->id)?->pluck('id');
         $apartments = Apartment::whereNull('tenant_id')->with('landlord','images', 'category')->get();
         $newApartments = Apartment::whereIn('tenant_id', $employees)->with('tenant','images', 'category')->get();
         return inertia('Apartments/Index', [

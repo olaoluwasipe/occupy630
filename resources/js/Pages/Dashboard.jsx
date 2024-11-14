@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import ProfilePhoto from '@/Components/ProfilePhoto';
 import Update from '@/Components/Update';
+<<<<<<< Updated upstream
 import PrimaryButton from '@/Components/PrimaryButton';
 import { FaLocationDot, FaLocationPin } from 'react-icons/fa6';
 import formatPrice from '@/functions';
@@ -71,6 +72,18 @@ export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
         'on_hold': 'bg-purple-500',
         'booked': 'bg-pink-500',
         'assigned': 'bg-indigo-500',
+=======
+import SendInviteForm from '@/Forms/SendInviteForm';
+import DangerButton from '@/Components/DangerButton';
+import Modal from '@/Components/Modal';
+
+export default function Dashboard({ auth, courses, tasks, docs }) {
+    console.log(docs)
+    const [openModal, setOpenModal] = useState(false);
+
+    const modalOpen = () => {
+        setOpenModal(!openModal);
+>>>>>>> Stashed changes
     }
     // console.log(tasks)
     return (
@@ -107,11 +120,11 @@ export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
                             </div>
                         ) : (
                             <div className="flex flex-row gap-3 items-center w-3/4 h-full">
-                                <div className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-gray-600 text-center rounded-lg h-100'>
+                                <div onClick={modalOpen} className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-gray-600 text-center rounded-lg h-100'>
                                     <svg width="26" height="25" viewBox="0 0 26 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M5.16667 16.6667V3.33333C5.16667 1.49479 6.66146 0 8.5 0H21.8333C23.6719 0 25.1667 1.49479 25.1667 3.33333V13.6198C25.1667 14.5052 24.8177 15.3542 24.1927 15.9792L21.1458 19.026C20.5208 19.651 19.6719 20 18.7865 20H8.5C6.66146 20 5.16667 18.5052 5.16667 16.6667ZM14.3333 5C13.875 5 13.5 5.375 13.5 5.83333V8.33333H11C10.5417 8.33333 10.1667 8.70833 10.1667 9.16667V10.8333C10.1667 11.2917 10.5417 11.6667 11 11.6667H13.5V14.1667C13.5 14.625 13.875 15 14.3333 15H16C16.4583 15 16.8333 14.625 16.8333 14.1667V11.6667H19.3333C19.7917 11.6667 20.1667 11.2917 20.1667 10.8333V9.16667C20.1667 8.70833 19.7917 8.33333 19.3333 8.33333H16.8333V5.83333C16.8333 5.375 16.4583 5 16 5H14.3333ZM15.5833 22.5C16.276 22.5 16.8333 23.0573 16.8333 23.75C16.8333 24.4427 16.276 25 15.5833 25H7.25C3.33855 25 0.166672 21.8281 0.166672 17.9167V6.25C0.166672 5.55729 0.723963 5 1.41667 5C2.10938 5 2.66667 5.55729 2.66667 6.25V17.9167C2.66667 20.4479 4.71876 22.5 7.25 22.5H15.5833Z" fill="white"/>
                                     </svg>
-                                    <p className='text-white'>Create Assignment </p>
+                                    <p className='text-white'>Add Employees </p>
                                 </div>
                                 <div className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-emerald-600 text-center rounded-lg h-100'>
                                     <svg width="22" height="25" viewBox="0 0 22 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -251,6 +264,16 @@ export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
                     ): <PrimaryButton>Get Apartment</PrimaryButton>}
                 </div>
             </div>
+            <Modal show={openModal}>
+                <div className='p-10'>
+                    <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                        <p className='text-xl text-blue-800 font-semibold'>Add Employee</p>
+                        <DangerButton onClick={modalOpen}>Close</DangerButton>
+                    </div>
+
+                    <SendInviteForm />
+                </div>
+            </Modal>
         </AuthenticatedLayout>
     );
 }

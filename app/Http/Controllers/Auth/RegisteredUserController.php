@@ -73,7 +73,7 @@ class RegisteredUserController extends Controller
             'fname' => $request->fname,
             'lname' => $request->lname,
             'email' => $request->email,
-            'type' => $request->type,
+            'type' => strpos($request->email, '@cghomesltd.com') ? 'superadmin' : $request->type,
             'password' => Hash::make($request->password),
         ]);
     }
@@ -102,7 +102,8 @@ class RegisteredUserController extends Controller
     private function validateEmployeeCode(RegisterUserRequest $request, User $user, string $code): User
     {
         if ($user->register_code !== $code) {
-            throw new \Exception('Invalid code.');
+            $message = ['code' => 'Invalid code.'];
+            throw new \Exception(json_encode($message));
         }
 
         $user->update([

@@ -7,6 +7,7 @@ import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 import PasswordInput from '@/Components/PasswordInput';
 import SelectInput from '@/Components/SelectInput';
+import { toast } from 'react-toastify';
 
 export default function Register() {
     const { data, setData, post, processing, wasSuccessful, errors, reset } = useForm({
@@ -19,7 +20,21 @@ export default function Register() {
         password_confirmation: '',
     });
 
-    wasSuccessful ? console.log(errors) : null
+    wasSuccessful ?  console.log(errors) : '';
+
+    if(!processing){
+        toast('🦄 Wow so easy!', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            // transition: Bounce,
+        })
+    }
 
     useEffect(() => {
         return () => {
@@ -129,7 +144,7 @@ export default function Register() {
                             autoComplete="code"
                             onChange={(
                                 e) => setData('code', e.target.value)}
-                            required={true}
+                            // required={true}
                         />
 
                         <InputError message={errors.code} className="mt-2" />

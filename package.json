@@ -34,6 +34,7 @@
         "react-quill": "^2.0.0",
         "react-slick": "^0.30.2",
         "react-step-wizard": "^5.3.11",
+        "react-toastify": "^10.0.6",
         "rollup-plugin-polyfill-node": "^0.13.0",
         "slick-carousel": "^1.8.1",
         "toastam": "^1.0.7"

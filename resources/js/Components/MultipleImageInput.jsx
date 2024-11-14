@@ -3,29 +3,25 @@ import SecondaryButton from './SecondaryButton';
 
 const MultipleImageInput = ({ onFileChange, preselected, rounded = true, title, showImages = true }) => {
     const fileInputRef = useRef(null);
-    const [selectedFiles, setSelectedFiles] = useState([]); // Initialize as an empty array
+    const [selectedFiles, setSelectedFiles] = useState([]);
     const [previewUrls, setPreviewUrls] = useState([]);
 
     const handleDivClick = () => {
-        // Trigger the click event on the hidden file input
         fileInputRef.current.click();
     };
 
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files);
         if (files.length > 0) {
-            // Update selectedFiles with new files
             setSelectedFiles(prevFiles => {
                 const updatedFiles = [...prevFiles, ...files];
-                // Notify the parent component of the updated files
                 if (onFileChange) {
                     onFileChange(updatedFiles);
                 }
+                const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+                setPreviewUrls(prevUrls => [...prevUrls, ...newPreviewUrls]);
                 return updatedFiles;
             });
-            // Set preview URLs for the new files
-            const newPreviewUrls = files.map(file => URL.createObjectURL(file));
-            setPreviewUrls(prevUrls => [...prevUrls, ...newPreviewUrls]);
         }
     };
 
@@ -35,10 +31,20 @@ const MultipleImageInput = ({ onFileChange, preselected, rounded = true, title, 
         }
     }, [preselected]);
 
+    useEffect(() => {
+        return () => {
+            previewUrls.forEach(url => URL.revokeObjectURL(url));
+        };
+    }, [previewUrls]);
+
     const handleRemoveFile = (e, index) => {
         e.preventDefault();
         const newSelectedFiles = selectedFiles.filter((_, i) => i !== index);
         const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
+
+        // Clean up object URL
+        URL.revokeObjectURL(previewUrls[index]);
+
         setSelectedFiles(newSelectedFiles);
         setPreviewUrls(newPreviewUrls);
         if (onFileChange) {
@@ -69,7 +75,7 @@ const MultipleImageInput = ({ onFileChange, preselected, rounded = true, title, 
                     {previewUrls.map((image, index) => (
                         <div key={index} className="relative">
                             <img
-                                src={image.url || image}
+                                src={image}
                                 alt={`Preview ${index}`}
                                 className={`w-24 h-24 object-cover ${rounded ? 'rounded-md' : ''}`}
                             />

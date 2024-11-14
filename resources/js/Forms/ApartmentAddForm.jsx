@@ -13,7 +13,7 @@ import LgaSelect from '@/Components/LgaSelect';
 import Checkbox from '@/Components/Checkbox';
 
 const ApartmentAddForm = ({ categories, attributes, apartment }) => {
-    console.log(apartment)
+    // console.log(apartment)
     attributes = ['parking', 'wifi', 'tv', 'ac', 'gym', 'pool', 'laundry', 'security']
     const { data, setData, post, processing, errors, reset } = useForm({
         title: apartment?.title,
@@ -40,7 +40,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
         setData((prevData) => ({
             ...prevData,
             amenities: checked
-                ? [...prevData.amenities, value]
+                ? [...prevData?.amenities, value]
                 : prevData.amenities.filter((amenity) => amenity !== value),
         }));
 

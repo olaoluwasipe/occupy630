@@ -34,19 +34,8 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-        
-        $token = JWTAuth::fromUser(User::find(Auth::user()->id));
-        // $token = '';
-        // $credentials = $request->only(['email', 'password']);
-        // if (! $token = auth('api')->attempt($credentials)) {
-        //     return redirect()->back()->withErrors(['email' => 'Invalid credentials.']);
-        // }
 
-        $docLink = 'docs.tekphluent.co.uk?token=' . $token;
-
-        session(['docs' => $docLink]);
-
-        return redirect()->intended(route('home', absolute: false))->with('docs', $docLink);
+        return redirect()->intended(route('home', absolute: false));
     }
 
     /**
