@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
+import parse from 'html-react-parser'
 
 const ChatArea = ({ chatData, user, selectChat }) => {
 
@@ -19,7 +20,7 @@ const ChatArea = ({ chatData, user, selectChat }) => {
                         {chat.all_messages.map((message, index) => (
                             <div key={index} className={`flex mt-2 message group gap-2 w-full ${message.receiver_id === user.id ? '' : 'flex-row-reverse'}`}>
                                 <div className='rounded p-3 border flex cursor-pointer max-w-72 float-right justify-between'>
-                                    <p>{message.message}</p>
+                                    <p>{parse(message.message)}</p>
                                 </div>
                                 <div className='cursor-pointer opacity-0 group-hover:opacity-100 group-hover:opacity-1 ease-in-out transition-all duration-150'>
                                     <svg width="7" height="28" viewBox="0 0 7 28" fill="none" xmlns="http://www.w3.org/2000/svg">

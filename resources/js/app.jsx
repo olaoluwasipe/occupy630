@@ -4,6 +4,7 @@ import '../css/app.css';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { Toaster, toast } from "toastam";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -13,7 +14,13 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        // Render App with Toaster as part of the layout
+        root.render(
+            <>
+                <App {...props} />
+                <Toaster /> {/* Make Toaster available across all pages */}
+            </>
+        );
     },
     progress: {
         color: '#4B5563',

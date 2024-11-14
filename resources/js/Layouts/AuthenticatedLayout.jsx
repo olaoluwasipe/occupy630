@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
@@ -7,16 +7,23 @@ import { Link } from '@inertiajs/react';
 import { Transition } from '@headlessui/react';
 import Chat from '@/Content/Chat';
 
-export default function Authenticated({ user, header, children, docslink='' }) {
+export default function Authenticated({ user, header, children, docslink='', openNav=false, prevAction='' }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-    const [openSideNav, setOpenSideNav] = useState(false)
-    const [action, setAction] = useState('')
+    const [openSideNav, setOpenSideNav] = useState(openNav)
+    const [action, setAction] = useState(prevAction)
+    console.log(action, openSideNav)
 
+    useEffect(() => {
+        // If openNav or prevAction prop changes, update the state
+        setOpenSideNav(openNav);
+        setAction(prevAction);
+    }, [openNav, prevAction]);
+
+    // sideNav function to update both action and openSideNav
     const sideNav = (action) => {
-        setAction(action)
-        setOpenSideNav(true)
-    }
-
+        setAction(action);
+        setOpenSideNav(true);
+    };
     return (
         <div className="min-h-screen bg-white">
             <nav className="bg-white border-b border-gray-100">

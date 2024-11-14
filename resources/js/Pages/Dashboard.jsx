@@ -1,15 +1,84 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
+import { useState } from 'react';
 import ProfilePhoto from '@/Components/ProfilePhoto';
 import Update from '@/Components/Update';
+import PrimaryButton from '@/Components/PrimaryButton';
+import { FaLocationDot, FaLocationPin } from 'react-icons/fa6';
+import formatPrice from '@/functions';
+import { formatDate } from 'date-fns';
+import SecondaryButton from '@/Components/SecondaryButton';
+import axios from 'axios';
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
-export default function Dashboard({ auth, courses, tasks, docs }) {
-    console.log(docs)
+function NextArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, display: "block", right: 20, zIndex: 100 }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  function PrevArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, display: "block", left: 20, zIndex: 100, width: 40 }}
+        onClick={onClick}
+      />
+    );
+  }
+  var settings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    nextArrow: <NextArrow style={{left: 20}} />,
+    prevArrow: <PrevArrow />
+  };
+
+export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
+    console.log(apartment)
+    const [openNav, setOpenNav] = useState(false)
+    const [action, setAction] = useState('')
+
+    const navFunc = (e, action='') => {
+        e.preventDefault()
+        setOpenNav(!openNav)
+        setAction(action)
+    }
+
+    const requestRentPay = (e) => {
+        axios.post(route('dashboard.rent.pay', apartment.id),
+            )
+        navFunc(e, 'chat')
+    }
+
+    const statusKeys = {
+        'pending': 'bg-yellow-500',
+        'success': 'bg-green-500',
+        'rejected': 'bg-red-500',
+        'completed': 'bg-blue-500',
+        'cancelled': 'bg-gray-500',
+        'in_progress': 'bg-orange-500',
+        'on_hold': 'bg-purple-500',
+        'booked': 'bg-pink-500',
+        'assigned': 'bg-indigo-500',
+    }
     // console.log(tasks)
     return (
         <AuthenticatedLayout
             user={auth.user}
             docslink = {docs}
+            openNav={openNav}
+            prevAction={action}
             // header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
         >
 
@@ -20,7 +89,7 @@ export default function Dashboard({ auth, courses, tasks, docs }) {
                         <div className='w-1/2 flex flex-row gap-3 items-center'>
                             <ProfilePhoto style={`w-24 h-24 border-green-500 border border-4`} user={auth.user} />
                             <div className='flex flex-col'>
-                                <h2 className='text-2xl font-bold text-blue-900'>{auth.user.name}</h2>
+                                <h2 className='text-2xl font-bold text-blue-900'>{auth.user.fname} {auth.user.lname}</h2>
                                 <p>{auth.user.email} | {auth.user.phonenumber}</p>
                                 <p className={`text-${auth.user.type === 'learner' ? 'blue' : 'green' }-800 font-bold capitalize`}>{auth.user.type || 'Learner'}</p>
                             </div>
@@ -60,9 +129,85 @@ export default function Dashboard({ auth, courses, tasks, docs }) {
                         )}
                     </div>
 
+                    {apartment ? (
                     <div className='md:flex flex-row gap-6 py-12 mx-auto'>
-                        <div className='actions flex flex-col gap-3 md:w-1/2 items-center flex-wrap' >
-                            <div className='flex flex-row gap-3 w-full'>
+                        <div style={{boxShadow: '0px 2px 12px #e3e3e3'}} className="bg-white h-full md:w-1/2 md:mt-0 mt-6 overflow-hidden shadow-xl shadow-gray-200 sm:rounded-lg p-6">
+                            <div className='mb-3 flex items-center justify-between'>
+                                <div className="flex items-center">
+                                    <p className='font-bold'>My Apartment</p>
+                                    <p className={`text-sm ${statusKeys[apartment.status]} p-2 rounded-md text-white ml-2`}>{apartment.status}</p>
+                                </div>
+                                <div className="flex">
+                                    {apartment.status == 'pending' && (
+                                        <PrimaryButton>Request Approval</PrimaryButton>
+                                    )}
+                                    {apartment.status == 'booked' && (
+                                        <PrimaryButton onClick={(e) => requestRentPay(e)}>Request Rent Payment</PrimaryButton>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-3 items-center w-full">
+                                {apartment ? (
+                                    <div className='w-full'>
+                                        <Slider {...settings}>
+                                            {apartment.images.map((image, index) => (
+                                                <div key={index}>
+                                                    <img src={`${image.url}`} alt="" className="w-full h-[40vh] object-cover" />
+                                                </div>
+                                            ))}
+                                        </Slider>
+
+                                    </div>
+                                ) : <PrimaryButton>Get Apartment</PrimaryButton>}
+                            </div>
+                        </div>
+                        <div className='actions flex flex-col gap-3 md:w-1/2 items-center' >
+                            <div className='flex flex-col gap-3 w-full'>
+                                <h3 className='text-2xl font-semibold'>{apartment?.title}</h3>
+                                <p className='text-gray-500 flex gap-3 items-center'><FaLocationDot/>{apartment?.address}</p>
+                                <div className="flex items-center justify-center">
+                                    <div className="w-1/2">
+                                        <p className="text-sm uppercase text-gray-500">Yearly Rent</p>
+                                        <p className="text-xl font-semibold">{formatPrice(apartment?.cg_price)}</p>
+                                    </div>
+                                    <div className="w-1/2">
+                                        <p className="text-sm uppercase text-gray-500">Monthly Rent</p>
+                                        <p className="text-xl font-semibold">{formatPrice(apartment?.monthly_price)}</p>
+                                    </div>
+                                </div>
+
+                            <div style={{boxShadow: '0px 2px 12px #e3e3e3'}} className="bg-white h-full md:w-full md:mt-0 mt-6 overflow-hidden shadow-xl shadow-gray-200 sm:rounded-lg p-6">
+                                <div className="mb-3 flex justify-between items-center">
+                                    <p className='font-bold'>Transactions</p>
+                                    <SecondaryButton>
+                                        View All
+                                    </SecondaryButton>
+                                </div>
+                                <div className="flex flex-col gap-3 w-full h-auto overflow-auto">
+                                    {apartment.transactions.slice(0,3).map((transaction, index) => (
+                                        <div className="flex gap-4 cursor-pointer justify-between flex-row mb-3 border-b border-gray-300 pb-3" key={index}>
+                                            {/* <div>
+                                                <p className="font-medium text-gray-500">Trx Ref</p>
+                                                <p className='text'>{transaction.reference}</p>
+                                            </div> */}
+                                            <div>
+                                                <p className="font-medium text-gray-500">Made by {transaction.user_id == auth.user.id ? 'Me' : transaction.user.fname}</p>
+                                                <p className='text'>{formatPrice(transaction.amount)}</p>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-500">Description</p>
+                                                <p className='text'>{transaction.note}</p>
+                                            </div>
+                                            <div>
+                                                <p className={`font-medium text-sm ${statusKeys[transaction.status]} rounded p-1 w-auto text-white`}>{transaction?.status}</p>
+                                                <p className='text'>{formatDate(transaction.created_at, 'd MMM, y')}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            </div>
+                            {/* <div className='flex flex-row gap-3 w-full'>
                                 <a href={route('courses')} className='action flex flex-col items-start h-48 rounded-2xl p-6 bg-orange-100 md:w-1/2 sm:w-full justify-center'>
                                     <img src='images/icons/courses-icon.png' />
                                     <p className='text-orange-900'>My Courses</p>
@@ -100,31 +245,10 @@ export default function Dashboard({ auth, courses, tasks, docs }) {
                                     <img src='images/icons/assignments-icon.png' />
                                     <p className='text-blue-900'>Documents</p>
                                 </a>
-                            </div>
-                        </div>
-
-                        <div style={{boxShadow: '0px 2px 12px #e3e3e3'}} className="bg-white h-full md:w-1/2 md:mt-0 mt-6 overflow-hidden shadow-xl shadow-gray-200 sm:rounded-lg p-6">
-                            <div className='mb-3'>
-                                <p className='font-bold'>My Schedule</p>
-                            </div>
-                            <div className="flex flex-col gap-3 items-center w-full">
-                                {tasks.map((task, i) => (
-                                    <Update
-                                        key={i}
-                                        title={task.title}
-                                        duedate={task.due_date || task.date}
-                                        action={true}
-                                        actionName={`Open ${task.due_date ? 'Assignment' : 'Meeting'}`}
-                                        actionLink={task.due_date ? 'assignments/' + task.id : task.link}
-                                        type={task.due_date ? 'Assignment' : 'Meeting'}
-                                        contentStyle='p-6 py-6'
-                                        sideColor={task.due_date ? 'red' : 'blue'}
-                                        course={task.cohort.course.title}
-                                    />
-                                ))}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
+                    ): <PrimaryButton>Get Apartment</PrimaryButton>}
                 </div>
             </div>
         </AuthenticatedLayout>

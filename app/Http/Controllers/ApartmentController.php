@@ -6,6 +6,8 @@ use App\Models\Apartment;
 use App\Http\Requests\StoreApartmentRequest;
 use App\Http\Requests\UpdateApartmentRequest;
 use App\Models\ApartmentAttribute;
+use App\Models\Chat;
+use App\Models\HousePayment;
 use App\Models\Inquiry;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -140,20 +142,63 @@ class ApartmentController extends Controller
             'apartment_id' => $request->apartment_id
         ]);
 
+        $apartment = Apartment::find($request->apartment_id);
+
+        $landlord = $apartment->landlord;
+
+        $user = Auth::user();
+        $message .= "\n\nAbout this <a style='color:red' href='".route('apartment.show', $apartment->slug)."'>apartment</a>.";
+        // $employer = $user->employedCompany->user_id;
+        Chat::create([
+            'sender_id' => $user->id,
+            'receiver_id' => $landlord->id,
+            'message' => $message,
+        ]);
         // if(!$inquiry) return redirect()->back()->withErrors();
         // $inquiry->apartment()->associate($request->apartment_id);
          return redirect()->back()->with('success', 'Message sent successfully');
 
     }
 
+    public function requestRentPay (Apartment $apartment) {
+        $user = Auth::user();
+        $message = "I have made the initial payment for the <a style='color:red' href='/apartment/".$apartment->slug."'>apartment</a>. Please make the first month payment of NGN ".number_format($apartment->monthly_price, 2).". Please let me know when the apartment is ready for occupancy. Thank you.";
+        $employer = $user->employedCompany->user_id;
+        Chat::create([
+            'sender_id' => $user->id,
+            'receiver_id' => $employer,
+            'message' => $message,
+        ]);
+        return redirect()->back()->with('success', 'Message sent successfully');
+    }
+
     public function makeInitialPayment (Request $request) {
-        // $request->validate([
-        //     'apartment_id' => 'required|exists:apartments,id',
-        //     'amount' => 'required|numeric|min:1',
-        //     'payment_method' => 'required|string|in:card,bank_transfer,paystack',
-        //     'payment_reference' => 'required_if:payment_method,bank_transfer|string',
-        // ]);
-        dd($request);
+        $request->validate([
+            'apartment_id' => 'required|exists:apartments,id',
+            'amount' => 'required|numeric|min:1',
+            'method' => 'required|string|in:card,bank_transfer,paystack',
+            'reference' => 'required_if:payment_method,bank_transfer|string',
+        ]);
+        HousePayment::create([
+            'apartment_id' => $request->apartment_id,
+            'user_id' => Auth::user()->id,
+            'amount' => $request->amount,
+            'due_date' => now()->addDays(7),
+            'date' => now(),
+            'status' => 'success',
+            'note' => 'Initial Payment made by Employee',
+            'mode' => 'initial',
+            'type' => 'one-time',
+            'method' => $request->method,
+            'reference' => $request->reference,
+        ]);
+
+        $apartment = Apartment::find($request->apartment_id);
+        $apartment->status = 'booked';
+        $apartment->tenant_id = Auth::user()->id;
+        $apartment->save();
+
+        return redirect()->back()->with('success', 'Payment made successfully');
     }
 
     public function makePayment (Request $request) {

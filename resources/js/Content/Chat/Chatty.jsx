@@ -25,7 +25,7 @@ const Chatty = ({ setChat, chat, user, selectChat }) => {
             }
             // post(route('message.read', id))
         }
-        
+
         chatData.all_messages.map((message) => {
             readMessages(message.id)
         })
@@ -64,7 +64,7 @@ const Chatty = ({ setChat, chat, user, selectChat }) => {
                             <div className='flex items-center gap-3'>
                                 <ProfilePhoto style='w-10' user={chatuser} />
                                 <div className='flex-col'>
-                                    <p className='font-medium'>{chatuser?.name}</p>
+                                    <p className='font-medium'>{chatuser?.fname} {chatuser?.lname}</p>
                                     <span className='text-green-700 capitalize font-bold text-sm'>{chatuser?.type}</span>
                                 </div>
                             </div>

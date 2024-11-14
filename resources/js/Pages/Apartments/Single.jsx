@@ -186,19 +186,19 @@ const Single = ({auth, apartment}) => {
                                 <hr className="mt-3 mb-5 bg-indigo-400 w-full h-[2px]" />
                                 <div className="flex gap-2 justify-between items-center">
                                     <p className="text-sm font-light uppercase mb-3">SECURITY DEPOSIT(30%)</p>
-                                    <p className="text-sm font-light mb-3">{formatPrice(apartment.cg_price * 0.3)}</p>
+                                    <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
                                 </div>
                                 <div className="flex gap-2 justify-between items-center">
                                     <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(5%)</p>
-                                    <p className="text-sm font-light mb-3">{formatPrice(apartment.cg_price * 0.05)}</p>
+                                    <p className="text-sm font-light mb-3">{formatPrice(prices.agreement)}</p>
                                 </div>
                                 <div className="flex gap-2 justify-between items-center">
                                     <p className="text-sm font-light uppercase mb-3">AGENCY FEE(5%)</p>
-                                    <p className="text-sm font-light mb-3">{formatPrice(apartment.cg_price * 0.05)}</p>
+                                    <p className="text-sm font-light mb-3">{formatPrice(prices.agency)}</p>
                                 </div>
                                 <div className="flex gap-2 justify-between items-center">
                                     <p className="text-sm font-light uppercase mb-3">MONTHLY RENT</p>
-                                    <p className="text-sm font-light mb-3">{formatPrice(apartment.monthly_price)}</p>
+                                    <p className="text-sm font-light mb-3">{formatPrice(prices.monthly)}</p>
                                 </div>
                                 <div className="flex gap-2 bg-indigo-500 rounded-md p-2 text-white justify-between items-center">
                                     <p className="text-sm font-light uppercase">TOTAL</p>
@@ -230,7 +230,7 @@ const Single = ({auth, apartment}) => {
                     </div>
 
                     {auth.user.type === 'employer' && <AssignStaffToRentForm apartment={apartment} user={auth.user} />}
-                    {auth.user.type === 'employee' && <RentForm apartment={apartment} prices={prices} user={auth.user} />}
+                    {auth.user.type === 'employee' && <RentForm apartment={apartment} prices={prices} openModal={modalRent} user={auth.user} />}
                     {/* <AssignStaffToRentForm apartment={apartment} user={auth.user} /> */}
                 </div>
             </Modal>

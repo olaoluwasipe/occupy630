@@ -15,6 +15,7 @@ use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TutorController;
+use App\Models\Apartment;
 use App\Models\ApartmentCategory;
 use App\Models\AssignmentSubmission;
 use App\Models\User;
@@ -49,11 +50,19 @@ Route::get('/', function () {
         return $combinedTasks->values();
     });
 
+    $apartment = Apartment::where('tenant_id', Auth::user()->id)
+                ->with(['images', 'transactions' => function ($query) {
+                    $query->with('user');
+                    $query->orderBy('created_at', 'desc'); // Adjust column name if needed
+                }])
+                ->first();
+
     // Convert the collection to an array
     $tasksArray = $tasks->toArray();
 
     return Inertia::render('Dashboard', [
         'courses' => $cohorts,
+        'apartment' => $apartment,
         'assignments' => $assignments,
         'tasks' => $tasksArray,
         'docs' => session('docs'),
@@ -63,6 +72,8 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 })->middleware(['auth', 'verified'])->name('home');
+
+Route::post('request-rent-pay/{apartment}', [ApartmentController::class, 'requestRentPay'])->name('dashboard.rent.pay');
 
 Route::prefix('/company')->middleware(['auth', 'checkcompany'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('company.dashboard');
