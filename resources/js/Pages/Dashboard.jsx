@@ -3,76 +3,6 @@ import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import ProfilePhoto from '@/Components/ProfilePhoto';
 import Update from '@/Components/Update';
-<<<<<<< Updated upstream
-import PrimaryButton from '@/Components/PrimaryButton';
-import { FaLocationDot, FaLocationPin } from 'react-icons/fa6';
-import formatPrice from '@/functions';
-import { formatDate } from 'date-fns';
-import SecondaryButton from '@/Components/SecondaryButton';
-import axios from 'axios';
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-
-function NextArrow(props) {
-    const { className, style, onClick } = props;
-    return (
-      <div
-        className={className}
-        style={{ ...style, display: "block", right: 20, zIndex: 100 }}
-        onClick={onClick}
-      />
-    );
-  }
-
-  function PrevArrow(props) {
-    const { className, style, onClick } = props;
-    return (
-      <div
-        className={className}
-        style={{ ...style, display: "block", left: 20, zIndex: 100, width: 40 }}
-        onClick={onClick}
-      />
-    );
-  }
-  var settings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    nextArrow: <NextArrow style={{left: 20}} />,
-    prevArrow: <PrevArrow />
-  };
-
-export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
-    console.log(apartment)
-    const [openNav, setOpenNav] = useState(false)
-    const [action, setAction] = useState('')
-
-    const navFunc = (e, action='') => {
-        e.preventDefault()
-        setOpenNav(!openNav)
-        setAction(action)
-    }
-
-    const requestRentPay = (e) => {
-        axios.post(route('dashboard.rent.pay', apartment.id),
-            )
-        navFunc(e, 'chat')
-    }
-
-    const statusKeys = {
-        'pending': 'bg-yellow-500',
-        'success': 'bg-green-500',
-        'rejected': 'bg-red-500',
-        'completed': 'bg-blue-500',
-        'cancelled': 'bg-gray-500',
-        'in_progress': 'bg-orange-500',
-        'on_hold': 'bg-purple-500',
-        'booked': 'bg-pink-500',
-        'assigned': 'bg-indigo-500',
-=======
 import SendInviteForm from '@/Forms/SendInviteForm';
 import DangerButton from '@/Components/DangerButton';
 import Modal from '@/Components/Modal';
@@ -83,7 +13,6 @@ export default function Dashboard({ auth, courses, tasks, docs }) {
 
     const modalOpen = () => {
         setOpenModal(!openModal);
->>>>>>> Stashed changes
     }
     // console.log(tasks)
     return (
