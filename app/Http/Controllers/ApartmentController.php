@@ -6,6 +6,7 @@ use App\Models\Apartment;
 use App\Http\Requests\StoreApartmentRequest;
 use App\Http\Requests\UpdateApartmentRequest;
 use App\Models\ApartmentAttribute;
+use App\Models\Approval;
 use App\Models\Chat;
 use App\Models\HousePayment;
 use App\Models\Inquiry;
@@ -24,12 +25,12 @@ class ApartmentController extends Controller
     public function index()
     {
         $company = Auth::user()->company;
-        $employees = User::where('type', 'employee')->where('company_id', $company->id)->pluck('id');
+        // $employees = User::where('type', 'employee')->where('company_id', $company->id)->pluck('id');
         $apartments = Apartment::whereNull('tenant_id')->with('landlord','images', 'category')->get();
-        $newApartments = Apartment::whereIn('tenant_id', $employees)->with('tenant','images', 'category')->get();
+        // $newApartments = Apartment::whereIn('tenant_id', $employees)->with('tenant','images', 'category')->get();
         return inertia('Apartments/Index', [
             'apartments' => $apartments,
-            'newApartments' => $newApartments,
+            // 'newApartments' => $newApartments,
         ]);
     }
 
@@ -119,8 +120,18 @@ class ApartmentController extends Controller
     public function show($slug)
     {
         $apartment = Apartment::where('slug', $slug)->with('landlord', 'category', 'images')->first();
+        $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('user_id', Auth::id())->latest()->first();
         return Inertia::render('Apartments/Single', [
             'apartment' => $apartment,
+        ]);
+    }
+
+    public function requestApproval(Apartment $apartment) {
+        $approval = Approval::create([
+            'apartment_id' => $apartment->id,
+            'user_id' => Auth::id(),
+            'approver_id' => Auth::user()->employedCompany->user_id,
+            'status' => Approval::getStatusTextAttribute('pending'),
         ]);
     }
 
@@ -198,7 +209,7 @@ class ApartmentController extends Controller
         $apartment->tenant_id = Auth::user()->id;
         $apartment->save();
 
-        return redirect()->back()->with('success', 'Payment made successfully');
+        return redirect()->route('home')->with('success', 'Payment made successfully');
     }
 
     public function makePayment (Request $request) {

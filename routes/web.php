@@ -50,21 +50,25 @@ Route::get('/', function () {
         return $combinedTasks->values();
     });
 
-    $apartment = Apartment::where('tenant_id', Auth::user()->id)
-                ->with(['images', 'transactions' => function ($query) {
-                    $query->with('user');
-                    $query->orderBy('created_at', 'desc'); // Adjust column name if needed
-                }])
-                ->first();
+    if(Auth::user()->type == 'employee') {
+
+        $apartment = Apartment::where('tenant_id', Auth::user()->id)
+                    ->with(['images', 'transactions' => function ($query) {
+                        $query->with('user');
+                        $query->orderBy('created_at', 'desc'); // Adjust column name if needed
+                    }])
+                    ->first();
+    } else {
+        $employees = User::where('type', 'employee')->where('company_id', Auth::user()->company_id)->pluck('id');
+        $apartment = Apartment::whereIn('tenant_id', $employees)->with('tenant', 'images', 'approvals', 'transactions')->get();
+        
+    }
 
     // Convert the collection to an array
     $tasksArray = $tasks->toArray();
 
     return Inertia::render('Dashboard', [
-        'courses' => $cohorts,
         'apartment' => $apartment,
-        'assignments' => $assignments,
-        'tasks' => $tasksArray,
         'docs' => session('docs'),
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -74,6 +78,7 @@ Route::get('/', function () {
 })->middleware(['auth', 'verified'])->name('home');
 
 Route::post('request-rent-pay/{apartment}', [ApartmentController::class, 'requestRentPay'])->name('dashboard.rent.pay');
+Route::post('request-approval/{apartment}', [ApartmentController::class, 'requestApproval'])->name('apartment.request-approval');
 
 Route::prefix('/company')->middleware(['auth', 'checkcompany'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('company.dashboard');

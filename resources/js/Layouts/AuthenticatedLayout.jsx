@@ -43,7 +43,7 @@ export default function Authenticated({ user, header, children, docslink='', ope
                                 {user.type == 'employee' ? (
                                     <>
                                     <NavLink href={route('apartments')} active={route().current('apartments')}>
-                                        My Courses
+                                        Apartments
                                     </NavLink>
                                     <NavLink href={route('tutors')} active={route().current('tutors')}>
                                         My Tutors

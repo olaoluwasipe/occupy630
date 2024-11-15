@@ -85,6 +85,10 @@ class Apartment extends Model
         return $this->hasMany(HousePayment::class, 'apartment_id');
     }
 
+    public function approvals() {
+        return $this->hasMany(Approval::class);
+    }
+
     // public function rentalHistory() {
     //     return $this->hasMany(RentalHistory::class);
     // }

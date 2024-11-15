@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import { Head } from '@inertiajs/react'
+import { Head, useForm } from '@inertiajs/react'
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -27,6 +27,7 @@ import ContactOwnerForm from '@/Forms/ContactOwnerForm';
 import AssignStaffToRentForm from '@/Forms/AssignStaffToRentForm';
 import RentForm from '@/Forms/RentForm';
 import formatPrice from '@/functions';
+import { toast } from 'react-toastify';
 
 function NextArrow(props) {
     const { className, style, onClick } = props;
@@ -71,6 +72,11 @@ const Single = ({auth, apartment}) => {
         initial: parseFloat(apartment.monthly_price) + parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.05) * 2 ) ,
     }
 
+    const { data, setData, post, processing, errors, reset } = useForm({
+        apartment_id: apartment?.id,
+        // cohort_id: cohort
+    });
+
 
     const [openContact, setOpenContact] = useState(false);
 
@@ -85,6 +91,20 @@ const Single = ({auth, apartment}) => {
     const modalRent = () => {
         setOpenRent(!openRent);
     }
+
+    const handleSubmit = () => {
+        const status = apartment?.approval?.status;
+        if(!status) {
+            post(route('apartment.request-approval', apartment.id))
+        }
+
+        processing ? null :
+
+        toast.success("Approval request sent")
+
+    }
+
+
 
     // const modalFile = () => {
     //     setOpenFile(!openFile);
@@ -180,7 +200,20 @@ const Single = ({auth, apartment}) => {
                                 <SecondaryButton className='w-1/2 flex items-center justify-center'><FaSave/> Save</SecondaryButton>
                                 <SecondaryButton onClick={modalOpen} className='w-1/2 flex items-center justify-center'>Contact Owner</SecondaryButton>
                             </div>
-                            <PrimaryButton onClick={modalRent} className='w-full flex items-center justify-center'>Rent Property</PrimaryButton>
+                            {apartment.approval ? (
+                                apartment.approval.status === "approved" ? (
+                                    <PrimaryButton onClick={modalRent} className='w-full flex items-center justify-center'>Rent Property</PrimaryButton>
+                                ) : apartment.approval.status === "pending" ? (
+                                    <SecondaryButton onClick={modalRent} disabled className='w-full flex items-center justify-center'>Approval Pending</SecondaryButton>
+                                ) : apartment.approval.status === "declined" ? (
+                                    <div>
+                                        <DangerButton disabled className='w-full flex items-center justify-center'>You can't get this property</DangerButton>
+                                        <p>{apartment.approval.comment}</p>
+                                    </div>
+                                ) : null
+                            ) : (
+                                <PrimaryButton onClick={handleSubmit} className='w-full flex items-center justify-center'>Request Approval</PrimaryButton>
+                            )}
                             <div className="mt-3 p-2 rounded-lg shadow-lg bg-blue-100">
                                 <h3 className="text-md font-bold">Initial Payments:</h3>
                                 <hr className="mt-3 mb-5 bg-indigo-400 w-full h-[2px]" />
