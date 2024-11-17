@@ -6,6 +6,7 @@ use App\Events\MessageSent;
 use App\Models\Chat;
 use App\Http\Requests\StoreChatRequest;
 use App\Http\Requests\UpdateChatRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,6 +28,16 @@ class ChatController extends Controller
     public function create()
     {
         //
+    }
+
+    public function startChat (User $user) {
+        Chat::create( [
+            'sender_id' => Auth::user()->id,
+            'receiver_id'=> $user->id,
+            'message' => 'Hello, how are you?',
+            'quote_id' => null,
+            'attachments' => null,
+        ] );
     }
 
     /**

@@ -26,7 +26,7 @@ const Users = ({auth, users, learners, tutors, admins, courses, cohorts, permiss
     }
     const tabsData = [
         {
-          label: 'Learners',
+          label: 'Companies',
           val: learners.length,
           content: <Table data={learners} actions={{
             type: 'user',
@@ -38,7 +38,7 @@ const Users = ({auth, users, learners, tutors, admins, courses, cohorts, permiss
           columnsToShow={['id', 'name', 'email']} />
         },
         {
-          label: 'Tutors',
+          label: 'Employees',
           val: tutors.length,
           content: <Table data={tutors} actions={{
             type: 'user',

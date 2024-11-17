@@ -17,7 +17,9 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TutorController;
 use App\Models\Apartment;
 use App\Models\ApartmentCategory;
+use App\Models\Approval;
 use App\Models\AssignmentSubmission;
+use App\Models\HousePayment;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Application;
@@ -51,6 +53,7 @@ Route::get('/', function () {
     });
 
     if(Auth::user()->type == 'employee') {
+        $employees = User::where('company_id', Auth::user()->company_id)->whereNot('id', Auth::id())->get(['fname', 'lname', 'id', 'type']);
 
         $apartment = Apartment::where('tenant_id', Auth::user()->id)
                     ->with(['images', 'transactions' => function ($query) {
@@ -58,17 +61,23 @@ Route::get('/', function () {
                         $query->orderBy('created_at', 'desc'); // Adjust column name if needed
                     }])
                     ->first();
-    } else {
+    } else if (Auth::user()->type == 'employer') {
+
         $employees = User::where('type', 'employee')->where('company_id', Auth::user()->company_id)->pluck('id');
-        $apartment = Apartment::whereIn('tenant_id', $employees)->with('tenant', 'images', 'approvals', 'transactions')->get();
-        
+        $apartment = Apartment::whereIn('tenant_id', $employees)->with('tenant', 'images', 'approvals', 'transactions')->latest()->get();
+        $approvals = Approval::whereIn('user_id', $employees)->with('apartment', 'user')->latest()->get();
+        $payments  = HousePayment::whereIn('user_id', $employees)->with('user', 'apartment')->latest()->get();
+
     }
 
     // Convert the collection to an array
     $tasksArray = $tasks->toArray();
 
     return Inertia::render('Dashboard', [
+        'employees' => $employees ?? [],
         'apartment' => $apartment,
+        'approvals' => $approvals ?? [],
+        'payments'=> $payments ?? [],
         'docs' => session('docs'),
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -78,7 +87,9 @@ Route::get('/', function () {
 })->middleware(['auth', 'verified'])->name('home');
 
 Route::post('request-rent-pay/{apartment}', [ApartmentController::class, 'requestRentPay'])->name('dashboard.rent.pay');
+Route::post('start-chat/{user}', [ChatController::class, 'startChat'])->name('dashboard.start.chat');
 Route::post('request-approval/{apartment}', [ApartmentController::class, 'requestApproval'])->name('apartment.request-approval');
+Route::post('approve-request', [ApartmentController::class, 'approveRequest'])->name('apartment.approve-request');
 
 Route::prefix('/company')->middleware(['auth', 'checkcompany'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('company.dashboard');
@@ -151,6 +162,7 @@ Route::middleware(['auth', 'checkuser'])->group(function () {
 
     // Apartments
     Route::post('/make-initial-payment', [ApartmentController::class, 'makeInitialPayment'])->name('payment.initial');
+    Route::post('/make-rent-payment', [ApartmentController::class, 'makeRentPayment'])->name('payment.rent');
     Route::get('/apartments', [ApartmentController::class, 'index'])->name('apartments');
     Route::get('/apartment/{slug}', [ApartmentController::class,'show'])->name('apartment.show');
 

@@ -11,9 +11,11 @@ use App\Models\Chat;
 use App\Models\HousePayment;
 use App\Models\Inquiry;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
@@ -120,19 +122,94 @@ class ApartmentController extends Controller
     public function show($slug)
     {
         $apartment = Apartment::where('slug', $slug)->with('landlord', 'category', 'images')->first();
-        $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('user_id', Auth::id())->latest()->first();
+        $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('user_id', Auth::id())->with('payment')->latest()->first();
         return Inertia::render('Apartments/Single', [
             'apartment' => $apartment,
         ]);
     }
 
     public function requestApproval(Apartment $apartment) {
+        $living = Apartment::where('tenant_id', Auth::id())->where('status', 'rented')->first();
+        if($living) {
+            return redirect()->back()->with('error', 'You have an existing apartment, you cannot request for another one.');
+        }
+        $existingApproval = Approval::where('user_id', Auth::id())
+                            ->where('created_at', '>=', now()->subDays(30))
+                            ->where('status', '!=', Approval::getStatusAttribute('declined'))// Assuming you have a constant or replace with the exact value.
+                            ->exists();
+        // dd($existingApproval);
+        if($existingApproval) {
+            return redirect()->back()->with('error', 'You have already made a request in the last 30 days.');
+        }
+        $sameApartment = Approval::where('apartment_id', $apartment->id)
+                                    ->where('user_id', Auth::id())
+                                    ->where('status', '!=', Approval::getStatusAttribute('declined'))
+                                    ->exists();
+        if($sameApartment) {
+            return redirect()->back()->with('error', 'You have already made a request for this apartment.');
+        }
         $approval = Approval::create([
             'apartment_id' => $apartment->id,
             'user_id' => Auth::id(),
             'approver_id' => Auth::user()->employedCompany->user_id,
             'status' => Approval::getStatusTextAttribute('pending'),
         ]);
+    }
+
+    public function approveRequest (Request $request) {
+        $request->validate([
+            'action' => 'required|string|in:approve,decline',
+            'approval_id' => 'required|exists:approvals,id',
+            'agree' => 'nullable|boolean|required_unless:action,decline',
+            'user_pay' => 'nullable|boolean|required_unless:action,decline',
+            'comment' => 'nullable|string|required_unless:action,approve',
+        ]);
+
+        // dd($request->all());
+
+        $approval = Approval::find($request->approval_id);
+        if (!$approval) {
+            return redirect()->back()->with('error', 'Approval not found.');
+        }
+        $approval->status = Approval::getStatusTextAttribute($request->action.'d');
+        $approval->comment = $request->comment;
+        $approval->save();
+
+        $apartment = Apartment::find($approval->apartment_id);
+
+        $prices = [
+            'security_deposit' => $apartment->cg_price * 0.3,
+            'agreement' => $apartment->cg_price * 0.05,
+            'agency_fee' => $apartment->cg_price * 0.05,
+        ];
+
+        $total = $prices['security_deposit'] + $prices['agreement'] + $prices['agency_fee'];
+        $reference = 'REF-'.Str::random(10);
+
+        if($request->action === 'approve') {
+            $housePay = HousePayment::create([
+                'apartment_id' => $apartment->id,
+                'user_id' => $approval->user_id,
+                'approval_id' => $approval->id,
+                'amount' => $total,
+                'due_date' => now()->addDays(30),
+                'date' => now(),
+                'method' => 'none',
+                'status' => 'pending',
+                'reference' => $reference,
+                'note' => 'Initial payment for the apartment',
+                'meta' => [
+                    'can_pay' => [
+                        Auth::id(), $request->user_pay ? $approval->user_id : null,
+                    ],
+                    'prices' => $prices,
+                ],
+                'type' => 'initial',
+                'mode' => 'one-time',
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Approval request '.$request->action.'d successfully.');
     }
 
     public function saveInquiry(Request $request) {
@@ -190,26 +267,123 @@ class ApartmentController extends Controller
             'method' => 'required|string|in:card,bank_transfer,paystack',
             'reference' => 'required_if:payment_method,bank_transfer|string',
         ]);
-        HousePayment::create([
-            'apartment_id' => $request->apartment_id,
-            'user_id' => Auth::user()->id,
-            'amount' => $request->amount,
+        // dd($request->all());
+        $existingHousePayment = HousePayment::where('reference', $request->reference)->first();
+        if ($existingHousePayment) {
+            $existingHousePayment->update([
+                'status' => 'completed',
+                'payment_method' => $request->method,
+                'date' => now(),
+            ]);
+        } else {
+            $housePayment = HousePayment::create([
+                'apartment_id' => $request->apartment_id,
+                'user_id' => Auth::user()->id,
+                'amount' => $request->amount,
+                'due_date' => now()->addDays(7),
+                'date' => now(),
+                'status' => 'completed',
+                'note' => 'Initial Payment made by Employee',
+                'mode' => 'initial',
+                'type' => 'one-time',
+                'method' => $request->method,
+                'reference' => $request->reference,
+            ]);
+        }
+        $apartment = Apartment::find($request->apartment_id);
+        $apartment->status = 'booked';
+        $apartment->tenant_id = $existingHousePayment->user_id ?? Auth::user()->id;
+        $apartment->save();
+
+        $housePay = HousePayment::create([
+            'apartment_id' => $apartment->id,
+            'user_id' => $existingHousePayment->user_id ?? Auth::user()->id,
+            // 'approval_id' => $approval->id,
+            'amount' => $apartment->monthly_price + ($apartment->monthly_price * 0.1),
             'due_date' => now()->addDays(7),
             'date' => now(),
-            'status' => 'success',
-            'note' => 'Initial Payment made by Employee',
-            'mode' => 'initial',
-            'type' => 'one-time',
-            'method' => $request->method,
-            'reference' => $request->reference,
+            'method' => 'none',
+            'status' => 'pending',
+            'reference' => 'REF-'.Str::random(10),
+            'note' => 'Rent payment for the apartment',
+            'meta' => [
+                'can_pay' => [
+                    Auth::id(),
+                ],
+                'prices' => [
+                    'monthly_rent' => $apartment->monthly_price,
+                    'service_charge' => $apartment->monthly_price * 0.1,
+                ],
+            ],
+            'type' => 'rent',
+            'mode' => 'monthly',
+        ]);
+
+        return redirect()->route('home')->with('success', 'Initial payment made successfully');
+    }
+
+    public function makeRentPayment (Request $request) {
+        $request->validate([
+            'apartment_id' => 'required|exists:apartments,id',
+            'amount' => 'required|numeric|min:1',
+            'method' => 'required|string|in:card,bank_transfer,paystack',
+            'reference' => 'required_if:payment_method,bank_transfer|string',
+        ]);
+        // dd($request->all());
+        $existingHousePayment = HousePayment::where('reference', $request->reference)->first();
+        if (!$existingHousePayment) {
+            return redirect()->back()->with('error', 'Invalid payment reference');
+        }
+        $existingHousePayment->update([
+            'status' => 'completed',
+            'payment_method' => $request->method,
+            'date' => now(),
         ]);
 
         $apartment = Apartment::find($request->apartment_id);
-        $apartment->status = 'booked';
-        $apartment->tenant_id = Auth::user()->id;
+        $apartment->status = 'rented';
+        $apartment->availability = 'unavailable';
+        $apartment->tenant_id = $existingHousePayment->user_id ?? Auth::user()->id;
         $apartment->save();
 
-        return redirect()->route('home')->with('success', 'Payment made successfully');
+        $payments = HousePayment::where('apartment_id', $apartment->id)
+            ->where('user_id', $existingHousePayment->user_id)
+            ->latest()
+            ->get();
+
+        // If there's only one payment, set the date to 30 days from now
+        if ($payments->count() == 1) {
+            $date = Carbon::now()->addDays(30);
+        } else {
+            // If there are multiple payments, set the date to 30 days after the first payment's due date
+            $date = Carbon::parse($payments->first()->due_date)->addDays(30);
+        }
+
+        $housePay = HousePayment::create([
+            'apartment_id' => $apartment->id,
+            'user_id' => $existingHousePayment->user_id ?? Auth::user()->id,
+            // 'approval_id' => $approval->id,
+            'amount' => $apartment->monthly_price + ($apartment->monthly_price * 0.1),
+            'due_date' => $date,
+            'date' => now(),
+            'method' => 'none',
+            'status' => 'pending',
+            'reference' => 'REF-'.Str::random(10),
+            'note' => 'Rent payment for the apartment',
+            'meta' => [
+                'can_pay' => [
+                    Auth::id(),
+                ],
+                'prices' => [
+                    'monthly_rent' => $apartment->monthly_price,
+                    'service_charge' => $apartment->monthly_price * 0.1,
+                ],
+            ],
+            'type' => 'rent',
+            'mode' => 'monthly',
+        ]);
+
+        return redirect()->route('home')->with('success', 'Initial payment made successfully');
     }
 
     public function makePayment (Request $request) {

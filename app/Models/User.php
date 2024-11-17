@@ -77,6 +77,10 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
+    public function getFullNameAttribute() {
+        return $this->fname .' '. $this->lname;
+    }
+
     public function company () {
         return $this->hasOne(Company::class, 'user_id');
     }

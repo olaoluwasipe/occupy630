@@ -96,11 +96,22 @@ const Users = ({auth, users, apartments, attributes, categories,}) => {
         {
           label: 'Apartments',
           val: apartments.length,
-          content: <Table data={apartments} actions={{
-            type: 'apartments',
-            editFunction: (apartment) => {setCreateApartment(true); setEditApartment(true); setApartment(apartment); console.log(apartment)},
-            // deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId);},
-            active: ['view', 'edit', 'delete']
+          content: <Table data={apartments}
+          actions={{
+              buttons: [
+                  {
+                      label: 'Edit',
+                      type: 'secondary',
+                      onClick: (apartment) => {setCreateApartment(true); setEditApartment(true); setApartment(apartment); console.log(apartment)},
+                  },
+                  // {
+                  //     label: 'Decline',
+                  //     type: 'danger',
+                  //     onClick: (row) => alert(`Declining ${row.id}`),
+                  // },
+              ],
+            //   defaultActions: ['delete'], // Specify default actions
+              onDelete: (row) => alert(`Deleting ${row.id}`), // Optional override for delete
           }}
           searchable
           columnsToShow={['id', 'title', 'slug', 'cg_price']} />

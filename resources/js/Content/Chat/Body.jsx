@@ -3,8 +3,10 @@ import ProfilePhoto from '@/Components/ProfilePhoto';
 import React, {useState} from 'react'
 import parse from 'html-react-parser'
 import { FaSearch } from 'react-icons/fa';
+import { FaX } from 'react-icons/fa6';
 
 const Body = ({ close, chats, setChat, user }) => {
+    console.log(chats);
     const [searchQuery, setSearchQuery] = useState('')
 
     const handleSearch = (e) => {
@@ -26,9 +28,7 @@ const Body = ({ close, chats, setChat, user }) => {
   return (
     <div className='flex flex-col gap-3'>
                     <div onClick={() => close()} className='flex justify-end cursor-pointer'>
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15.5265 2.73247C16.1512 2.10776 16.1512 1.09324 15.5265 0.46853C14.9018 -0.156177 13.8872 -0.156177 13.2625 0.46853L8 5.73606L2.73247 0.473528C2.10776 -0.151179 1.09324 -0.151179 0.46853 0.473528C-0.156177 1.09824 -0.156177 2.11276 0.46853 2.73747L5.73606 8L0.473528 13.2675C-0.151179 13.8922 -0.151179 14.9068 0.473528 15.5315C1.09824 16.1562 2.11276 16.1562 2.73747 15.5315L8 10.2639L13.2675 15.5265C13.8922 16.1512 14.9068 16.1512 15.5315 15.5265C16.1562 14.9018 16.1562 13.8872 15.5315 13.2625L10.2639 8L15.5265 2.73247Z" fill="#464E5F"/>
-                        </svg>
+                        <FaX size={17} />
                     </div>
                     <div className='flex justify-between items-center'>
                         <p className='text-2xl font-semibold'>Chats</p>
@@ -49,7 +49,7 @@ const Body = ({ close, chats, setChat, user }) => {
                             const chatuser = chat?.received.id !== user.id ? chat?.received : chat?.sent;
                             return (
                                 <div onClick={() => setChat(chatuser.id)} key={index} className='py-4 relative cursor-pointer hover:bg-slate-100 transition-all bg-white border-b-2'>
-                                    {chat.last_message.read == 0 && <div className='h-2 w-2 bg-red-800 rounded-lg absolute top-10 -left-2.5'></div>}
+                                    {chat.last_message.read == 0 && chat.last_message.received.id == user.id ? <div className='h-2 w-2 bg-red-800 rounded-lg absolute top-10 -left-2.5'></div> : null}
 
                                     <div className='flex justify-between items-center'>
                                         <div className='flex items-center gap-3'>

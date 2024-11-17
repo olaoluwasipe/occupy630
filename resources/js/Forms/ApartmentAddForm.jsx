@@ -40,8 +40,8 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
         setData((prevData) => ({
             ...prevData,
             amenities: checked
-                ? [...prevData.amenities, value]
-                : prevData.amenities.filter((amenity) => amenity !== value),
+                ? [...prevData?.amenities, value]
+                : prevData?.amenities?.filter((amenity) => amenity !== value),
         }));
 
         console.log(data.amenities)

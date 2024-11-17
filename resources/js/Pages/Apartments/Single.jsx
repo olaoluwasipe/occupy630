@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import { Head, useForm } from '@inertiajs/react'
+import { Head, useForm, usePage } from '@inertiajs/react'
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -51,7 +51,8 @@ function NextArrow(props) {
     );
   }
 
-const Single = ({auth, apartment}) => {
+const Single = ({auth, apartment, success, error}) => {
+    const { flash } = usePage().props;
     var settings = {
       dots: true,
       infinite: true,
@@ -65,11 +66,11 @@ const Single = ({auth, apartment}) => {
     var prices = {
         monthly: apartment.monthly_price,
         yearly: apartment.cg_price,
-        security: apartment.cg_price * 0.3,
+        security: apartment?.approval?.payment?.meta?.prices?.security_deposit ?? apartment.cg_price * 0.3,
         agreement: apartment.cg_price * 0.05,
-        agency: apartment.cg_price * 0.05,
+        agency: apartment?.approval?.payment?.meta?.prices?.agreement ?? apartment.cg_price * 0.05,
         total:  parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.05) * 2 ) ,
-        initial: parseFloat(apartment.monthly_price) + parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.05) * 2 ) ,
+        initial: apartment?.approval?.payment?.amount ?? (parseFloat(apartment.monthly_price) + parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.05) * 2 )) ,
     }
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -98,11 +99,10 @@ const Single = ({auth, apartment}) => {
             post(route('apartment.request-approval', apartment.id))
         }
 
-        processing ? null :
-
-        toast.success("Approval request sent")
-
     }
+
+    success && toast.success(success ?? "Approval request sent")
+    error && toast.error(error ?? "Something went wrong")
 
 
 

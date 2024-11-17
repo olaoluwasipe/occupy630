@@ -17,12 +17,16 @@ class Approval extends Model
         return $this->belongsTo(User::class, "user_id");
     }
 
-    public function approval() {
+    public function approver() {
         return $this->belongsTo(User::class, "approver_id");
     }
 
     public function apartment() {
         return $this->belongsTo(Apartment::class, "apartment_id");
+    }
+
+    public function payment() {
+        return $this->hasOne(HousePayment::class, "approval_id");
     }
 
     public function scopeApproved($query) {

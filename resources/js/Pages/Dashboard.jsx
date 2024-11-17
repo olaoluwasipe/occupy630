@@ -14,6 +14,12 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ExistingApartmentEmployee from '@/Pieces/ExistingApartmentEmployee';
 import ExistingApartmentsEmployer from '@/Pieces/ExistingApartmentsEmployer';
+import { toast } from 'react-toastify';
+import SendInviteForm from '@/Forms/SendInviteForm';
+import Modal from '@/Components/Modal';
+import DangerButton from '@/Components/DangerButton';
+import { RiMessage2Fill } from 'react-icons/ri';
+import { IoDocument } from 'react-icons/io5';
 
 function NextArrow(props) {
     const { className, style, onClick } = props;
@@ -46,14 +52,28 @@ function NextArrow(props) {
     prevArrow: <PrevArrow />
   };
 
-export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
-    console.log(apartment)
+export default function Dashboard({ auth, payments, employees, docs, apartment, approvals, success, error }) {
+    // console.log(employees)
     const [openNav, setOpenNav] = useState(false)
     const [action, setAction] = useState('')
+    const [openModal, setOpenModal] = useState(false);
+    const [openMessage, setOpenMessage] = useState(false);
+
+    const modalOpen = () => {
+        setOpenModal(!openModal);
+    }
+
+    const messageModalOpen = () => {
+        setOpenMessage(!openMessage);
+    }
+
+    success && toast.success(success ?? "Approval request sent")
+    error && toast.error(error ?? "Something went wrong")
 
     const navFunc = (e, action='') => {
         e.preventDefault()
         setOpenNav(!openNav)
+        setOpenMessage(!openMessage)
         setAction(action)
     }
 
@@ -63,9 +83,15 @@ export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
         navFunc(e, 'chat')
     }
 
+    const sendMessage = (e, user) => {
+        axios.post(route('dashboard.start.chat', user.id),
+            )
+        navFunc(e, 'chat')
+    }
+
     const statusKeys = {
         'pending': 'bg-yellow-500',
-        'success': 'bg-green-500',
+        'rented': 'bg-green-500',
         'rejected': 'bg-red-500',
         'completed': 'bg-blue-500',
         'cancelled': 'bg-gray-500',
@@ -96,24 +122,24 @@ export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
                                 <p className={`text-${auth.user.type === 'learner' ? 'blue' : 'green' }-800 font-bold capitalize`}>{auth.user.type || 'Learner'}</p>
                             </div>
                         </div>
-                        {auth.user.type === 'learner' ? (
-                            <div className="flex flex-row gap-3 items-center md:w-3/4 sm:mt-2 h-full">
-                                <div className='flex flex-1 flex-col justify-center bg-emerald-600 p-3 text-center rounded-lg h-100'>
-                                    <h2 className='text-2xl font-bold text-white'>{courses.length}</h2>
-                                    <p className='text-white'>Courses Enrolled</p>
+                        {auth.user.type === 'employee' ? (
+                            <div className="flex flex-row gap-3 items-center md:w-1/2 sm:mt-2 h-full">
+                                <div onClick={messageModalOpen} className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-emerald-600 text-center rounded-lg h-100'>
+                                    <RiMessage2Fill size={25} color='#fff' />
+                                    <p className='text-white'>Message Someone </p>
                                 </div>
-                                <div className='flex flex-1 flex-col justify-center bg-blue-900 p-3 text-center rounded-lg h-100'>
-                                    <h2 className='text-2xl font-bold text-white'>{tasks.length}</h2>
-                                    <p className='text-white'>Pending Tasks</p>
+                                <div className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-sky-600 text-center rounded-lg h-100'>
+                                    <IoDocument size={25} color='#fff' />
+                                    <p className='text-white'>View Documents </p>
                                 </div>
                             </div>
                         ) : (
                             <div className="flex flex-row gap-3 items-center w-3/4 h-full">
-                                <div className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-gray-600 text-center rounded-lg h-100'>
+                                <div onClick={modalOpen} className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-gray-600 text-center rounded-lg h-100'>
                                     <svg width="26" height="25" viewBox="0 0 26 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M5.16667 16.6667V3.33333C5.16667 1.49479 6.66146 0 8.5 0H21.8333C23.6719 0 25.1667 1.49479 25.1667 3.33333V13.6198C25.1667 14.5052 24.8177 15.3542 24.1927 15.9792L21.1458 19.026C20.5208 19.651 19.6719 20 18.7865 20H8.5C6.66146 20 5.16667 18.5052 5.16667 16.6667ZM14.3333 5C13.875 5 13.5 5.375 13.5 5.83333V8.33333H11C10.5417 8.33333 10.1667 8.70833 10.1667 9.16667V10.8333C10.1667 11.2917 10.5417 11.6667 11 11.6667H13.5V14.1667C13.5 14.625 13.875 15 14.3333 15H16C16.4583 15 16.8333 14.625 16.8333 14.1667V11.6667H19.3333C19.7917 11.6667 20.1667 11.2917 20.1667 10.8333V9.16667C20.1667 8.70833 19.7917 8.33333 19.3333 8.33333H16.8333V5.83333C16.8333 5.375 16.4583 5 16 5H14.3333ZM15.5833 22.5C16.276 22.5 16.8333 23.0573 16.8333 23.75C16.8333 24.4427 16.276 25 15.5833 25H7.25C3.33855 25 0.166672 21.8281 0.166672 17.9167V6.25C0.166672 5.55729 0.723963 5 1.41667 5C2.10938 5 2.66667 5.55729 2.66667 6.25V17.9167C2.66667 20.4479 4.71876 22.5 7.25 22.5H15.5833Z" fill="white"/>
                                     </svg>
-                                    <p className='text-white'>Create Assignment </p>
+                                    <p className='text-white'>Invite Employee </p>
                                 </div>
                                 <div className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-emerald-600 text-center rounded-lg h-100'>
                                     <svg width="22" height="25" viewBox="0 0 22 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -138,8 +164,42 @@ export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
                             <PrimaryButton>Get Apartment</PrimaryButton>
                         )
                     ) : (
-                        <ExistingApartmentsEmployer apartment={apartment} />
+                        <ExistingApartmentsEmployer apartment={apartment} auth={auth} payments={payments} approvals={approvals} />
                     )}
+
+                    <Modal show={openModal}>
+                        <div className='p-10'>
+                            <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                                <p className='text-xl text-blue-800 font-semibold'>Add Employee</p>
+                                <DangerButton onClick={modalOpen}>Close</DangerButton>
+                            </div>
+
+                            <SendInviteForm />
+                        </div>
+                    </Modal>
+
+                    <Modal show={openMessage}>
+                        <div className='p-10'>
+                            <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                                <p className='text-xl text-blue-800 font-semibold'>Message Someone</p>
+                                <DangerButton onClick={messageModalOpen}>Close</DangerButton>
+                            </div>
+
+                            <div className="flex flex-col gap-3">
+                                {employees.map((employee, i) => (
+                                    <div key={i} className="flex border-b-2 pb-3 flex-row w-full justify-between items-center gap-3">
+                                        <div className="flex flex-col gap-3">
+                                            <p className="text-blue-800 font-semibold">{employee.fname} {employee.lname}</p>
+                                            <PrimaryButton onClick={(e) => sendMessage(e, employee)}>Send Message</PrimaryButton>
+                                        </div>
+                                        <div className="flex flex-col gap-3">
+                                            <p className="text-gray-500 uppercase font-medium text-sm">{employee.type}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </Modal>
 
                 </div>
             </div>
