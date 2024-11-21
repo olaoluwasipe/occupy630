@@ -44,6 +44,8 @@ class User extends Authenticatable implements JWTSubject
         'remember_token',
     ];
 
+    protected $appends = ['fullname'];
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
@@ -77,8 +79,9 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
-    public function getFullNameAttribute() {
-        return $this->fname .' '. $this->lname;
+    public function getFullnameAttribute()
+    {
+        return "{$this->fname} {$this->lname}";
     }
 
     public function company () {

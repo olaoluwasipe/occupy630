@@ -20,6 +20,7 @@ import Modal from '@/Components/Modal';
 import DangerButton from '@/Components/DangerButton';
 import { RiMessage2Fill } from 'react-icons/ri';
 import { IoDocument } from 'react-icons/io5';
+import ExistingApartmentsLandlord from '@/Pieces/ExistingApartmentsLandlord';
 
 function NextArrow(props) {
     const { className, style, onClick } = props;
@@ -157,14 +158,19 @@ export default function Dashboard({ auth, payments, employees, docs, apartment, 
                         )}
                     </div>
 
-                    {auth.user.type === 'employee' ? (
+                    {auth.user.type === 'employee' && (
                         apartment ? (
                             <ExistingApartmentEmployee apartment={apartment} statusKeys={statusKeys} settings={settings} auth={auth} requestRentPay={requestRentPay} />
                         ) : (
                             <PrimaryButton>Get Apartment</PrimaryButton>
                         )
-                    ) : (
+                    )}
+                    {auth.user.type === 'employer' && (
                         <ExistingApartmentsEmployer apartment={apartment} auth={auth} payments={payments} approvals={approvals} />
+                    )}
+
+                    {auth.user.type === 'landlord' && (
+                        <ExistingApartmentsLandlord apartment={apartment} auth={auth} payments={payments} approvals={approvals} />
                     )}
 
                     <Modal show={openModal}>

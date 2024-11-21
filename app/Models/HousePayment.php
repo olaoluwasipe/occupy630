@@ -26,6 +26,17 @@ class HousePayment extends Model
         'meta' => 'array',
     ];
 
+    protected $appends = ['apartment', 'tenant'];
+
+    public function getApartmentAttribute()
+    {
+        return $this->apartment()->first();
+    }
+
+    public function getTenantAttribute() {
+        return $this->user;
+    }
+
     public function apartment() {
         return $this->belongsTo(Apartment::class);
     }

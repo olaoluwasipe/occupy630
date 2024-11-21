@@ -129,7 +129,7 @@ export default function Register() {
                             autoComplete="code"
                             onChange={(
                                 e) => setData('code', e.target.value)}
-                            required={true}
+                            // required={true}
                         />
 
                         <InputError message={errors.code} className="mt-2" />

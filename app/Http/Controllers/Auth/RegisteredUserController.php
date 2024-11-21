@@ -149,7 +149,7 @@ class RegisteredUserController extends Controller
     private function getRedirectLink(User $user): string
     {
         return match ($user->type) {
-            'landlord' => route('landlord.dashboard', absolute: false),
+            // 'landlord' => route('home', absolute: false),
             'employer' => route('company.register', absolute: false),
             'employee' => route('employee.dashboard', absolute: false),
             'superadmin' => route('home', absolute: false),

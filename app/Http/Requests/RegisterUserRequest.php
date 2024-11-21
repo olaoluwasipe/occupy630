@@ -34,7 +34,13 @@ class RegisterUserRequest extends FormRequest
                 'email',
                 'max:255',
                 new UniqueIf('users', 'email', 'register_code', null),
-                new CompanyEmail,
+                function ($attribute, $value, $fail) {
+                    // Skip CompanyEmail validation if type is landlord
+                    if (request()->input('type') !== 'landlord') {
+                        $rule = new CompanyEmail;
+                        $rule->passes($attribute, $value) || $fail($rule->message());
+                    }
+                },
             ],
             'type' => 'required|string|max:255|in:landlord,employer,employee',
             'password' => ['required', 'confirmed', Password::defaults()],

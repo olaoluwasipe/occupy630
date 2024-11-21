@@ -56,7 +56,7 @@ Route::get('/', function () {
         $employees = User::where('company_id', Auth::user()->company_id)->whereNot('id', Auth::id())->get(['fname', 'lname', 'id', 'type']);
 
         $apartment = Apartment::where('tenant_id', Auth::user()->id)
-                    ->with(['images', 'transactions' => function ($query) {
+                    ->with(['images', 'approvals', 'transactions' => function ($query) {
                         $query->with('user');
                         $query->orderBy('created_at', 'desc'); // Adjust column name if needed
                     }])
@@ -67,6 +67,14 @@ Route::get('/', function () {
         $apartment = Apartment::whereIn('tenant_id', $employees)->with('tenant', 'images', 'approvals', 'transactions')->latest()->get();
         $approvals = Approval::whereIn('user_id', $employees)->with('apartment', 'user')->latest()->get();
         $payments  = HousePayment::whereIn('user_id', $employees)->with('user', 'apartment')->latest()->get();
+
+    } else if (Auth::user()->type == 'landlord') {
+        $apartment = Apartment::where('landlord_id', Auth::id())->with('tenant', 'images', 'approvals', 'transactions')->latest()->get();
+        $payments = collect();
+        foreach($apartment as $apart) {
+            $payments->push($apart->transactions);
+        }
+        $payments = $payments->flatten();
 
     }
 

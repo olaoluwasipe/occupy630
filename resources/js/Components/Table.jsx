@@ -29,12 +29,14 @@ const formatValue = (value, formatter) => {
                     case 'approved':
                     case 'successful':
                     case 'completed':
+                    case 'available':
                         return <span className="bg-green-500 p-2 rounded text-sm text-white">{value}</span>;
                     case 'rejected':
                     case 'failed':
                     case 'cancelled':
                     case 'expired':
                     case 'declined':
+                    case 'unavailable':
                         return <span className="bg-red-500 p-2 rounded text-sm text-white">{value}</span>;
                     default:
                         return value;
