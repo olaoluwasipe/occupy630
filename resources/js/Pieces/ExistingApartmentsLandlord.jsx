@@ -133,7 +133,7 @@ const ExistingApartmentsLandlord = ({apartment, approvals, payments, auth, succe
                     actions={{
                         buttons: [
                             {
-                                label: 'Pay',
+                                label: 'View',
                                 type: 'secondary',
                                 onClick: (row) => modalRent(row),
                             },
@@ -146,6 +146,7 @@ const ExistingApartmentsLandlord = ({apartment, approvals, payments, auth, succe
                         // defaultActions: ['view'], // Specify default actions
                         onDelete: (row) => alert(`Deleting ${row.id}`), // Optional override for delete
                     }}
+                    completed={false}
                     searchable
                     clickable={(row)=>alert(row.id)}
                     columnsToShow={[

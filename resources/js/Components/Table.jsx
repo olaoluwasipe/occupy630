@@ -56,7 +56,7 @@ const formatValue = (value, formatter) => {
 
 };
 
-const Table = ({ data, columnsToShow = [], actions, rowsPerPage = 10, searchable = false, type=null, clickable }) => {
+const Table = ({ data, columnsToShow = [], actions, rowsPerPage = 10, searchable = false, type=null, clickable, completed=true }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -133,7 +133,7 @@ const Table = ({ data, columnsToShow = [], actions, rowsPerPage = 10, searchable
                             ))}
                             {actions && (
                                 <td className="px-6 py-4 flex gap-3">
-                                    {(row.status === 'approved' || row.status === 'declined' || row.status === 'failed' || row.status === 'completed') ? (
+                                    {((row.status === 'approved' || row.status === 'declined' || row.status === 'failed' || row.status === 'completed') && completed) ? (
                                         <span className="text-green-500 capitalize">
                                             {row.status} On: {formatValue(row.updated_at, 'datetime')}
                                         </span>
