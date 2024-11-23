@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TutorController;
 use App\Models\Apartment;
+use App\Models\ApartmentAttribute;
 use App\Models\ApartmentCategory;
 use App\Models\Approval;
 use App\Models\AssignmentSubmission;
@@ -75,6 +76,8 @@ Route::get('/', function () {
             $payments->push($apart->transactions);
         }
         $payments = $payments->flatten();
+        $categories = ApartmentCategory::all();
+        $attributes = ApartmentAttribute::all();
 
     }
 
@@ -86,6 +89,8 @@ Route::get('/', function () {
         'apartment' => $apartment,
         'approvals' => $approvals ?? [],
         'payments'=> $payments ?? [],
+        'categories'=> $categories ?? [],
+        'attributes'=> $attributes ?? [],
         'docs' => session('docs'),
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),

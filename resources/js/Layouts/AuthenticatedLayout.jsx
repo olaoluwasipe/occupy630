@@ -35,24 +35,25 @@ export default function Authenticated({ user, header, children, docslink='', ope
                                     <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
                                 </Link>
                             </div>
-                            {user.type !== 'admin' ? (
+                            {/* {user.type !== 'admin' ? (
                                 <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink href={route('home')} active={route().current('home')}>
                                     Home
                                 </NavLink>
-                                {user.type == 'employee' ? (
+                                {user.type == 'employee' && (
                                     <>
-                                    <NavLink href={route('apartments')} active={route().current('apartments')}>
-                                        Apartments
-                                    </NavLink>
-                                    <NavLink href={route('tutors')} active={route().current('tutors')}>
-                                        My Tutors
+                                        <NavLink href={route('apartments')} active={route().current('apartments')}>
+                                            Apartments
+                                        </NavLink>
+                                        <NavLink href={route('tutors')} active={route().current('tutors')}>
+                                            My Tutors
                                         </NavLink>
                                         <NavLink href={route('tasks')} active={route().current('tasks')}>
                                             My Tasks
                                         </NavLink>
-                                        </>
-                                ) : (
+                                    </>
+                                )}
+                                {user.type == 'employer' && (
                                     <>
                                     <NavLink href={route('apartments')} active={route().current('apartments')}>
                                         Apartments
@@ -66,7 +67,7 @@ export default function Authenticated({ user, header, children, docslink='', ope
                                     </>
                                 )}
                             </div>
-                            ) : ''}
+                            ) : ''} */}
 
                         </div>
 

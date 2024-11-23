@@ -58,6 +58,7 @@ class ApartmentController extends Controller
                 'country' => 'Nigeria',
                 'status' => 'pending',
                 'category_id' => $request->category,
+                'monthly_rent' => $request->price / 12,
                 'cg_price' => $request->price + ($request->price * 0.3),
                 'monthly_price' => ($request->price + ($request->price * 0.3)) / 12,
             ]
@@ -91,7 +92,7 @@ class ApartmentController extends Controller
             $apartment->images()->createMany($attachments);
         }
 
-        return redirect()->route('admin.apartments');
+        return redirect()->back()->with('success', 'Apartment created successfully');
     }
 
     public function uploadImage($file)

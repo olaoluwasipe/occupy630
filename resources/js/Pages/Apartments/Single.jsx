@@ -34,7 +34,7 @@ function NextArrow(props) {
     return (
       <div
         className={className}
-        style={{ ...style, display: "block", right: 20, zIndex: 100 }}
+        style={{ ...style, display: "block", right: 50, zIndex: 100, transform: 'scale(2)' }}
         onClick={onClick}
       />
     );
@@ -45,7 +45,7 @@ function NextArrow(props) {
     return (
       <div
         className={className}
-        style={{ ...style, display: "block", left: 20, zIndex: 100, width: 40 }}
+        style={{ ...style, display: "block", left: 50, zIndex: 100, width: 40, transform: 'scale(2)' }}
         onClick={onClick}
       />
     );
@@ -124,124 +124,150 @@ const Single = ({auth, apartment, success, error}) => {
             ))}
         </Slider>
         <div className="py-12 mb-10">
-            <div className="max-w-7xl mx-auto sm:px-6 flex flex-row gap-5 lg:px-8">
-                <div className="w-4/6">
-                    <h1 className='text-5xl font-bold'>{apartment.title}</h1>
-                    <p className="flex items-center mt-3 gap-3">
-                        <FaLocationDot className='text-blue-500' />
-                        <span className='text-gray-500'>{apartment.address}, {apartment.lga}, {apartment.state}, {apartment.country}</span>
-                    </p>
-                    <div className="mt-3">
-                        <h3 className="font-bold text-xl my-3">Property Description</h3>
-                        <p className="text-gray-500">
-                            {parse(apartment.description)}
+            {auth.user.type === 'landlord' ? (
+                <div className="max-w-7xl mx-auto sm:px-6 flex flex-row gap-5 lg:px-8">
+                    <div className="flex justify-between w-full items-center">
+                        <div>
+                            <h1 className='text-5xl font-bold'>{apartment.title}</h1>
+                            <p className="flex items-center mt-3 gap-3">
+                                <FaLocationDot className='text-blue-500' />
+                                <span className='text-gray-500'>{apartment.address}, {apartment.lga}, {apartment.state}, {apartment.country}</span>
+                            </p>
+                        </div>
+                        <div>
+                            <div className="flex gap-2 items-center">
+                                <h3 className="text-5xl">{formatPrice(apartment.price)} </h3>
+                                <p className="text-sm font-light">PER YEAR</p>
+                            </div>
+                            <hr className='my-3' />
+                            <div className="flex gap-2 items-center  ">
+                                {/* <div className="bg-blue-200 w-full h-10"></div> */}
+                                <h3 className="text-2xl">{formatPrice(apartment.monthly_rent)} </h3>
+                                <p className="text-sm font-light">PER MONTH</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="max-w-7xl mx-auto sm:px-6 flex flex-row gap-5 lg:px-8">
+                    <div className="w-4/6">
+                        <h1 className='text-5xl font-bold'>{apartment.title}</h1>
+                        <p className="flex items-center mt-3 gap-3">
+                            <FaLocationDot className='text-blue-500' />
+                            <span className='text-gray-500'>{apartment.address}, {apartment.lga}, {apartment.state}, {apartment.country}</span>
                         </p>
+                        <div className="mt-3">
+                            <h3 className="font-bold text-xl my-3">Property Description</h3>
+                            <p className="text-gray-500">
+                                {parse(apartment.description)}
+                            </p>
 
-                        <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
-                            <h2 className="text-xl font-bold mb-5">Amenities</h2>
+                            <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                                <h2 className="text-xl font-bold mb-5">Amenities</h2>
 
-                            <div className="flex items-center gap-3 items-center">
-                                {apartment.amenities.map((amenity, index) => (
-                                    <div key={index} className="flex items-center w-1/4 justify-center gap-3">
-                                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                            <img src={`/storage/${amenity.icon}`} alt="" className="w-6 h-6" />
+                                <div className="flex items-center gap-3 items-center">
+                                    {apartment.amenities.map((amenity, index) => (
+                                        <div key={index} className="flex items-center w-1/4 justify-center gap-3">
+                                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                                <img src={`/storage/${amenity.icon}`} alt="" className="w-6 h-6" />
+                                            </div>
+                                            <span className="text-gray-500">{amenity}</span>
                                         </div>
-                                        <span className="text-gray-500">{amenity}</span>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
-                            <h2 className="text-xl font-bold mb-5">Features</h2>
+                            <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                                <h2 className="text-xl font-bold mb-5">Features</h2>
 
-                            <div className="flex items-center gap-3 items-center">
-                                {apartment.amenities.map((amenity, index) => (
-                                    <div key={index} className="flex items-center w-1/4 justify-center gap-3">
-                                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                            <FaCheckCircle />
+                                <div className="flex items-center gap-3 items-center">
+                                    {apartment.amenities.map((amenity, index) => (
+                                        <div key={index} className="flex items-center w-1/4 justify-center gap-3">
+                                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                                <FaCheckCircle />
+                                            </div>
+                                            <span className="text-gray-500">{amenity}</span>
                                         </div>
-                                        <span className="text-gray-500">{amenity}</span>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
-                            <h2 className="text-xl font-bold mb-5">Map</h2>
+                            <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                                <h2 className="text-xl font-bold mb-5">Map</h2>
 
-                            <div className="flex items-center gap-3 items-center">
-                                {apartment.amenities.map((amenity, index) => (
-                                    <div key={index} className="flex items-center w-1/4 justify-center gap-3">
-                                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                            <img src={`/storage/${amenity.icon}`} alt="" className="w-6 h-6" />
+                                <div className="flex items-center gap-3 items-center">
+                                    {apartment.amenities.map((amenity, index) => (
+                                        <div key={index} className="flex items-center w-1/4 justify-center gap-3">
+                                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                                <img src={`/storage/${amenity.icon}`} alt="" className="w-6 h-6" />
+                                            </div>
+                                            <span className="text-gray-500">{amenity}</span>
                                         </div>
-                                        <span className="text-gray-500">{amenity}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="w-2/6">
-                    <div className=" sticky top-20">
-                        <div className="flex gap-2 items-center">
-                            <h3 className="text-5xl">{formatPrice(apartment.cg_price)} </h3>
-                            <p className="text-sm font-light">PER YEAR</p>
-                        </div>
-                        <hr className='my-3' />
-                        <div className="flex gap-2 items-center  ">
-                            {/* <div className="bg-blue-200 w-full h-10"></div> */}
-                            <h3 className="text-2xl">{formatPrice(apartment.monthly_price)} </h3>
-                            <p className="text-sm font-light">PER MONTH</p>
-                        </div>
-                        <div className="rounded-lg shadow-lg bg-white p-4">
-                            <div className="flex gap-3 items-center justify-between items-center mb-4">
-                                <SecondaryButton className='w-1/2 flex items-center justify-center'><FaSave/> Save</SecondaryButton>
-                                <SecondaryButton onClick={modalOpen} className='w-1/2 flex items-center justify-center'>Contact Owner</SecondaryButton>
-                            </div>
-                            {apartment.approval ? (
-                                apartment.approval.status === "approved" ? (
-                                    <PrimaryButton onClick={modalRent} className='w-full flex items-center justify-center'>Rent Property</PrimaryButton>
-                                ) : apartment.approval.status === "pending" ? (
-                                    <SecondaryButton onClick={modalRent} disabled className='w-full flex items-center justify-center'>Approval Pending</SecondaryButton>
-                                ) : apartment.approval.status === "declined" ? (
-                                    <div>
-                                        <DangerButton disabled className='w-full flex items-center justify-center'>You can't get this property</DangerButton>
-                                        <p>{apartment.approval.comment}</p>
-                                    </div>
-                                ) : null
-                            ) : (
-                                <PrimaryButton onClick={handleSubmit} className='w-full flex items-center justify-center'>Request Approval</PrimaryButton>
-                            )}
-                            <div className="mt-3 p-2 rounded-lg shadow-lg bg-blue-100">
-                                <h3 className="text-md font-bold">Initial Payments:</h3>
-                                <hr className="mt-3 mb-5 bg-indigo-400 w-full h-[2px]" />
-                                <div className="flex gap-2 justify-between items-center">
-                                    <p className="text-sm font-light uppercase mb-3">SECURITY DEPOSIT(30%)</p>
-                                    <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
-                                </div>
-                                <div className="flex gap-2 justify-between items-center">
-                                    <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(5%)</p>
-                                    <p className="text-sm font-light mb-3">{formatPrice(prices.agreement)}</p>
-                                </div>
-                                <div className="flex gap-2 justify-between items-center">
-                                    <p className="text-sm font-light uppercase mb-3">AGENCY FEE(5%)</p>
-                                    <p className="text-sm font-light mb-3">{formatPrice(prices.agency)}</p>
-                                </div>
-                                <div className="flex gap-2 justify-between items-center">
-                                    <p className="text-sm font-light uppercase mb-3">MONTHLY RENT</p>
-                                    <p className="text-sm font-light mb-3">{formatPrice(prices.monthly)}</p>
-                                </div>
-                                <div className="flex gap-2 bg-indigo-500 rounded-md p-2 text-white justify-between items-center">
-                                    <p className="text-sm font-light uppercase">TOTAL</p>
-                                    <p className="text-sm font-light">{formatPrice(prices.initial)}</p>
+                                    ))}
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div className="w-2/6">
+                        <div className=" sticky top-20">
+                            <div className="flex gap-2 items-center">
+                                <h3 className="text-5xl">{formatPrice(apartment.cg_price)} </h3>
+                                <p className="text-sm font-light">PER YEAR</p>
+                            </div>
+                            <hr className='my-3' />
+                            <div className="flex gap-2 items-center  ">
+                                {/* <div className="bg-blue-200 w-full h-10"></div> */}
+                                <h3 className="text-2xl">{formatPrice(apartment.monthly_price)} </h3>
+                                <p className="text-sm font-light">PER MONTH</p>
+                            </div>
+                            <div className="rounded-lg shadow-lg bg-white p-4">
+                                <div className="flex gap-3 items-center justify-between items-center mb-4">
+                                    <SecondaryButton className='w-1/2 flex items-center justify-center'><FaSave/> Save</SecondaryButton>
+                                    <SecondaryButton onClick={modalOpen} className='w-1/2 flex items-center justify-center'>Contact Owner</SecondaryButton>
+                                </div>
+                                {apartment.approval ? (
+                                    apartment.approval.status === "approved" ? (
+                                        <PrimaryButton onClick={modalRent} className='w-full flex items-center justify-center'>Rent Property</PrimaryButton>
+                                    ) : apartment.approval.status === "pending" ? (
+                                        <SecondaryButton onClick={modalRent} disabled className='w-full flex items-center justify-center'>Approval Pending</SecondaryButton>
+                                    ) : apartment.approval.status === "declined" ? (
+                                        <div>
+                                            <DangerButton disabled className='w-full flex items-center justify-center'>You can't get this property</DangerButton>
+                                            <p>{apartment.approval.comment}</p>
+                                        </div>
+                                    ) : null
+                                ) : (
+                                    <PrimaryButton onClick={handleSubmit} className='w-full flex items-center justify-center'>Request Approval</PrimaryButton>
+                                )}
+                                <div className="mt-3 p-2 rounded-lg shadow-lg bg-blue-100">
+                                    <h3 className="text-md font-bold">Initial Payments:</h3>
+                                    <hr className="mt-3 mb-5 bg-indigo-400 w-full h-[2px]" />
+                                    <div className="flex gap-2 justify-between items-center">
+                                        <p className="text-sm font-light uppercase mb-3">SECURITY DEPOSIT(30%)</p>
+                                        <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
+                                    </div>
+                                    <div className="flex gap-2 justify-between items-center">
+                                        <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(5%)</p>
+                                        <p className="text-sm font-light mb-3">{formatPrice(prices.agreement)}</p>
+                                    </div>
+                                    <div className="flex gap-2 justify-between items-center">
+                                        <p className="text-sm font-light uppercase mb-3">AGENCY FEE(5%)</p>
+                                        <p className="text-sm font-light mb-3">{formatPrice(prices.agency)}</p>
+                                    </div>
+                                    <div className="flex gap-2 justify-between items-center">
+                                        <p className="text-sm font-light uppercase mb-3">MONTHLY RENT</p>
+                                        <p className="text-sm font-light mb-3">{formatPrice(prices.monthly)}</p>
+                                    </div>
+                                    <div className="flex gap-2 bg-indigo-500 rounded-md p-2 text-white justify-between items-center">
+                                        <p className="text-sm font-light uppercase">TOTAL</p>
+                                        <p className="text-sm font-light">{formatPrice(prices.initial)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
             </div>
 
             <Modal show={openContact}  >

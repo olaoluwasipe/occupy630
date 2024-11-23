@@ -1,17 +1,19 @@
 import DangerButton from '@/Components/DangerButton';
 import IconTextInput from '@/Components/IconTextInput';
 import Modal from '@/Components/Modal';
+import MultipleImageInput from '@/Components/MultipleImageInput';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import Table from '@/Components/Table';
 import Tabs from '@/Components/Tabs';
+import ApartmentAddForm from '@/Forms/ApartmentAddForm';
 import ApprovalForm from '@/Forms/ApprovalForm';
 import RentForm from '@/Forms/RentForm';
 import { format } from 'date-fns';
 import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify';
 
-const ExistingApartmentsLandlord = ({apartment, approvals, payments, auth, success, error}) => {
+const ExistingApartmentsLandlord = ({apartment, approvals, payments, auth, success, error, categories, attributes}) => {
     const [showModal, setShowModal] = useState(false);
     const [openRent, setOpenRent] = useState(false);
     const [selectedApartment, setSelectedApartment] = useState(null);
@@ -63,15 +65,27 @@ const ExistingApartmentsLandlord = ({apartment, approvals, payments, auth, succe
     const tabsData = [
         {
           label: 'Overview',
-          content: <div></div>
+          content: <div></div>,
         //   content: <CourseOverview modules={course.modules} description={course.description} objectives={course.objectives} />
         },
         {
             label: 'Apartments',
             content: <Table data={apartment} actions={{
+                buttons: [
+                    {
+                        label: 'View',
+                        type: 'primary',
+                        onClick: (row) => window.location.href = '/apartment/'+row.slug,
+                    },
+                    {
+                        label: 'Edit',
+                        type: 'secondary',
+                        onClick: (row) => window.location.href = '/apartment/'+row.slug,
+                    },
+                ],
               type: 'user',
             //   deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId)},
-              defaultActions: ['view', 'edit']
+            //   defaultActions: ['view', 'edit']
             }}
             searchable
             columnsToShow={[
@@ -191,7 +205,7 @@ const ExistingApartmentsLandlord = ({apartment, approvals, payments, auth, succe
                     </div>
 
                     {/* {auth.user.type === 'employer' && <AssignStaffToRentForm apartment={apartment} user={auth.user} />} */}
-                    <RentForm apartment={selectedApartment?.apartment} prices={prices} payment={selectedApartment} openModal={modalRent} user={auth.user} />
+                    <ApartmentAddForm categories={categories} attributes={attributes} apartment={ []} modalClose={() => setCreateUser(false)} />
                     {/* <AssignStaffToRentForm apartment={apartment} user={auth.user} /> */}
                 </div>
             </Modal>

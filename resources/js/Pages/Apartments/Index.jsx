@@ -74,7 +74,7 @@ const Apartments = ({auth, apartments, newApartments}) => {
                                         </div>
                                         <div className="h-1/4 course-heading flex text-black w-full flex-col gap-3">
                                             <h4 className='text-2xl font-bold'>{item.title}</h4>
-                                            <p className='tutor text-base mb-20'>Landlord: {item.landlord.fname}</p>
+                                            <p className='tutor text-base mb-20'>Landlord: {item.landlord.fullname}</p>
                                         </div>
                                         <hr className='mt-4' />
                                         <p className='text-bold mt-3'>Price:</p>

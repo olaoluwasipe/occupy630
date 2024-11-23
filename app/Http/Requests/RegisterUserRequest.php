@@ -38,7 +38,8 @@ class RegisterUserRequest extends FormRequest
                     // Skip CompanyEmail validation if type is landlord
                     if (request()->input('type') !== 'landlord') {
                         $rule = new CompanyEmail;
-                        $rule->passes($attribute, $value) || $fail($rule->message());
+                        return $rule->validate($attribute, $value, $fail);
+                        // $rule->passes($attribute, $value) || $fail($rule->message());
                     }
                 },
             ],
