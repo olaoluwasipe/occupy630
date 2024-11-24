@@ -124,4 +124,12 @@ class User extends Authenticatable implements JWTSubject
     public function forums() {
         return $this->hasMany(Forum::class, 'user_id');
     }
+
+    public function files () {
+        return $this->hasMany(File::class);
+    }
+
+    public function tenantFiles () {
+        return $this->hasMany(File::class, 'tenant_id');
+    }
 }

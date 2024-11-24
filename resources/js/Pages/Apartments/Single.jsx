@@ -28,6 +28,7 @@ import AssignStaffToRentForm from '@/Forms/AssignStaffToRentForm';
 import RentForm from '@/Forms/RentForm';
 import formatPrice from '@/functions';
 import { toast } from 'react-toastify';
+import Table from '@/Components/Table';
 
 function NextArrow(props) {
     const { className, style, onClick } = props;
@@ -78,6 +79,171 @@ const Single = ({auth, apartment, success, error}) => {
         // cohort_id: cohort
     });
 
+    const [openFile, setOpenFile] = useState(false)
+
+    const modalFile = () => {
+        setOpenFile(!openFile);
+    }
+
+    const tabsData = [
+        {
+          label: 'Overview',
+          content: <div className="max-w-7xl mx-auto flex flex-row gap-5">
+                        <div className="w-4/6">
+                            <div className="mt-3">
+                                <h3 className="font-bold text-xl my-3">Property Description</h3>
+                                <p className="text-gray-500">
+                                    {parse(apartment.description)}
+                                </p>
+
+                                <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                                    <h2 className="text-xl font-bold mb-5">Amenities</h2>
+
+                                    <div className="flex items-center gap-3 items-center">
+                                        {apartment.amenities.map((amenity, index) => (
+                                            <div key={index} className="flex items-center w-1/4 justify-center gap-3">
+                                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <img src={`/storage/${amenity.icon}`} alt="" className="w-6 h-6" />
+                                                </div>
+                                                <span className="text-gray-500">{amenity}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                                    <h2 className="text-xl font-bold mb-5">Features</h2>
+
+                                    <div className="flex items-center gap-3 items-center">
+                                        {apartment.amenities.map((amenity, index) => (
+                                            <div key={index} className="flex items-center w-1/4 justify-center gap-3">
+                                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <FaCheckCircle />
+                                                </div>
+                                                <span className="text-gray-500">{amenity}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                                    <h2 className="text-xl font-bold mb-5">Map</h2>
+
+                                    <div className="flex items-center gap-3 items-center">
+                                        {apartment.amenities.map((amenity, index) => (
+                                            <div key={index} className="flex items-center w-1/4 justify-center gap-3">
+                                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <img src={`/storage/${amenity.icon}`} alt="" className="w-6 h-6" />
+                                                </div>
+                                                <span className="text-gray-500">{amenity}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="w-2/6">
+                            <div className=" sticky top-20">
+
+                                <div className="rounded-lg shadow-lg bg-white p-4">
+                                    <div className="mt-3 p-2 rounded-lg shadow-lg bg-blue-100">
+                                        <h3 className="text-md font-bold">Initial Payments:</h3>
+                                        <hr className="mt-3 mb-5 bg-indigo-400 w-full h-[2px]" />
+                                        <div className="flex gap-2 justify-between items-center">
+                                            <p className="text-sm font-light uppercase mb-3">SECURITY DEPOSIT(30%)</p>
+                                            <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
+                                        </div>
+                                        <div className="flex gap-2 justify-between items-center">
+                                            <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(5%)</p>
+                                            <p className="text-sm font-light mb-3">{formatPrice(prices.agreement)}</p>
+                                        </div>
+                                        <div className="flex gap-2 justify-between items-center">
+                                            <p className="text-sm font-light uppercase mb-3">AGENCY FEE(5%)</p>
+                                            <p className="text-sm font-light mb-3">{formatPrice(prices.agency)}</p>
+                                        </div>
+                                        <div className="flex gap-2 justify-between items-center">
+                                            <p className="text-sm font-light uppercase mb-3">MONTHLY RENT</p>
+                                            <p className="text-sm font-light mb-3">{formatPrice(prices.monthly)}</p>
+                                        </div>
+                                        <div className="flex gap-2 bg-indigo-500 rounded-md p-2 text-white justify-between items-center">
+                                            <p className="text-sm font-light uppercase">TOTAL</p>
+                                            <p className="text-sm font-light">{formatPrice(prices.initial)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        },
+        {
+            label: 'Tenant',
+            content: <div>
+                {apartment?.tenant ? (
+                    <div className=" gap-5">
+                        <div className="flex items-center justify-between gap-3 mb-10">
+                            <div className="">
+                                <p className='text-sm uppercase text-gray-400'>current tenant</p>
+                                <div className="flex items-center gap-3">
+                                    <p className='text-sm uppercase text-gray-500'>Name:</p>
+                                    <h3 className='text-2xl'>{apartment.tenant.fullname}</h3>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <p className='text-sm uppercase text-gray-500'>Company:</p>
+                                    <h3 className='text-2xl'>{apartment.tenant.employed_company?.name}</h3>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <p className='text-sm uppercase text-gray-500'>Employer:</p>
+                                    <h3 className='text-2xl'>{apartment.tenant.employed_company?.owner.fullname}</h3>
+                                </div>
+                            </div>
+
+                            <ProfilePhoto style={`w-24 h-24 border-green-500 border border-4`} user={auth.user} />
+                        </div>
+                        <Files openFile={() => setOpenFile(!openFile)} files={apartment.files} />
+                    </div>
+                ) : <div className='text-center'>No tenant yet</div>}
+            </div>
+        },
+        {
+            label: 'Payments',
+            content: (
+                <Table
+                    type="apartment"
+                    data={apartment.transactions}
+                    actions={{
+                        buttons: [
+                            {
+                                label: 'Pay',
+                                type: 'secondary',
+                                onClick: (row) => modalRent(row),
+                            },
+                            // {
+                            //     label: 'Decline',
+                            //     type: 'danger',
+                            //     onClick: (row) => alert(`Declining ${row.id}`),
+                            // },
+                        ],
+                        // defaultActions: ['view'], // Specify default actions
+                        onDelete: (row) => alert(`Deleting ${row.id}`), // Optional override for delete
+                    }}
+                    searchable
+                    clickable={(row)=>alert(row.id)}
+                    columnsToShow={[
+                        { key: 'reference', label: 'Reference' },
+                        { key: 'apartment.title', label: 'Apartment' },
+                        { key: 'note', label: 'Description' },
+                        { key: 'user.lname', label: 'For' },
+                        { key: 'due_date', label: 'Due Date', formatter: 'date' },
+                        { key: 'type', label: 'Type' },
+                        { key: 'mode', label: 'Mode' },
+                        { key: 'status', label: 'Status', formatter: 'tag' },
+                        { key: 'created_at', label: 'Date', formatter: 'datetime' },
+                    ]}
+                />
+            ),
+        },
+      ];
+
 
     const [openContact, setOpenContact] = useState(false);
 
@@ -125,13 +291,13 @@ const Single = ({auth, apartment, success, error}) => {
         </Slider>
         <div className="py-12 mb-10">
             {auth.user.type === 'landlord' ? (
-                <div className="max-w-7xl mx-auto sm:px-6 flex flex-row gap-5 lg:px-8">
+                <div className="max-w-7xl mx-auto sm:px-6 gap-5 lg:px-8">
                     <div className="flex justify-between w-full items-center">
                         <div>
                             <h1 className='text-5xl font-bold'>{apartment.title}</h1>
                             <p className="flex items-center mt-3 gap-3">
                                 <FaLocationDot className='text-blue-500' />
-                                <span className='text-gray-500'>{apartment.address}, {apartment.lga}, {apartment.state}, {apartment.country}</span>
+                                <span className='text-gray-500'>{apartment.address}, {apartment.city}, {apartment.state}, {apartment.country}</span>
                             </p>
                         </div>
                         <div>
@@ -146,6 +312,10 @@ const Single = ({auth, apartment, success, error}) => {
                                 <p className="text-sm font-light">PER MONTH</p>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="container mx-auto mt-12">
+                        <Tabs container={false} tabs={tabsData} />
                     </div>
                 </div>
             ) : (
@@ -294,16 +464,16 @@ const Single = ({auth, apartment, success, error}) => {
                 </div>
             </Modal>
 
-            {/* <Modal show={openFile}  >
+            <Modal show={openFile}  >
                 <div className='p-10'>
                     <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
                         <p className='text-xl text-blue-800 font-semibold'>Upload File</p>
                         <DangerButton onClick={modalFile}>Close</DangerButton>
                     </div>
 
-                    <FileAddForm cohort={course.cohorts[0].id} />
+                    <FileAddForm apartment={apartment} />
                 </div>
-            </Modal> */}
+            </Modal>
     </AuthenticatedLayout>
   )
 }

@@ -122,7 +122,7 @@ class ApartmentController extends Controller
      */
     public function show($slug)
     {
-        $apartment = Apartment::where('slug', $slug)->with('landlord', 'category', 'images')->first();
+        $apartment = Apartment::where('slug', $slug)->with('landlord', 'category', 'images', 'tenant.employedCompany', 'transactions', 'files')->first();
         $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('user_id', Auth::id())->with('payment')->latest()->first();
         return Inertia::render('Apartments/Single', [
             'apartment' => $apartment,
