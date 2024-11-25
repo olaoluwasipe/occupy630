@@ -7,22 +7,37 @@ import Table from '@/Components/Table'
 import CreateSessionForm from '@/Forms/CreateSessionForm'
 import Admin from '@/Layouts/AdminLayout'
 import { Head, Link } from '@inertiajs/react'
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { FaSearch } from 'react-icons/fa'
 
-const Notifications = ({notifications}) => {
-    console.log(notifications)
+const Notifications = () => {
     const [searchQuery, setSearchQuery] = useState('')
+    const [notifications, setNotifications] = useState([])
     const [session, setSession] = useState({id: 0})
     const [createSession, setCreateSession] = useState(false)
     const [deleteSession, setDeleteSession] = useState(false)
     const [editSession, setEditSession] = useState(false)
 
-    const startEdit = (session) => {
-        setEditSession(true)
-        setSession(session)
-        setCreateSession(true)
-    }
+    useEffect(() => {
+        const fetchedNotifications = async () => {
+            try {
+                const response = await fetch('/notifications');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                setNotifications(data.data);
+                // const lastMessages = groupMessages(data);/
+            } catch (error) {
+                console.error('Error fetching chats:', error);
+            }
+        };
+
+        const intervalId = setInterval(fetchedNotifications, 1000);
+        console.log(notifications)
+
+        return () => clearInterval(intervalId);
+    }, []);
 
     function formatDate(dateString) {
         const date = new Date(dateString);
@@ -53,8 +68,8 @@ const Notifications = ({notifications}) => {
     const handleSearch = (e) => {
         setSearchQuery(e.target.value);
     };
-    const filteredData = notifications.filter((notification) =>
-        notification.notifiable.cohort.course.title.toLowerCase().includes(searchQuery.toLowerCase()) || JSON.parse(notification.data).message.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredData = notifications?.filter((notification) =>
+        notification.notifiable.name.toLowerCase().includes(searchQuery.toLowerCase()) || notification.data.message.toLowerCase().includes(searchQuery.toLowerCase())
     );
   return (
     <div>
@@ -65,59 +80,32 @@ const Notifications = ({notifications}) => {
                     icon={<FaSearch />}
                     style={{borderRadious: '900px'}}
                     rounded="rounded-full"
-                    className='border border-gray-400 bg-slate-50 mb-6 rounded-full'
+                    className='border border-gray-400 bg-slate-50 mb-2 rounded-full'
                     placeholder='Search...'
                     value={searchQuery}
                     onChange={handleSearch}
                 />
             </div>
-            <div class="relative overflow-x-auto">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 ">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50  ">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">
-                                Notification
-                            </th>
-                            <th scope="col" class="px-6 py-3">
-                                Course
-                            </th>
-                            <th scope="col" class="px-6 py-3">
-                                Tutor
-                            </th>
-                            <th scope="col" class="px-6 py-3">
-                                Posted On
-                            </th>
-                            {/* <th scope="col" class="px-6 py-3">
-                                Actions
-                            </th> */}
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {filteredData.map ((notification) => (
-                        <tr class="bg-white border-b  ">
-                            <td class="px-6 py-4">
-                                {JSON.parse(notification.data).message}
-                            </td>
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
-                                {notification.notifiable.cohort.course.title}
-                            </th>
-                            <td class="px-6 py-4">
-                                {notification.notifiable.cohort.tutor[0].name}
-                            </td>
-                            <td class="px-6 py-4">
+            <div className="relative overflow-x-auto">
+
+                    {filteredData?.map ((notification) => (
+                        <div className={`${notification.read_at == null ? 'bg-white' : 'bg-gray-300'} cursor-pointer relative hover:bg-gray-200 transition animate px-6 py-4 border-b`}>
+                            <div className=" text-md font-semibold text-gray-900">
+                                {notification.data.message}
+                            </div>
+                            <div className="py-4 text-sm text-gray-500">
                                 {formatDate(notification.created_at)}
-                            </td>
+                            </div>
+                            {notification.read_at == null && <span className="bg-red-600 rounded-full block right-5 top-[40%] absolute w-5 h-5"></span>}
+                            {/* <span className="bg-green-600 rounded-full block right-5 top-[40%] absolute w-5 h-5"></span> */}
                             {/* <td>
                                 <div class="flex items-center space-x-4">
                                     <SecondaryButton onClick={() => startEdit(notification)}>Edit</SecondaryButton>
                                     <DangerButton onClick={() => {modalDelete(!deleteSession); setSession(session)}}>Delete</DangerButton>
                                 </div>
                             </td> */}
-                        </tr>
+                        </div>
                     ))}
-
-                    </tbody>
-                </table>
             </div>
             </div>
 

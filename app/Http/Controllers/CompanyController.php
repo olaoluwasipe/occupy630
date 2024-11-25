@@ -78,7 +78,7 @@ class CompanyController extends Controller
         // Save changes
         $company->save();
 
-        return Redirect::route('company.dashboard');
+        return Redirect::route('home');
     }
 
     /**

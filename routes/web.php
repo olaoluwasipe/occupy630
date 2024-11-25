@@ -12,6 +12,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TutorController;
@@ -190,6 +191,9 @@ Route::middleware(['auth', 'checkuser'])->group(function () {
     Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');
     Route::post('/message', [ChatController::class, 'store'])->name('message.send');
     Route::get('/read/{chat}', [ChatController::class, 'readMessage'])->name('message.read');
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
 
     // Forum
     Route::post('/forum', [ForumController::class, 'store'])->name('forum.store');

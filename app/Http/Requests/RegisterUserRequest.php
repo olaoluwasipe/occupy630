@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use App\Rules\CompanyEmail;
 use App\Rules\UniqueIf;
 use Illuminate\Foundation\Http\FormRequest;
@@ -36,7 +37,7 @@ class RegisterUserRequest extends FormRequest
                 new UniqueIf('users', 'email', 'register_code', null),
                 function ($attribute, $value, $fail) {
                     // Skip CompanyEmail validation if type is landlord
-                    if (request()->input('type') !== 'landlord') {
+                    if (request()->input('type') !== 'landlord' && (request()->input('type') !== 'employee' && request()->input('code') != '' && request()->input('code') != null && User::find('register_code', request()->input('code')))) {
                         $rule = new CompanyEmail;
                         return $rule->validate($attribute, $value, $fail);
                         // $rule->passes($attribute, $value) || $fail($rule->message());
