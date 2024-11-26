@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Models\Apartment;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -20,8 +22,8 @@ class AuthController extends Controller
         }
 
         return $this->respondWithToken($token);
-    } 
-    
+    }
+
     /**
     * Get the authenticated User.
     *
@@ -68,5 +70,21 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
+    }
+
+    public function deleteUser (User $user) {
+        if(Auth::user()->type !== 'superadmin' && Auth::user()->type !== 'employer') {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        if(Apartment::where('tenant_id', $user->id)->exists()) {
+            // return redirect()->back()->with('error', 'User has an apartment');
+            return response()->json(['error' => 'Can\'t delete because the user has an apartment'], 401);
+        }
+        if(Auth::user()->id == $user->employedCompany->owner->id) {
+            $user->delete();
+            return response()->json(['message' => 'User deleted successfully']);
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
     }
 }

@@ -9,9 +9,12 @@ import ApprovalForm from '@/Forms/ApprovalForm';
 import RentForm from '@/Forms/RentForm';
 import { format } from 'date-fns';
 import React, { useState, useEffect } from 'react'
+import { FaCheckCircle, FaMoneyBill, FaUserFriends } from 'react-icons/fa';
+import { FaCheck, FaHouse, FaMonero } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
 
-const ExistingApartmentsEmployer = ({apartment, approvals, payments, auth, success, error}) => {
+const ExistingApartmentsEmployer = ({apartment, approvals, employees, payments, auth, success, error, sendMessage}) => {
+    console.log(employees)
     const [showModal, setShowModal] = useState(false);
     const [openRent, setOpenRent] = useState(false);
     const [selectedApartment, setSelectedApartment] = useState(null);
@@ -25,6 +28,26 @@ const ExistingApartmentsEmployer = ({apartment, approvals, payments, auth, succe
     const modalRent = (apart) => {
         setSelectedApartment(apart ? apart : null); // Set or clear apartment
         setOpenRent(!openRent); // Toggle modal state
+    };
+
+    const deleteUser = async (user) => {
+        if (confirm('Are you sure you want to delete this employee?')) {
+            try {
+                const response = await axios.post(route('dashboard.employees.destroy', user.id));
+
+                if (response.data.success) {
+                    toast.success(response.data.message);
+                    // Update state to remove the deleted user
+                    setEmployees(employees.filter((e) => e.id !== user.id));
+                } else {
+                    toast.error(response.data.message);
+                }
+            } catch (error) {
+                // Handle any errors from the Axios request
+                console.error(error);
+                toast.error(error.response.data.error ?? 'An error occurred while deleting the user.');
+            }
+        }
     };
 
     success && toast.success(success ?? "Approval request sent")
@@ -63,15 +86,77 @@ const ExistingApartmentsEmployer = ({apartment, approvals, payments, auth, succe
     const tabsData = [
         {
           label: 'Overview',
-          content: <div></div>
+          content: <div>
+            <div className="overflow-auto h-72 sm:rounded-lg flex gap-5 flex-row items-start">
+                        <div className='flex flex-1 flex-col justify-center flex-wrap bg-white shadow-lg border p-5 rounded-lg h-100'>
+                            <p className='text-gray-500 font-semibold w-full mb-5'>Employees</p>
+                            <div className='flex flex-row items-center justify-between'>
+                                <h2 className='text-4xl w-1/2 font-bold'>{employees.length}</h2>
+                                <div className="bg-violet-100 rounded-xl p-3">
+                                    <FaUserFriends color='violet' size={30} />
+                                </div>
+                            </div>
+                        </div>
+                        <div className='flex flex-1 flex-col justify-center flex-wrap bg-white shadow-lg border p-5 rounded-lg h-100'>
+                            <p className='text-gray-500 font-semibold w-full mb-5'>Total Upcoming Payments</p>
+                            <div className='flex flex-row items-center justify-between'>
+                                <h2 className='text-4xl w-1/2 font-bold'>{payments.filter((payment) => payment.status == 'pending').length}</h2>
+                                <div className="bg-violet-100 rounded-xl p-3">
+                                    <FaMoneyBill color='violet' size={30} />
+                                </div>
+                            </div>
+                        </div>
+                        <div className='flex flex-1 flex-col justify-center flex-wrap bg-white shadow-lg border p-5 rounded-lg h-100'>
+                            <p className='text-gray-500 font-semibold w-full mb-5'>Rented Apartments</p>
+                            <div className='flex flex-row items-center justify-between'>
+                                <h2 className='text-4xl w-1/2 font-bold'>{apartment.length}</h2>
+                                <div className="bg-violet-100 rounded-xl p-3">
+                                    <FaHouse color='violet' size={30} />
+                                </div>
+                            </div>
+                        </div>
+                        <div className='flex flex-1 flex-col justify-center flex-wrap bg-white shadow-lg border p-5 rounded-lg h-100'>
+                            <p className='text-gray-500 font-semibold w-full mb-5'>Pending Approvals</p>
+                            <div className='flex flex-row items-center justify-between'>
+                                <h2 className='text-4xl w-1/2 font-bold'>{approvals.filter((approval) => approval.status == 'pending').length}</h2>
+                                <div className="bg-violet-100 rounded-xl p-3">
+                                    <FaCheckCircle color='violet' size={30} />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+          </div>
         //   content: <CourseOverview modules={course.modules} description={course.description} objectives={course.objectives} />
         },
         {
             label: 'Rented Apartments',
-            content: <Table data={apartment} actions={{
-              type: 'user',
-            //   deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId)},
-              defaultActions: ['view', 'edit']
+            content: <Table data={apartment}
+            // actions={{
+            //   type: 'user',
+            // //   deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId)},
+            //   defaultActions: ['view', 'edit']
+            // }}
+            actions={{
+                buttons: [
+                    {
+                        label: 'View',
+                        type: 'primary',
+                        onClick: (row) => window.location.href = '/apartment/' + row.slug,
+                    },
+                    // {
+                    //     label: 'Approve',
+                    //     type: 'secondary',
+                    //     onClick: (row) => openModal(row),
+                    // },
+                    // {
+                    //     label: 'Decline',
+                    //     type: 'danger',
+                    //     onClick: (row) => alert(`Declining ${row.id}`),
+                    // },
+                ],
+                // defaultActions: ['view'], // Specify default actions
+                onDelete: (row) => alert(`Deleting ${row.id}`), // Optional override for delete
             }}
             searchable
             columnsToShow={[
@@ -83,6 +168,44 @@ const ExistingApartmentsEmployer = ({apartment, approvals, payments, auth, succe
             ]}
             // columnsToShow={['id', 'title', 'tenant.fname', 'updated_at',]}
              />
+        },
+        {
+            label: 'Employees',
+            content: (
+                <Table
+                    data={employees}
+                    actions={{
+                        buttons: [
+                            {
+                                label: 'Message',
+                                type: 'primary',
+                                onClick: (row) => sendMessage(row),
+                            },
+                            // {
+                            //     label: 'Approve',
+                            //     type: 'secondary',
+                            //     onClick: (row) => openModal(row),
+                            // },
+                            {
+                                label: 'Delete',
+                                type: 'danger',
+                                onClick: (row) => deleteUser(row),
+                            },
+                        ],
+                        // defaultActions: ['view'], // Specify default actions
+                        onDelete: (row) => alert(`Deleting ${row.id}`), // Optional override for delete
+                    }}
+                    searchable
+                    columnsToShow={[
+                        { key: 'id', label: 'ID' },
+                        { key: 'fullname', label: 'Name' },
+                        { key: 'email', label: 'Email' },
+                        // { key: 'user.lname', label: 'Last Name' },
+                        // { key: 'status', label: 'Status', formatter: 'tag' },
+                        { key: 'created_at', label: 'Date Joined', formatter: 'datetime' },
+                    ]}
+                />
+            ),
         },
         {
             label: 'Approvals',

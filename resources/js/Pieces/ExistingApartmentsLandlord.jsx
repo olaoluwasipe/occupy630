@@ -9,8 +9,11 @@ import Tabs from '@/Components/Tabs';
 import ApartmentAddForm from '@/Forms/ApartmentAddForm';
 import ApprovalForm from '@/Forms/ApprovalForm';
 import RentForm from '@/Forms/RentForm';
+import formatPrice from '@/functions';
 import { format } from 'date-fns';
 import React, { useState, useEffect } from 'react'
+import { FaMoneyBill } from 'react-icons/fa';
+import { FaHouse } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
 
 const ExistingApartmentsLandlord = ({apartment, approvals, payments, auth, success, error, categories, attributes}) => {
@@ -18,6 +21,8 @@ const ExistingApartmentsLandlord = ({apartment, approvals, payments, auth, succe
     const [openRent, setOpenRent] = useState(false);
     const [selectedApartment, setSelectedApartment] = useState(null);
     const [prices, setPrices] = useState({});
+
+    console.log(payments)
 
     const openModal = (apart) => {
         setSelectedApartment(apart ? apart : null); // Set or clear apartment
@@ -65,7 +70,59 @@ const ExistingApartmentsLandlord = ({apartment, approvals, payments, auth, succe
     const tabsData = [
         {
           label: 'Overview',
-          content: <div></div>,
+          content: <div>
+          <div className="overflow-auto h-72 sm:rounded-lg flex gap-5 flex-row items-start">
+                      {/* <div className='flex flex-1 flex-col justify-center flex-wrap bg-white shadow-lg border p-5 rounded-lg h-100'>
+                          <p className='text-gray-500 font-semibold w-full mb-5'>Employees</p>
+                          <div className='flex flex-row items-center justify-between'>
+                              <h2 className='text-4xl w-1/2 font-bold'>{employees.length}</h2>
+                              <div className="bg-violet-100 rounded-xl p-3">
+                                  <FaUserFriends color='violet' size={30} />
+                              </div>
+                          </div>
+                      </div> */}
+                      <div className='flex flex-1 flex-col justify-center flex-wrap bg-white shadow-lg border p-5 rounded-lg h-100'>
+                          <p className='text-gray-500 font-semibold w-full mb-5'>Total Earned</p>
+                          <div className='flex flex-row items-center justify-between'>
+                              <h2 className='text-4xl w-1/2 font-bold'>{formatPrice(payments
+                                                .filter((payment) => payment.status === 'completed')
+                                                .reduce((sum, payment) => sum + parseInt(payment.landlord_amount), 0))}
+                                </h2>
+                              <div className="bg-violet-100 rounded-xl p-3">
+                                  <FaMoneyBill color='violet' size={30} />
+                              </div>
+                          </div>
+                      </div>
+                      <div className='flex flex-1 flex-col justify-center flex-wrap bg-white shadow-lg border p-5 rounded-lg h-100'>
+                          <p className='text-gray-500 font-semibold w-full mb-5'>Upcoming Payments</p>
+                          <div className='flex flex-row items-center justify-between'>
+                              <h2 className='text-4xl w-1/2 font-bold'>{payments.filter((payment) => payment.status == 'completed').length}</h2>
+                              <div className="bg-violet-100 rounded-xl p-3">
+                                  <FaMoneyBill color='violet' size={30} />
+                              </div>
+                          </div>
+                      </div>
+                      <div className='flex flex-1 flex-col justify-center flex-wrap bg-white shadow-lg border p-5 rounded-lg h-100'>
+                          <p className='text-gray-500 font-semibold w-full mb-5'>Rented Apartments</p>
+                          <div className='flex flex-row items-center justify-between'>
+                              <h2 className='text-4xl w-1/2 font-bold'>{apartment.filter((apart) => apart.status !== 'pending').length}</h2>
+                              <div className="bg-violet-100 rounded-xl p-3">
+                                  <FaHouse color='violet' size={30} />
+                              </div>
+                          </div>
+                      </div>
+                      {/* <div className='flex flex-1 flex-col justify-center flex-wrap bg-white shadow-lg border p-5 rounded-lg h-100'>
+                          <p className='text-gray-500 font-semibold w-full mb-5'>Pending Approvals</p>
+                          <div className='flex flex-row items-center justify-between'>
+                              <h2 className='text-4xl w-1/2 font-bold'>{approvals.filter((approval) => approval.status == 'pending').length}</h2>
+                              <div className="bg-violet-100 rounded-xl p-3">
+                                  <FaCheckCircle color='violet' size={30} />
+                              </div>
+                          </div>
+                      </div> */}
+
+                  </div>
+            </div>,
         //   content: <CourseOverview modules={course.modules} description={course.description} objectives={course.objectives} />
         },
         {

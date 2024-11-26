@@ -6,6 +6,7 @@ use App\Http\Controllers\ApartmentCategoryController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentSubmissionController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CompanyController;
@@ -65,10 +66,10 @@ Route::get('/', function () {
                     ->first();
     } else if (Auth::user()->type == 'employer') {
 
-        $employees = User::where('type', 'employee')->where('company_id', Auth::user()->company_id)->pluck('id');
-        $apartment = Apartment::whereIn('tenant_id', $employees)->with('tenant', 'images', 'approvals', 'transactions')->latest()->get();
-        $approvals = Approval::whereIn('user_id', $employees)->with('apartment', 'user')->latest()->get();
-        $payments  = HousePayment::whereIn('user_id', $employees)->with('user', 'apartment')->latest()->get();
+        $employees = User::where('type', 'employee')->where('company_id', Auth::user()->company_id)->get();
+        $apartment = Apartment::whereIn('tenant_id', $employees->pluck('id'))->with('tenant', 'images', 'approvals', 'transactions')->latest()->get();
+        $approvals = Approval::whereIn('user_id', $employees->pluck('id'))->with('apartment', 'user')->latest()->get();
+        $payments  = HousePayment::whereIn('user_id', $employees->pluck('id'))->with('user', 'apartment')->latest()->get();
 
     } else if (Auth::user()->type == 'landlord') {
         $apartment = Apartment::where('landlord_id', Auth::id())->with('tenant', 'images', 'approvals', 'transactions')->latest()->get();
@@ -77,6 +78,12 @@ Route::get('/', function () {
             $payments->push($apart->transactions);
         }
         $payments = $payments->flatten();
+        foreach($payments as $payment) {
+            $apart = Apartment::where('id', $payment->apartment_id)->first();
+            $initial = ($apart->price * 0.3) + ($apart->price * 0.05 * 2);
+            $payment->landlord_amount = $payment->type == 'rent' ? $apart->monthly_rent : $initial;
+        }
+        // $payments = $payments->sortByDesc('created_at');
         $categories = ApartmentCategory::all();
         $attributes = ApartmentAttribute::all();
 
@@ -102,6 +109,7 @@ Route::get('/', function () {
 
 Route::post('request-rent-pay/{apartment}', [ApartmentController::class, 'requestRentPay'])->name('dashboard.rent.pay');
 Route::post('start-chat/{user}', [ChatController::class, 'startChat'])->name('dashboard.start.chat');
+Route::post('delete/{user}', [AuthController::class, 'deleteUser'])->name('dashboard.employees.destroy');
 Route::post('request-approval/{apartment}', [ApartmentController::class, 'requestApproval'])->name('apartment.request-approval');
 Route::post('approve-request', [ApartmentController::class, 'approveRequest'])->name('apartment.approve-request');
 
