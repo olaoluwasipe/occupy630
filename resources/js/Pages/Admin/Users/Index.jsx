@@ -8,8 +8,8 @@ import Admin from '@/Layouts/AdminLayout'
 import { Head, Link } from '@inertiajs/react'
 import React, {useState} from 'react'
 
-const Users = ({auth, users, learners, tutors, admins, courses, cohorts, permissions}) => {
-    // console.log(users, learners, tutors, admins)
+const Users = ({auth, users, companies, tutors, admins, courses, cohorts, permissions}) => {
+    // console.log(users)
 
     const [createUser, setCreateUser] = useState(false)
     const [deleteUser, setDeleteUser] = useState(false)
@@ -27,27 +27,27 @@ const Users = ({auth, users, learners, tutors, admins, courses, cohorts, permiss
     const tabsData = [
         {
           label: 'Companies',
-          val: learners.length,
-          content: <Table data={learners} actions={{
+          val: companies.length,
+          content: <Table data={companies} actions={{
             type: 'user',
             editFunction: (user) => {setCreateUser(true); setEditUser(true); setUser(user); console.log(user)},
             deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId);},
             active: ['view', 'edit', 'delete']
           }}
           searchable
-          columnsToShow={['id', 'name', 'email']} />
+          columnsToShow={['id', 'name', 'address', 'phone', 'email']} />
         },
         {
-          label: 'Employees',
-          val: tutors.length,
-          content: <Table data={tutors} actions={{
+          label: 'Users',
+          val: users.length,
+          content: <Table data={users} actions={{
             type: 'user',
             editFunction: (user) => {setCreateUser(true); setEditUser(true); setUser(user); console.log(user)},
             deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId)},
             active: ['view', 'edit', 'delete']
           }}
           searchable
-          columnsToShow={['id', 'name', 'email']} />
+          columnsToShow={['id', 'fullname', 'email', 'phone', 'type', 'company.name']} />
         },
         {
             label: 'Admins',

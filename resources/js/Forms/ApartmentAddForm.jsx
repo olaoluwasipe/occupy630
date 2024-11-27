@@ -23,7 +23,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
         address: apartment?.address,
         price: apartment?.price,
         category: apartment?.category_id,
-        location: {state: apartment?.state, city: apartment?.lga},
+        location: {state: apartment?.state, city: apartment?.city},
         // city: '',
         bathrooms: apartment?.bathrooms,
         bedrooms: apartment?.bedrooms,

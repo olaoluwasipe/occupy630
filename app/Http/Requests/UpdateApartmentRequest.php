@@ -39,7 +39,7 @@ class UpdateApartmentRequest extends FormRequest
             // Location array with specific fields required
             'location' => 'required|array',
             'location.state' => 'required|string',
-            'location.lga' => 'required|string',
+            'location.city' => 'required|string',
 
             'bathrooms' => 'required|integer',
             'bedrooms' => 'required|integer',

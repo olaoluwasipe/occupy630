@@ -123,6 +123,7 @@ Route::prefix('/company')->middleware(['auth', 'checkcompany'])->group(function 
 
 Route::post('/create-apartment', [ApartmentController::class, 'store'])->name('apartment.store');
 Route::post('/update-apartment/{apartment}', [ApartmentController::class, 'update'])->name('apartment.update');
+Route::post('/approve-apartment/{apartment}', [ApartmentController::class, 'approve'])->name('apartment.approve');
 Route::post('/send-inquiry', [ApartmentController::class, 'saveInquiry'])->name('apartment.send-inquiry');
 Route::post('/create-attribute', [ApartmentAttributeController::class, 'store'])->name('apartment.attributes.store');
 Route::post('/update-attribute', [ApartmentAttributeController::class, 'edit'])->name('apartment.attributes.update');

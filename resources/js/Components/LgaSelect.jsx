@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import SelectInput from './SelectInput'
 import lgaList from '@/lga'
 
@@ -15,6 +15,15 @@ const LgaSelect = ({ direction = 'col', onChange, className, location, ...props 
                 {lga.state}
             </option>
     ));
+
+    useEffect(() => {
+        console.log(location)
+        if (location) {
+            setConState(location.state);
+            setLga(lgaList.find((lga) => lga.state === location.state));
+            setConLga(location.city);
+        }
+    }, [location]);
 
     // Function to handle state changes
     const handleStateChange = (e) => {

@@ -30,14 +30,20 @@ const formatValue = (value, formatter) => {
                     case 'successful':
                     case 'completed':
                     case 'available':
+                    case 'rented':
                         return <span className="bg-green-500 p-2 rounded text-sm text-white">{value}</span>;
                     case 'rejected':
                     case 'failed':
                     case 'cancelled':
                     case 'expired':
                     case 'declined':
+                    case 'disapproved':
                     case 'unavailable':
                         return <span className="bg-red-500 p-2 rounded text-sm text-white">{value}</span>;
+                    case 'booked':
+                        return <span className="bg-pink-500 p-2 rounded text-sm text-white">{value}</span>;
+                    case 'cancelled':
+                        return <span className="bg-gray-500 p-2 rounded text-sm text-white">{value}</span>;
                     default:
                         return value;
                 }

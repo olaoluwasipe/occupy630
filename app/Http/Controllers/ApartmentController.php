@@ -61,6 +61,7 @@ class ApartmentController extends Controller
                 'monthly_rent' => $request->price / 12,
                 'cg_price' => $request->price + ($request->price * 0.3),
                 'monthly_price' => ($request->price + ($request->price * 0.3)) / 12,
+                'six_months_rent' => ($request->price + ($request->price * 0.3)) / 2,
             ]
         );
 
@@ -155,6 +156,8 @@ class ApartmentController extends Controller
             'approver_id' => Auth::user()->employedCompany->user_id,
             'status' => Approval::getStatusTextAttribute('pending'),
         ]);
+
+        return redirect()->back()->with('success', 'Request sent successfully');
     }
 
     public function approveRequest (Request $request) {
@@ -179,9 +182,9 @@ class ApartmentController extends Controller
         $apartment = Apartment::find($approval->apartment_id);
 
         $prices = [
-            'security_deposit' => $apartment->cg_price * 0.3,
-            'agreement' => $apartment->cg_price * 0.05,
-            'agency_fee' => $apartment->cg_price * 0.05,
+            'security_deposit' => $apartment->six_months_rent * 0.3,
+            'agreement' => $apartment->six_months_rent * 0.10,
+            'agency_fee' => $apartment->six_months_rent * 0.10,
         ];
 
         $total = $prices['security_deposit'] + $prices['agreement'] + $prices['agency_fee'];
@@ -405,6 +408,20 @@ class ApartmentController extends Controller
         //
     }
 
+    public function approve(Apartment $apartment) {
+        if($apartment->status == 'pending' || $apartment->status == 'disapproved') {
+            $apartment->status = 'approved';
+            $apartment->save();
+            return redirect()->back()->with('success', 'Apartment approved successfully');
+        } elseif($apartment->status == 'approved') {
+            $apartment->status = 'disapproved';
+            $apartment->save();
+            return redirect()->back()->with('success', 'Apartment disapproved successfully');
+        }
+
+        return redirect()->back()->with('error', 'Apartment status failed to update');
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -414,12 +431,14 @@ class ApartmentController extends Controller
             $request->validated(),
             [
                 'state' => $request->location['state'] ?? null,
-                'city' => $request->location['lga'] ?? null,
+                'city' => $request->location['city'] ?? null,
                 'country' => 'Nigeria',
-                'status' => 'pending',
+                // 'status' => 'pending',
                 'category_id' => $request->category,
                 'cg_price' => $request->price + ($request->price * 0.3),
                 'monthly_price' => ($request->price + ($request->price * 0.3)) / 12,
+                'six_months_rent' => ($request->price + ($request->price * 0.3)) / 2,
+                'monthly_rent' => $request->price / 12,
             ]
         );
 
@@ -455,7 +474,7 @@ class ApartmentController extends Controller
                 }
                 // Update apartment details
                 $apartment->update($data);
-                dd($data);
+                // dd($data);
 
                 return redirect()->route('admin.apartments')->with('success', 'Apartment updated successfully');
 
@@ -466,6 +485,9 @@ class ApartmentController extends Controller
      */
     public function destroy(Apartment $apartment)
     {
-        //
+        if($apartment->has('tenant')) {
+            return redirect()->back()->with('error', 'Apartment has a tenant. Please remove the tenant first');
+        }
+        $apartment->delete();
     }
 }

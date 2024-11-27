@@ -6,6 +6,7 @@ use App\Models\Apartment;
 use App\Models\ApartmentAttribute;
 use App\Models\ApartmentCategory;
 use App\Models\Cohort;
+use App\Models\Company;
 use App\Models\Course;
 use App\Models\CourseModule;
 use App\Models\Notification;
@@ -24,14 +25,15 @@ use Spatie\Permission\Models\Permission;
 class AdminController extends Controller
 {
     public function index () {
-        $courses = Course::count();
-        $tutors = User::where('type', 'tutor')->count();
-        $students = User::where('type','learner')->count();
+        $companies = Company::count();
+        $employees = User::where('type', 'employee')->count();
+        $employers = User::where('type','employer')->count();
+        // $companies = User::where('type','employer')->count();
         $admin = User::where('type', 'admin')->count();
         return Inertia::render('Admin/Dashboard', [
-            'courses' => $courses,
-            'tutors' => $tutors,
-            'students' => $students,
+            'companies' => $companies,
+            'employees' => $employees,
+            'employers' => $employers,
             'admins' => $admin,
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
@@ -42,9 +44,19 @@ class AdminController extends Controller
 
     public function users () {
         $user = Auth::user();
-        $users = User::all();
-        $learners = $user->can('manage learners') ? User::where('type', 'learner')->get() : [];
-        $tutors = $user->can('manage tutors') ? User::where('type', 'tutor')->get() : [];
+        // $users = User::all();
+        if ($user->can('manage users')) {
+            $users = User::where('type', '!=', 'superadmin')
+                ->where('type', '!=', 'admin')
+                ->get()
+                ->map(function ($user) {
+                    $user->company = $user->employedCompany ?? $user->company;
+                    return $user;
+                });
+        } else {
+            $users = collect(); // Use an empty collection for consistency
+        }
+        $companies = $user->can('manage companies') ? Company::all() : [];
         $admins = User::where('type', 'admin')->get();
         foreach($admins as $user) {
             $user->permissions = $user->getDirectPermissions()->pluck('name');
@@ -54,8 +66,8 @@ class AdminController extends Controller
         $permissions = Permission::all();
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
-            'learners' => $learners,
-            'tutors' => $tutors,
+            'companies' => $companies,
+            // 'tutors' => $tutors,
             'admins' => $admins,
             'courses' => $courses,
             'cohorts' => $cohorts,
@@ -67,7 +79,7 @@ class AdminController extends Controller
         $apartments = Apartment::orderBy('id', 'desc');
         $apartmentAttributes = ApartmentAttribute::all();
         $apartmentCategories = ApartmentCategory::all();
-        $apartments = $apartments->with('images', 'category')->get();
+        $apartments = $apartments->with('images', 'category', 'landlord')->get();
         return Inertia::render('Admin/Apartments/Index', [
             'apartments' => $apartments,
             'attributes' => $apartmentAttributes,
