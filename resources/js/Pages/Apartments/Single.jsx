@@ -19,10 +19,10 @@ import AssignmentAddForm from '@/Forms/AssignmentAddForm'
 import ScheduleAddForm from '@/Forms/ScheduleAddForm'
 import FileAddForm from '@/Forms/FileAddForm'
 import parse from 'html-react-parser'
-import { FaLocationDot } from 'react-icons/fa6';
+import { FaAnchorCircleXmark, FaCircleXmark, FaLocationDot } from 'react-icons/fa6';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
-import { FaCheckCircle, FaSave } from 'react-icons/fa';
+import { FaCheckCircle, FaCross, FaSave } from 'react-icons/fa';
 import ContactOwnerForm from '@/Forms/ContactOwnerForm';
 import AssignStaffToRentForm from '@/Forms/AssignStaffToRentForm';
 import RentForm from '@/Forms/RentForm';
@@ -30,6 +30,7 @@ import formatPrice from '@/functions';
 import { toast } from 'react-toastify';
 import Table from '@/Components/Table';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import ApprovalForm from '@/Forms/ApprovalForm';
 
 function NextArrow(props) {
     const { className, style, onClick } = props;
@@ -69,11 +70,11 @@ const Single = ({auth, apartment, success, error}) => {
     var prices = {
         monthly: apartment.monthly_price,
         yearly: apartment.cg_price,
-        security: apartment?.approval?.payment?.meta?.prices?.security_deposit ?? apartment.cg_price * 0.3,
-        agreement: apartment.cg_price * 0.05,
+        security: apartment?.approval?.payment?.meta?.prices?.security_deposit ?? apartment.six_months_rent * 0.3,
+        agreement: apartment.cg_price * 0.1,
         agency: apartment?.approval?.payment?.meta?.prices?.agreement ?? apartment.cg_price * 0.1,
-        total:  parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.1) * 2 ) ,
-        initial: apartment?.approval?.payment?.amount ?? (parseFloat(apartment.monthly_price) + parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.1) * 2 )) ,
+        total:  parseFloat(apartment.six_months_rent * 0.3) + parseFloat( (apartment.cg_price * 0.1) * 2 ) ,
+        initial: apartment?.approval?.payment?.amount ?? (parseFloat(apartment.monthly_price) + parseFloat(apartment.six_months_rent * 0.3) + parseFloat( (apartment.cg_price * 0.1) * 2 )) ,
     }
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -82,23 +83,28 @@ const Single = ({auth, apartment, success, error}) => {
     });
 
     const [openFile, setOpenFile] = useState(false)
+    const [openApproval, setOpenApproval] = useState(false)
 
     const modalFile = () => {
         setOpenFile(!openFile);
+    }
+
+    const modalApproval = () => {
+        setOpenApproval(!openApproval);
     }
 
     const tabsData = [
         {
           label: 'Overview',
           content: <div className="max-w-7xl mx-auto flex flex-row gap-5">
-                        <div className="w-4/6">
+                        <div className="flex-1">
                             <div className="mt-3">
                                 <h3 className="font-bold text-xl my-3">Property Description</h3>
                                 <p className="text-gray-500">
                                     {parse(apartment.description)}
                                 </p>
 
-                                <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                                {/* <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
                                     <h2 className="text-xl font-bold mb-5">Amenities</h2>
 
                                     <div className="flex items-center gap-3 items-center">
@@ -111,7 +117,7 @@ const Single = ({auth, apartment, success, error}) => {
                                             </div>
                                         ))}
                                     </div>
-                                </div>
+                                </div> */}
 
                                 <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
                                     <h2 className="text-xl font-bold mb-5">Features</h2>
@@ -128,7 +134,7 @@ const Single = ({auth, apartment, success, error}) => {
                                     </div>
                                 </div>
 
-                                <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                                {/* <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
                                     <h2 className="text-xl font-bold mb-5">Map</h2>
 
                                     <div className="flex items-center gap-3 items-center">
@@ -141,18 +147,22 @@ const Single = ({auth, apartment, success, error}) => {
                                             </div>
                                         ))}
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
+                        {auth.user.type == 'employer' && (
                         <div className="w-2/6">
                             <div className=" sticky top-20">
-
                                 <div className="rounded-lg shadow-lg bg-white p-4">
+                                    <div className="flex gap-3 items-center justify-between items-center mb-4">
+                                        <SecondaryButton onClick={modalApproval} className='w-1/2 flex items-center justify-center'><FaCheckCircle/> Approve</SecondaryButton>
+                                        <DangerButton onClick={modalApproval} className='w-1/2 flex items-center justify-center'><FaCircleXmark/>Decline</DangerButton>
+                                    </div>
                                     <div className="mt-3 p-2 rounded-lg shadow-lg bg-blue-100">
                                         <h3 className="text-md font-bold">Initial Payments:</h3>
                                         <hr className="mt-3 mb-5 bg-indigo-400 w-full h-[2px]" />
                                         <div className="flex gap-2 justify-between items-center">
-                                            <p className="text-sm font-light uppercase mb-3">SECURITY DEPOSIT(30%)</p>
+                                            <p className="text-sm font-light uppercase mb-3">REFUNDABLE SECURITY DEPOSIT(30%)</p>
                                             <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
                                         </div>
                                         <div className="flex gap-2 justify-between items-center">
@@ -175,6 +185,7 @@ const Single = ({auth, apartment, success, error}) => {
                                 </div>
                             </div>
                         </div>
+                        )}
                     </div>
         },
         {
@@ -292,7 +303,7 @@ const Single = ({auth, apartment, success, error}) => {
             ))}
         </Slider>
         <div className="py-12 mb-10">
-            {auth.user.type === 'landlord' ? (
+            {auth.user.type === 'landlord' || auth.user.type === 'employer' ? (
                 <div className="max-w-7xl mx-auto sm:px-6 gap-5 lg:px-8">
                     <div className="flex justify-between w-full items-center">
                         <div>
@@ -304,13 +315,13 @@ const Single = ({auth, apartment, success, error}) => {
                         </div>
                         <div>
                             <div className="flex gap-2 items-center">
-                                <h3 className="text-5xl">{formatPrice(apartment.price)} </h3>
-                                <p className="text-sm font-light">PER YEAR</p>
+                                <h3 className="text-5xl">{formatPrice(auth.user.type === 'landlord' ? apartment.price : apartment.six_months_rent)} </h3>
+                                <p className="text-sm font-light">{auth.user.type === 'landlord' ?  "PER YEAR" : "PER SIX MONTHS"}</p>
                             </div>
                             <hr className='my-3' />
                             <div className="flex gap-2 items-center  ">
                                 {/* <div className="bg-blue-200 w-full h-10"></div> */}
-                                <h3 className="text-2xl">{formatPrice(apartment.monthly_rent)} </h3>
+                                <h3 className="text-2xl">{formatPrice(auth.user.type === 'landlord' ? apartment.monthly_rent : apartment.monthly_price)} </h3>
                                 <p className="text-sm font-light">PER MONTH</p>
                             </div>
                         </div>
@@ -416,7 +427,7 @@ const Single = ({auth, apartment, success, error}) => {
                                     <h3 className="text-md font-bold">Initial Payments:</h3>
                                     <hr className="mt-3 mb-5 bg-indigo-400 w-full h-[2px]" />
                                     <div className="flex gap-2 justify-between items-center">
-                                        <p className="text-sm font-light uppercase mb-3">SECURITY DEPOSIT(30%)</p>
+                                        <p className="text-sm font-light uppercase mb-3">REFUNDABLE SECURITY DEPOSIT(30%)</p>
                                         <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
                                     </div>
                                     <div className="flex gap-2 justify-between items-center">
@@ -451,6 +462,18 @@ const Single = ({auth, apartment, success, error}) => {
                     </div>
 
                     <ContactOwnerForm apartment={apartment} />
+                </div>
+            </Modal>
+
+            <Modal show={openApproval}  >
+                <div className='p-10'>
+                    <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                        <p className='text-xl text-blue-800 font-semibold'>Give Approval to {apartment?.user?.fname} {apartment?.user?.lname}</p>
+                        <DangerButton onClick={modalApproval}>Close</DangerButton>
+                    </div>
+
+
+                    <ApprovalForm apartment={apartment} openModal={modalApproval} approval={apartment.approval} prices={prices} />
                 </div>
             </Modal>
 

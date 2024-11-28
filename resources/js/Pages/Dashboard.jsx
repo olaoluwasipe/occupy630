@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import ProfilePhoto from '@/Components/ProfilePhoto';
 import Update from '@/Components/Update';
@@ -182,7 +182,12 @@ export default function Dashboard({ auth, payments, employees, docs, apartment, 
                         apartment ? (
                             <ExistingApartmentEmployee apartment={apartment} statusKeys={statusKeys} settings={settings} auth={auth} requestRentPay={requestRentPay} />
                         ) : (
-                            <PrimaryButton>Get Apartment</PrimaryButton>
+                            <div className='flex flex-col items-center justify-center p-20 bg-gray-100 mt-10 rounded-md gap-10'>
+
+                                <Link href={route('apartments')} className='text-blue-500'>
+                                    <PrimaryButton>Get Apartment</PrimaryButton>
+                                </Link>
+                            </div>
                         )
                     )}
                     {auth.user.type === 'employer' && (

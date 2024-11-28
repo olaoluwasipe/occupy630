@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\MailNotification;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Apartment;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -88,29 +90,57 @@ class AuthController extends Controller
         }
     }
 
-    public function approveUser (User $user) {
-        if(Auth::user()->type !== 'superadmin' && Auth::user()->type !== 'employer') {
+    public function approveUser(User $user)
+    {
+        // Check if the authenticated user is authorized to perform this action
+        if (!in_array(Auth::user()->type, ['superadmin', 'employer'])) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        if($user->status == 'pending') {
-            $user->status = 'active';
+
+        // Define status transitions and mail details
+        $statusTransitions = [
+            'pending' => [
+                'new_status' => 'active',
+                'subject' => 'Your account has been activated',
+                'header' => 'Your account is now active',
+                'body' => 'Your account has been activated. You can now log in to your account.',
+            ],
+            'active' => [
+                'new_status' => 'inactive',
+                'subject' => 'Your account has been deactivated',
+                'header' => 'Your account is now inactive',
+                'body' => 'Your account has been deactivated. Please contact support for more details.',
+            ],
+            'inactive' => [
+                'new_status' => 'active',
+                'subject' => 'Your account has been reactivated',
+                'header' => 'Welcome back! Your account is active again',
+                'body' => 'Your account has been reactivated. You can now log in to your account.',
+            ],
+        ];
+
+        // Handle status change and send email
+        if (array_key_exists($user->status, $statusTransitions)) {
+            $transition = $statusTransitions[$user->status];
+
+            // Update the user's status
+            $user->status = $transition['new_status'];
             $user->save();
 
-            return redirect()->back()->with('success', 'User approved successfully');
+            // Send notification email
+            $link = route('login');
+            Mail::to($user->email)->send(new MailNotification(
+                $transition['subject'],
+                $transition['body'],
+                $link,
+                $transition['header']
+            ));
+
+            return redirect()->back()->with('success', 'User status updated successfully.');
         }
 
-        if($user->status == 'active') {
-            $user->status = 'inactive';
-            $user->save();
-
-            return redirect()->back()->with('success','User deactivated successfully');
-        }
-
-        if($user->status == 'inactive') {
-            $user->status = 'active';
-            $user->save();
-
-            return redirect()->back()->with('success','User activated successfully');
-        }
+        // If the status is unexpected, return an error
+        return redirect()->back()->with('error', 'Invalid user status.');
     }
+
 }

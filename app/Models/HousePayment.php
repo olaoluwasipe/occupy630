@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class HousePayment extends Model
 {
@@ -26,6 +27,14 @@ class HousePayment extends Model
         'meta' => 'array',
     ];
 
+    public static function boot() {
+        parent::boot();
+
+        static::creating(function ($payment) {
+            $payment->reference = 'REF-' . Str::random(10);
+        });
+    }
+
     protected $appends = ['apartment', 'tenant'];
 
     public function getApartmentAttribute()
@@ -47,5 +56,9 @@ class HousePayment extends Model
 
     public function approval () {
         return $this->belongsTo(Approval::class);
+    }
+
+    public function notifications () {
+        return $this->morphMany(Notification::class,'notifiable');
     }
 }

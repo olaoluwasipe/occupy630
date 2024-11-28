@@ -12,6 +12,7 @@ import Checkbox from '@/Components/Checkbox';
 import { FaArrowAltCircleRight } from 'react-icons/fa';
 
 const ApprovalForm = ({ apartment, approval, prices, openModal }) => {
+    console.log(apartment)
     const { data, setData, post, processing, errors, reset } = useForm({
         action: '',
         user_pay: true,
@@ -46,7 +47,7 @@ const ApprovalForm = ({ apartment, approval, prices, openModal }) => {
             <h3 className="text-md font-bold">Initial Payments:</h3>
             <hr className="mt-3 mb-5 bg-indigo-400 w-full h-[2px]" />
             <div className="flex gap-2 justify-between items-center">
-                <p className="text-sm font-light uppercase mb-3">SECURITY DEPOSIT(30%)</p>
+                <p className="text-sm font-light uppercase mb-3">REFUNDABLE SECURITY DEPOSIT(30%)</p>
                 <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
             </div>
             <div className="flex gap-2 justify-between items-center">

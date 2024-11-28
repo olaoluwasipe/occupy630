@@ -99,4 +99,8 @@ class Apartment extends Model
     // public function rentalHistory() {
     //     return $this->hasMany(RentalHistory::class);
     // }
+
+    public function notifications () {
+        return $this->morphMany(Notification::class,'notifiable');
+    }
 }

@@ -6,9 +6,11 @@ use App\Events\MessageSent;
 use App\Models\Chat;
 use App\Http\Requests\StoreChatRequest;
 use App\Http\Requests\UpdateChatRequest;
+use App\Mail\MessageNotifier;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class ChatController extends Controller
 {
@@ -31,13 +33,32 @@ class ChatController extends Controller
     }
 
     public function startChat (User $user) {
-        Chat::create( [
+        $chat = Chat::create( [
             'sender_id' => Auth::user()->id,
             'receiver_id'=> $user->id,
             'message' => 'Hello, how are you?',
             'quote_id' => null,
             'attachments' => null,
         ] );
+        $sender = User::find(Auth::user()->id);
+        $receiver = $user;
+
+        // $sender = $sender->email;
+        $messageContent = 'Hello, how are you?';
+        $subjectText = 'You have a new message from!';
+        $link = url('/');
+
+        Mail::to($receiver->email)->send(new MessageNotifier($sender, $messageContent, $subjectText, $link));
+
+        $chat->notifications()->create([
+            'user_id' => $receiver->id,
+            'type' => 'message',
+            'data' => [
+                'message' => $messageContent,
+                'sender' => $sender->fullname,
+                'link' => $link,
+            ]
+        ]);
     }
 
     /**
@@ -45,12 +66,31 @@ class ChatController extends Controller
      */
     public function store(Request $request)
     {
-        Chat::create([
+        $chat = Chat::create([
             'sender_id' => Auth::user()->id,
             'receiver_id' => $request->receiver_id,
             'message' => $request->message,
             'quote_id' => $request->quote_id,
             'attachments' => $request->attachments,
+        ]);
+        $sender = User::find(Auth::user()->id);
+        $receiver = User::find($request->receiver_id);
+
+        // $sender = $sender->email;
+        $messageContent = $request->message;
+        $subjectText = 'You have a new message from!';
+        $link = url('/');
+
+        Mail::to($receiver->email)->send(new MessageNotifier($sender, $messageContent, $subjectText, $link));
+
+        $chat->notifications()->create([
+            'user_id' => $receiver->id,
+            'type' => 'message',
+            'data' => [
+                'message' => $messageContent,
+                'sender' => $sender->fullname,
+                'link' => $link,
+            ]
         ]);
 
         return redirect()->back();

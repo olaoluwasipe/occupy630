@@ -7,7 +7,7 @@ import { FaLocationDot } from 'react-icons/fa6'
 import Slider from 'react-slick'
 
 const ExistingApartmentEmployee = ({apartment, statusKeys, settings, auth, requestRentPay}) => {
-    console.log(apartment)
+    // console.log(apartment)
   return (
     <div className='md:flex flex-row gap-6 py-12 mx-auto'>
                                 <div style={{ boxShadow: '0px 2px 12px #e3e3e3' }} className="bg-white h-full md:w-1/2 md:mt-0 mt-6 overflow-hidden shadow-xl shadow-gray-200 sm:rounded-lg p-6">

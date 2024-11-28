@@ -8,13 +8,13 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import PasswordInput from '@/Components/PasswordInput';
 import SelectInput from '@/Components/SelectInput';
 
-export default function Register() {
+export default function Register(props) {
     const { data, setData, post, processing, wasSuccessful, errors, reset } = useForm({
         fname: '',
         lname: '',
-        email: '',
-        type: 'employer',
-        code: '' ?? null,
+        email: props.email ?? '',
+        type: props.type ?? 'employer',
+        code: props.code ?? null,
         password: '',
         password_confirmation: '',
     });

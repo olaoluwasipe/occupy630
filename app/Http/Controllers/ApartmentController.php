@@ -5,19 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Apartment;
 use App\Http\Requests\StoreApartmentRequest;
 use App\Http\Requests\UpdateApartmentRequest;
+use App\Mail\MailNotification;
 use App\Models\ApartmentAttribute;
 use App\Models\Approval;
 use App\Models\Chat;
 use App\Models\HousePayment;
 use App\Models\Inquiry;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+// use Barryvdh\DomPDF\Facade as PDF;
 
 class ApartmentController extends Controller
 {
@@ -126,7 +130,13 @@ class ApartmentController extends Controller
     public function show($slug)
     {
         $apartment = Apartment::where('slug', $slug)->with('landlord', 'category', 'images', 'tenant.employedCompany', 'transactions', 'files')->first();
-        $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('user_id', Auth::id())->with('payment')->latest()->first();
+        if(Auth::user()->type == 'employer') {
+            $employees = Auth::user()->company->users()->orderBy('id','desc')->pluck('id')->toArray();
+            $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('status', 1)->whereIn('user_id', $employees)->with('payment')->latest()->first();
+
+        } else {
+            $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('user_id', Auth::id())->with('payment')->latest()->first();
+        }
         return Inertia::render('Apartments/Single', [
             'apartment' => $apartment,
         ]);
@@ -158,6 +168,16 @@ class ApartmentController extends Controller
             'approver_id' => Auth::user()->employedCompany->user_id,
             'status' => Approval::getStatusTextAttribute('pending'),
         ]);
+
+        $user = Auth::user();
+        $header = "{$user->fname} is requesting approval for an apartment";
+        $subject = "Request For Approval";
+        $body = "An employee requested approval to rent this apartment.";
+        $link = route('apartment.show', $apartment->slug);
+
+        Mail::to(Auth::user()->employedCompany->owner->email)->send(new MailNotification($subject, $body, $link, $header));
+
+
 
         return redirect()->back()->with('success', 'Request sent successfully');
     }
@@ -198,7 +218,7 @@ class ApartmentController extends Controller
                 'user_id' => $approval->user_id,
                 'approval_id' => $approval->id,
                 'amount' => $total,
-                'due_date' => now()->addDays(30),
+                'due_date' => now()->addDays(7),
                 'date' => now(),
                 'method' => 'none',
                 'status' => 'pending',
@@ -213,6 +233,21 @@ class ApartmentController extends Controller
                 'type' => 'initial',
                 'mode' => 'one-time',
             ]);
+
+            // dd($housePay);
+
+            $pdf = $this->getPdfInHousePayment($housePay);
+
+
+            $user = Auth::user();
+            $header = "Congrats! Your approval has been granted by your employer";
+            $subject = "Approval Status";
+            $body = "Your apartment approval has been granted. Attached are the initial payments to be made.";
+            $link = route('apartment.show', $apartment->slug);
+
+            Mail::to($approval->user->email)->send(new MailNotification($subject, $body, $link, $header, $pdf, $housePay->reference));
+
+            // $this->sendPaymentNotification($apartment, 'initial', $total, $pdf, $housePay->reference);
         }
 
         return redirect()->back()->with('success', 'Approval request '.$request->action.'d successfully.');
@@ -267,14 +302,24 @@ class ApartmentController extends Controller
     }
 
     public function makeInitialPayment (Request $request) {
+        $this->handlePayment($request, 'initial');
+    }
+
+    public function makeRentPayment (Request $request) {
+        $this->handlePayment($request, 'rent');
+    }
+
+    public function handlePayment(Request $request, $type = 'initial') {
         $request->validate([
             'apartment_id' => 'required|exists:apartments,id',
             'amount' => 'required|numeric|min:1',
             'method' => 'required|string|in:card,bank_transfer,paystack',
-            'reference' => 'required_if:payment_method,bank_transfer|string',
+            'reference' => 'required_if:method,bank_transfer|string',
         ]);
-        // dd($request->all());
+
+        // Check for existing payment
         $existingHousePayment = HousePayment::where('reference', $request->reference)->first();
+
         if ($existingHousePayment) {
             $existingHousePayment->update([
                 'status' => 'completed',
@@ -282,40 +327,43 @@ class ApartmentController extends Controller
                 'date' => now(),
             ]);
         } else {
-            $housePayment = HousePayment::create([
+            $existingHousePayment = HousePayment::create([
                 'apartment_id' => $request->apartment_id,
-                'user_id' => Auth::user()->id,
+                'user_id' => Auth::id(),
                 'amount' => $request->amount,
                 'due_date' => now()->addDays(7),
                 'date' => now(),
                 'status' => 'completed',
-                'note' => 'Initial Payment made by Employee',
-                'mode' => 'initial',
-                'type' => 'one-time',
+                'note' => ucfirst($type) . ' payment made by user',
+                'mode' => $type === 'initial' ? 'initial' : 'monthly',
+                'type' => $type === 'initial' ? 'one-time' : 'rent',
                 'method' => $request->method,
                 'reference' => $request->reference,
             ]);
         }
+
+        // Update apartment status
         $apartment = Apartment::find($request->apartment_id);
-        $apartment->status = 'booked';
-        $apartment->tenant_id = $existingHousePayment->user_id ?? Auth::user()->id;
+        $apartment->status = $type === 'initial' ? 'booked' : 'rented';
+        $apartment->availability = $type === 'initial' ? null : 'unavailable';
+        $apartment->tenant_id = $existingHousePayment->user_id ?? Auth::id();
         $apartment->save();
+
+        // Set next payment schedule
+        $nextDueDate = $this->getNextDueDate($apartment->id, $apartment->monthly_price + $apartment->service_charge);
 
         $housePay = HousePayment::create([
             'apartment_id' => $apartment->id,
-            'user_id' => Auth::user()->id,
-            // 'approval_id' => $approval->id,
+            'user_id' => Auth::id(),
             'amount' => $apartment->monthly_price + $apartment->service_charge,
-            'due_date' => now()->addDays(7),
+            'due_date' => $nextDueDate,
             'date' => now(),
             'method' => 'none',
             'status' => 'pending',
-            'reference' => 'REF-'.Str::random(10),
+            'reference' => 'REF-' . Str::random(10),
             'note' => 'Rent payment for the apartment',
             'meta' => [
-                'can_pay' => [
-                    Auth::id(),
-                ],
+                'can_pay' => [Auth::id()],
                 'prices' => [
                     'monthly_rent' => $apartment->monthly_price,
                     'service_charge' => $apartment->service_charge,
@@ -325,72 +373,57 @@ class ApartmentController extends Controller
             'mode' => 'monthly',
         ]);
 
-        return redirect()->route('home')->with('success', 'Initial payment made successfully');
+        // dd($existingHousePayment);
+        // Generate PDF invoice
+        $pdf = $this->getPdfInHousePayment($existingHousePayment);
+
+        // Send mail notification
+        $this->sendPaymentNotification($apartment, $type, $request->amount, $pdf, $existingHousePayment->reference);
+
+        return redirect()->route('home')->with('success', ucfirst($type) . ' payment made successfully');
     }
 
-    public function makeRentPayment (Request $request) {
-        $request->validate([
-            'apartment_id' => 'required|exists:apartments,id',
-            'amount' => 'required|numeric|min:1',
-            'method' => 'required|string|in:card,bank_transfer,paystack',
-            'reference' => 'required_if:payment_method,bank_transfer|string',
-        ]);
-        // dd($request->all());
-        $existingHousePayment = HousePayment::where('reference', $request->reference)->first();
-        if (!$existingHousePayment) {
-            return redirect()->back()->with('error', 'Invalid payment reference');
+
+    private function getPdfInHousePayment(HousePayment $payment) {
+        if (!$payment->relationLoaded('user')) {
+            $payment->load('user');
         }
-        $existingHousePayment->update([
-            'status' => 'completed',
-            'payment_method' => $request->method,
-            'date' => now(),
-        ]);
+        $pdf = Pdf::loadView('invoices.pdf', ['invoice' => $payment]);
 
-        $apartment = Apartment::find($request->apartment_id);
-        $apartment->status = 'rented';
-        $apartment->availability = 'unavailable';
-        $apartment->tenant_id = $existingHousePayment->user_id ?? Auth::user()->id;
-        $apartment->save();
+        return $pdf;
+    }
 
-        $payments = HousePayment::where('apartment_id', $apartment->id)
-            ->where('user_id', $existingHousePayment->user_id)
+    private function getNextDueDate($apartmentId, $totalAmount) {
+        $payments = HousePayment::where('apartment_id', $apartmentId)
+            ->where('status', 'completed')
             ->latest()
             ->get();
 
-        // If there's only one payment, set the date to 30 days from now
-        if ($payments->count() == 1) {
-            $date = Carbon::now()->addDays(30);
-        } else {
-            // If there are multiple payments, set the date to 30 days after the first payment's due date
-            $date = Carbon::parse($payments->first()->due_date)->addDays(30);
-        }
-
-        $housePay = HousePayment::create([
-            'apartment_id' => $apartment->id,
-            'user_id' => Auth::user()->id,
-            // 'approval_id' => $approval->id,
-            'amount' => $apartment->monthly_price + $apartment->service_charge,
-            'due_date' => $date,
-            'date' => now(),
-            'method' => 'none',
-            'status' => 'pending',
-            'reference' => 'REF-'.Str::random(10),
-            'note' => 'Rent payment for the apartment',
-            'meta' => [
-                'can_pay' => [
-                    Auth::id(),
-                ],
-                'prices' => [
-                    'monthly_rent' => $apartment->monthly_price,
-                    'service_charge' => $apartment->service_charge,
-                ],
-            ],
-            'type' => 'rent',
-            'mode' => 'monthly',
-        ]);
-
-        return redirect()->route('home')->with('success', 'Initial payment made successfully');
+        return $payments->count() == 1
+            ? now()->addDays(30)
+            : Carbon::parse($payments->first()->due_date)->addDays(30);
     }
+
+    private function sendPaymentNotification($apartment, $type, $amount, $pdf=null, $reference='') {
+        $user = Auth::user();
+        $header = "Payment Notification";
+        $subject = ucfirst($type) . " Payment Successful";
+        $body = "Dear {$user->fname}, your {$type} payment of {$amount} for the apartment {$apartment->title} was successful.";
+        $link = route('home');
+
+        Mail::to($user->email)->send(new MailNotification($subject, $body, $link, $header, $pdf, $reference));
+
+        $apartment->notifications()->create([
+            'user_id' => $user->id,
+            'type' => 'message',
+            'data' => [
+                'message' => $body,
+                // 'sender' => $sender->fullname,
+                // 'link' => $link,
+            ]
+        ]);
+    }
+
 
     public function makePayment (Request $request) {
         dd($request);
@@ -410,19 +443,53 @@ class ApartmentController extends Controller
         //
     }
 
-    public function approve(Apartment $apartment) {
-        if($apartment->status == 'pending' || $apartment->status == 'disapproved') {
-            $apartment->status = 'approved';
+    public function approve(Apartment $apartment)
+    {
+        // Define status transitions and email details
+        $statusTransitions = [
+            'pending' => [
+                'new_status' => 'approved',
+                'subject' => 'Your apartment has been approved',
+                'header' => 'Apartment Approval Notification',
+                'body' => 'Congratulations! Your apartment has been approved and is now listed on the platform.',
+            ],
+            'disapproved' => [
+                'new_status' => 'approved',
+                'subject' => 'Your apartment has been approved',
+                'header' => 'Apartment Approval Notification',
+                'body' => 'Congratulations! Your apartment has been approved and is now listed on the platform.',
+            ],
+            'approved' => [
+                'new_status' => 'disapproved',
+                'subject' => 'Your apartment has been disapproved',
+                'header' => 'Apartment Disapproval Notification',
+                'body' => 'We regret to inform you that your apartment listing has been disapproved. Please contact support for more details.',
+            ],
+        ];
+
+        // Check if the current status is valid for a transition
+        if (array_key_exists($apartment->status, $statusTransitions)) {
+            $transition = $statusTransitions[$apartment->status];
+
+            // Update the apartment status
+            $apartment->status = $transition['new_status'];
             $apartment->save();
-            return redirect()->back()->with('success', 'Apartment approved successfully');
-        } elseif($apartment->status == 'approved') {
-            $apartment->status = 'disapproved';
-            $apartment->save();
-            return redirect()->back()->with('success', 'Apartment disapproved successfully');
+
+            // Send notification email
+            Mail::to($apartment->landlord->email)->send(new MailNotification(
+                $transition['subject'],
+                $transition['body'],
+                route('apartments'),
+                $transition['header']
+            ));
+
+            return redirect()->back()->with('success', "Apartment {$transition['new_status']} successfully");
         }
 
+        // Handle unexpected status
         return redirect()->back()->with('error', 'Apartment status failed to update');
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -443,11 +510,12 @@ class ApartmentController extends Controller
                 'monthly_rent' => $request->price / 12,
             ]
         );
+        // dd($request->all());
 
                 // Handle image uploads if present
-                if ($request->has('images')) {
+                if ($request->has('attachments')) {
                     // Get existing image IDs from the request
-                    $existingImageIds = collect($request->input('images'))
+                    $existingImageIds = collect($request->input('attachments'))
                         ->filter(fn($image) => is_array($image) && isset($image['id']))
                         ->pluck('id')
                         ->toArray();
@@ -458,7 +526,7 @@ class ApartmentController extends Controller
                         ->delete();
 
                     // Handle new image uploads
-                    $newImages = collect($request->file('images'))
+                    $newImages = collect($request->file('attachments'))
                         ->filter(fn($image) => is_object($image) && $image instanceof \Illuminate\Http\UploadedFile);
 
                     foreach ($newImages as $image) {
