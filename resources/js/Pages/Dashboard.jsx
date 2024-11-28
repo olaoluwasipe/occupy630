@@ -22,6 +22,8 @@ import { RiMessage2Fill } from 'react-icons/ri';
 import { IoDocument } from 'react-icons/io5';
 import ExistingApartmentsLandlord from '@/Pieces/ExistingApartmentsLandlord';
 import ApartmentAddForm from '@/Forms/ApartmentAddForm';
+import FileAddForm from '@/Forms/FileAddForm';
+import Files from '@/Content/Files';
 
 function NextArrow(props) {
     const { className, style, onClick } = props;
@@ -54,10 +56,11 @@ function NextArrow(props) {
     prevArrow: <PrevArrow />
   };
 
-export default function Dashboard({ auth, payments, employees, docs, apartment, approvals, success, error, categories, attributes }) {
-    // console.log(employees)
+export default function Dashboard({ auth, payments, employees, docs, apartment, approvals, success, error, categories, attributes, files }) {
+    console.log(files)
     const [openNav, setOpenNav] = useState(false)
     const [action, setAction] = useState('')
+    const [openFiles, setOpenFiles] = useState(false)
     const [openModal, setOpenModal] = useState(false);
     const [openMessage, setOpenMessage] = useState(false);
     const [openRent, setOpenRent] = useState(false);
@@ -71,6 +74,10 @@ export default function Dashboard({ auth, payments, employees, docs, apartment, 
 
     const modalOpen = () => {
         setOpenModal(!openModal);
+    }
+
+    const modalFiles = () => {
+        setOpenFiles(!openFiles);
     }
 
     const messageModalOpen = () => {
@@ -138,7 +145,7 @@ export default function Dashboard({ auth, payments, employees, docs, apartment, 
                                     <RiMessage2Fill size={25} color='#fff' />
                                     <p className='text-white'>Message Someone </p>
                                 </div>
-                                <div className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-sky-600 text-center rounded-lg h-100'>
+                                <div onClick={modalFiles} className='flex flex-1 items-center gap-5 p-5 flex-col cursor-pointer justify-center bg-sky-600 text-center rounded-lg h-100'>
                                     <IoDocument size={25} color='#fff' />
                                     <p className='text-white'>View Documents </p>
                                 </div>
@@ -194,6 +201,17 @@ export default function Dashboard({ auth, payments, employees, docs, apartment, 
                             </div>
 
                             <SendInviteForm />
+                        </div>
+                    </Modal>
+
+                    <Modal show={openFiles} >
+                        <div className='p-10'>
+                            <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                                <p className='text-xl text-blue-800 font-semibold'>See files</p>
+                                <DangerButton onClick={modalFiles}>Close</DangerButton>
+                            </div>
+
+                            <Files showAction={false} files={files} />
                         </div>
                     </Modal>
 

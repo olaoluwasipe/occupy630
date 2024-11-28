@@ -87,4 +87,30 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
     }
+
+    public function approveUser (User $user) {
+        if(Auth::user()->type !== 'superadmin' && Auth::user()->type !== 'employer') {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        if($user->status == 'pending') {
+            $user->status = 'active';
+            $user->save();
+
+            return redirect()->back()->with('success', 'User approved successfully');
+        }
+
+        if($user->status == 'active') {
+            $user->status = 'inactive';
+            $user->save();
+
+            return redirect()->back()->with('success','User deactivated successfully');
+        }
+
+        if($user->status == 'inactive') {
+            $user->status = 'active';
+            $user->save();
+
+            return redirect()->back()->with('success','User activated successfully');
+        }
+    }
 }

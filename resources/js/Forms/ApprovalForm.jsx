@@ -34,8 +34,8 @@ const ApprovalForm = ({ apartment, approval, prices, openModal }) => {
         <p className='text-gray-500 flex gap-3 items-center'><FaLocationDot /> {apartment?.address}, {apartment?.city}, {apartment?.state}, {apartment?.country}</p>
         <div className="flex items-center justify-between mt-3">
             <div className="w-auto">
-                <p className="text-sm uppercase text-gray-500">Yearly Rent</p>
-                <p className="text-xl font-semibold">{formatPrice(apartment?.cg_price)}</p>
+                <p className="text-sm uppercase text-gray-500">Six Month Rent</p>
+                <p className="text-xl font-semibold">{formatPrice(apartment?.six_months_rent)}</p>
             </div>
             <div className="w-auto">
                 <p className="text-sm uppercase text-gray-500">Monthly Rent</p>
@@ -50,11 +50,11 @@ const ApprovalForm = ({ apartment, approval, prices, openModal }) => {
                 <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
             </div>
             <div className="flex gap-2 justify-between items-center">
-                <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(5%)</p>
+                <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(10%)</p>
                 <p className="text-sm font-light mb-3">{formatPrice(prices.agreement)}</p>
             </div>
             <div className="flex gap-2 justify-between items-center">
-                <p className="text-sm font-light uppercase mb-3">AGENCY FEE(5%)</p>
+                <p className="text-sm font-light uppercase mb-3">AGENCY FEE(10%)</p>
                 <p className="text-sm font-light mb-3">{formatPrice(prices.agency)}</p>
             </div>
             {/* <div className="flex gap-2 justify-between items-center">

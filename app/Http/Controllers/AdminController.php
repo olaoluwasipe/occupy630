@@ -48,6 +48,7 @@ class AdminController extends Controller
         if ($user->can('manage users')) {
             $users = User::where('type', '!=', 'superadmin')
                 ->where('type', '!=', 'admin')
+                ->orderByDesc('created_at')
                 ->get()
                 ->map(function ($user) {
                     $user->company = $user->employedCompany ?? $user->company;
@@ -138,7 +139,8 @@ class AdminController extends Controller
 
     public function createUser () {
         $validatedData = request()->validate([
-            'name' => 'required|string|max:255',
+            'fname' => 'required|string|max:255',
+            'lname' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'userType' => 'required|in:learner,tutor,admin,superadmin',
             'gender' => 'required|in:Male,Female,Other',
@@ -149,7 +151,8 @@ class AdminController extends Controller
         ]);
 
         $user = User::create([
-            'name' => $validatedData['name'],
+            'fname' => $validatedData['fname'],
+            'lname' => $validatedData['lname'],
             'email' => $validatedData['email'],
             'password' => Hash::make('password'),
             'type' => $validatedData['userType'],
@@ -167,7 +170,7 @@ class AdminController extends Controller
             if($permission['status'] === true) $user->givePermissionTo($permission['permission_id']);
         }
 
-        if ($validatedData['userType'] === 'learner') {
+        if ($validatedData['userType'] === 'employee') {
             $user->studentcohort()->attach(request('session'));
         }
 

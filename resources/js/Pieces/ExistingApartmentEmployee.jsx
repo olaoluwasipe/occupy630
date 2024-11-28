@@ -43,8 +43,8 @@ const ExistingApartmentEmployee = ({apartment, statusKeys, settings, auth, reque
                                         <p className='text-gray-500 flex gap-3 items-center'><FaLocationDot />{apartment?.address}</p>
                                         <div className="flex items-center justify-center">
                                             <div className="w-1/2">
-                                                <p className="text-sm uppercase text-gray-500">Yearly Rent</p>
-                                                <p className="text-xl font-semibold">{formatPrice(apartment?.cg_price)}</p>
+                                                <p className="text-sm uppercase text-gray-500">Six Months Rent</p>
+                                                <p className="text-xl font-semibold">{formatPrice(apartment?.six_months_rent)}</p>
                                             </div>
                                             <div className="w-1/2">
                                                 <p className="text-sm uppercase text-gray-500">Monthly Rent</p>
@@ -55,13 +55,13 @@ const ExistingApartmentEmployee = ({apartment, statusKeys, settings, auth, reque
                                         <div style={{ boxShadow: '0px 2px 12px #e3e3e3' }} className="bg-white h-full md:w-full md:mt-0 mt-6 overflow-hidden shadow-xl shadow-gray-200 sm:rounded-lg p-6">
                                             <div className="mb-3 flex justify-between items-center">
                                                 <p className='font-bold'>Transactions</p>
-                                                <SecondaryButton>View All</SecondaryButton>
+                                                {/* <SecondaryButton>View All</SecondaryButton> */}
                                             </div>
                                             <div className="flex flex-col gap-3 w-full h-auto overflow-auto">
-                                                {apartment.transactions.slice(0, 3).map((transaction, index) => (
+                                                {apartment.transactions.map((transaction, index) => (
                                                     <div className="flex gap-4 cursor-pointer justify-between flex-row mb-3 border-b border-gray-300 pb-3" key={index}>
                                                         <div>
-                                                            <p className="font-medium text-gray-500">Made by {transaction.user_id === auth.user.id ? 'Me' : transaction.user.fname}</p>
+                                                            <p className="font-medium text-gray-500">Made by {transaction.user_id == auth.user.id ? 'Me' : transaction.user.fullname}</p>
                                                             <p className='text'>{formatPrice(transaction.amount)}</p>
                                                         </div>
                                                         <div>

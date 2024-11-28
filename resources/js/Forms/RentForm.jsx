@@ -87,11 +87,11 @@ const RentForm = ({ apartment, prices, user, openModal, payment=null }) => {
                         <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
                     </div>
                     <div className="flex gap-2 justify-between items-center">
-                        <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE (5%)</p>
+                        <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE (10%)</p>
                         <p className="text-sm font-light mb-3">{formatPrice(prices.agreement)}</p>
                     </div>
                     <div className="flex gap-2 justify-between items-center">
-                        <p className="text-sm font-light uppercase mb-3">AGENCY FEE (5%)</p>
+                        <p className="text-sm font-light uppercase mb-3">AGENCY FEE (10%)</p>
                         <p className="text-sm font-light mb-3">{formatPrice(prices.agency)}</p>
                     </div>
                 </>

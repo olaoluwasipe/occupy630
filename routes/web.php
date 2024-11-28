@@ -22,6 +22,7 @@ use App\Models\ApartmentAttribute;
 use App\Models\ApartmentCategory;
 use App\Models\Approval;
 use App\Models\AssignmentSubmission;
+use App\Models\File;
 use App\Models\HousePayment;
 use App\Models\User;
 use Carbon\Carbon;
@@ -64,6 +65,7 @@ Route::get('/', function () {
                         $query->orderBy('created_at', 'desc'); // Adjust column name if needed
                     }])
                     ->first();
+        $files     = File::where('tenant_id', Auth::user()->id)->with('user')->latest()->get();
     } else if (Auth::user()->type == 'employer') {
 
         $employees = User::where('type', 'employee')->where('company_id', Auth::user()->company_id)->get();
@@ -99,6 +101,7 @@ Route::get('/', function () {
         'payments'=> $payments ?? [],
         'categories'=> $categories ?? [],
         'attributes'=> $attributes ?? [],
+        'files'=> $files ?? [],
         'docs' => session('docs'),
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -138,6 +141,7 @@ Route::prefix('/admin')->middleware(['auth', 'checkadmin'])->group(function () {
     Route::post('/create-user', [AdminController::class, 'createUser'])->name('admin.create-user');
     Route::post('/update-user/{user}', [AdminController::class, 'updateUser'])->name('admin.update-user');
     Route::delete('/delete-user/{user}', [AdminController::class, 'deleteUser'])->name('admin.delete-user');
+    Route::post('approve/{user}', [AuthController::class, 'approveUser'])->name('users.approve');
 
     Route::group(['middleware' => ['can:upload apartments']], function () {
         Route::get('/apartments', [AdminController::class, 'apartments'])->name('admin.apartments');

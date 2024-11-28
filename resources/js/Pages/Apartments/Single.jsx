@@ -29,6 +29,7 @@ import RentForm from '@/Forms/RentForm';
 import formatPrice from '@/functions';
 import { toast } from 'react-toastify';
 import Table from '@/Components/Table';
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
 
 function NextArrow(props) {
     const { className, style, onClick } = props;
@@ -54,6 +55,7 @@ function NextArrow(props) {
 
 const Single = ({auth, apartment, success, error}) => {
     const { flash } = usePage().props;
+    const position = [51.505, -0.09]
     var settings = {
       dots: true,
       infinite: true,
@@ -69,9 +71,9 @@ const Single = ({auth, apartment, success, error}) => {
         yearly: apartment.cg_price,
         security: apartment?.approval?.payment?.meta?.prices?.security_deposit ?? apartment.cg_price * 0.3,
         agreement: apartment.cg_price * 0.05,
-        agency: apartment?.approval?.payment?.meta?.prices?.agreement ?? apartment.cg_price * 0.05,
-        total:  parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.05) * 2 ) ,
-        initial: apartment?.approval?.payment?.amount ?? (parseFloat(apartment.monthly_price) + parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.05) * 2 )) ,
+        agency: apartment?.approval?.payment?.meta?.prices?.agreement ?? apartment.cg_price * 0.1,
+        total:  parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.1) * 2 ) ,
+        initial: apartment?.approval?.payment?.amount ?? (parseFloat(apartment.monthly_price) + parseFloat(apartment.cg_price * 0.3) + parseFloat( (apartment.cg_price * 0.1) * 2 )) ,
     }
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -154,11 +156,11 @@ const Single = ({auth, apartment, success, error}) => {
                                             <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
                                         </div>
                                         <div className="flex gap-2 justify-between items-center">
-                                            <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(5%)</p>
+                                            <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(10%)</p>
                                             <p className="text-sm font-light mb-3">{formatPrice(prices.agreement)}</p>
                                         </div>
                                         <div className="flex gap-2 justify-between items-center">
-                                            <p className="text-sm font-light uppercase mb-3">AGENCY FEE(5%)</p>
+                                            <p className="text-sm font-light uppercase mb-3">AGENCY FEE(10%)</p>
                                             <p className="text-sm font-light mb-3">{formatPrice(prices.agency)}</p>
                                         </div>
                                         <div className="flex gap-2 justify-between items-center">
@@ -332,7 +334,7 @@ const Single = ({auth, apartment, success, error}) => {
                                 {parse(apartment.description)}
                             </p>
 
-                            <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                            {/* <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
                                 <h2 className="text-xl font-bold mb-5">Amenities</h2>
 
                                 <div className="flex items-center gap-3 items-center">
@@ -345,7 +347,7 @@ const Single = ({auth, apartment, success, error}) => {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
                                 <h2 className="text-xl font-bold mb-5">Features</h2>
@@ -362,27 +364,28 @@ const Single = ({auth, apartment, success, error}) => {
                                 </div>
                             </div>
 
-                            <div className="mt-3 rounded-md shadow-lg bg-white px-4 py-6">
+                            {/* <div className="mt-3 rounded-md shadow-lg bg-white overflow-hidden px-4 py-6">
                                 <h2 className="text-xl font-bold mb-5">Map</h2>
 
-                                <div className="flex items-center gap-3 items-center">
-                                    {apartment.amenities.map((amenity, index) => (
-                                        <div key={index} className="flex items-center w-1/4 justify-center gap-3">
-                                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                                <img src={`/storage/${amenity.icon}`} alt="" className="w-6 h-6" />
-                                            </div>
-                                            <span className="text-gray-500">{amenity}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                                <MapContainer center={position} zoom={13} scrollWheelZoom={false}>
+                                    <TileLayer
+                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    />
+                                    <Marker position={position}>
+                                        <Popup>
+                                            A pretty CSS3 popup. <br /> Easily customizable.
+                                        </Popup>
+                                    </Marker>
+                                </MapContainer>
+                            </div> */}
                         </div>
                     </div>
                     <div className="w-2/6">
                         <div className=" sticky top-20">
                             <div className="flex gap-2 items-center">
-                                <h3 className="text-5xl">{formatPrice(apartment.cg_price)} </h3>
-                                <p className="text-sm font-light">PER YEAR</p>
+                                <h3 className="text-5xl">{formatPrice(apartment.six_months_rent)} </h3>
+                                <p className="text-sm font-light">PER SIX MONTHS</p>
                             </div>
                             <hr className='my-3' />
                             <div className="flex gap-2 items-center  ">
@@ -417,11 +420,11 @@ const Single = ({auth, apartment, success, error}) => {
                                         <p className="text-sm font-light mb-3">{formatPrice(prices.security)}</p>
                                     </div>
                                     <div className="flex gap-2 justify-between items-center">
-                                        <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(5%)</p>
+                                        <p className="text-sm font-light uppercase mb-3">AGREEMENT FEE(10%)</p>
                                         <p className="text-sm font-light mb-3">{formatPrice(prices.agreement)}</p>
                                     </div>
                                     <div className="flex gap-2 justify-between items-center">
-                                        <p className="text-sm font-light uppercase mb-3">AGENCY FEE(5%)</p>
+                                        <p className="text-sm font-light uppercase mb-3">AGENCY FEE(10%)</p>
                                         <p className="text-sm font-light mb-3">{formatPrice(prices.agency)}</p>
                                     </div>
                                     <div className="flex gap-2 justify-between items-center">

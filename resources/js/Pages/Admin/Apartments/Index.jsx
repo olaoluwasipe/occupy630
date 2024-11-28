@@ -150,7 +150,7 @@ const Users = ({auth, users, apartments, attributes, categories, error, success}
             {key: 'id', label: 'ID'},
             {key: 'title', label: 'Title'},
             {key: 'slug', label: 'Slug'},
-            {key: 'cg_price', label: 'CG Price'},
+            {key: 'cg_price', label: 'CG Price', formatter: 'money'},
             {key: 'six_months_rent', label: 'Six Months Rent', formatter: 'money'},
             {key: 'landlord.fullname', label: 'Uploaded By'},
             {key: 'created_at', label: 'Date Added', formatter: 'date'},

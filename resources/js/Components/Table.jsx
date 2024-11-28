@@ -31,6 +31,7 @@ const formatValue = (value, formatter) => {
                     case 'completed':
                     case 'available':
                     case 'rented':
+                    case 'active':
                         return <span className="bg-green-500 p-2 rounded text-sm text-white">{value}</span>;
                     case 'rejected':
                     case 'failed':

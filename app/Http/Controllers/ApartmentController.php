@@ -28,7 +28,9 @@ class ApartmentController extends Controller
     {
         $company = Auth::user()->company;
         // $employees = User::where('type', 'employee')->where('company_id', $company->id)->pluck('id');
-        $apartments = Apartment::whereNull('tenant_id')->with('landlord','images', 'category')->get();
+        $apartments = Apartment::whereNull('tenant_id')
+                        ->where('status',  'approved')
+                        ->with('landlord','images', 'category')->get();
         // $newApartments = Apartment::whereIn('tenant_id', $employees)->with('tenant','images', 'category')->get();
         return inertia('Apartments/Index', [
             'apartments' => $apartments,
@@ -301,9 +303,9 @@ class ApartmentController extends Controller
 
         $housePay = HousePayment::create([
             'apartment_id' => $apartment->id,
-            'user_id' => $existingHousePayment->user_id ?? Auth::user()->id,
+            'user_id' => Auth::user()->id,
             // 'approval_id' => $approval->id,
-            'amount' => $apartment->monthly_price + ($apartment->monthly_price * 0.1),
+            'amount' => $apartment->monthly_price + $apartment->service_charge,
             'due_date' => now()->addDays(7),
             'date' => now(),
             'method' => 'none',
@@ -316,7 +318,7 @@ class ApartmentController extends Controller
                 ],
                 'prices' => [
                     'monthly_rent' => $apartment->monthly_price,
-                    'service_charge' => $apartment->monthly_price * 0.1,
+                    'service_charge' => $apartment->service_charge,
                 ],
             ],
             'type' => 'rent',
@@ -365,9 +367,9 @@ class ApartmentController extends Controller
 
         $housePay = HousePayment::create([
             'apartment_id' => $apartment->id,
-            'user_id' => $existingHousePayment->user_id ?? Auth::user()->id,
+            'user_id' => Auth::user()->id,
             // 'approval_id' => $approval->id,
-            'amount' => $apartment->monthly_price + ($apartment->monthly_price * 0.1),
+            'amount' => $apartment->monthly_price + $apartment->service_charge,
             'due_date' => $date,
             'date' => now(),
             'method' => 'none',
@@ -380,7 +382,7 @@ class ApartmentController extends Controller
                 ],
                 'prices' => [
                     'monthly_rent' => $apartment->monthly_price,
-                    'service_charge' => $apartment->monthly_price * 0.1,
+                    'service_charge' => $apartment->service_charge,
                 ],
             ],
             'type' => 'rent',
