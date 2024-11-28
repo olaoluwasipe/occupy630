@@ -35,7 +35,7 @@ const formatValue = (value, formatter) => {
                         return <span className="bg-green-500 p-2 rounded text-sm text-white">{value}</span>;
                     case 'rejected':
                     case 'failed':
-                    case 'cancelled':
+                    // case 'cancelled':
                     case 'expired':
                     case 'declined':
                     case 'disapproved':
