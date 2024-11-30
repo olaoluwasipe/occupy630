@@ -50,12 +50,18 @@ class ApartmentController extends Controller
         //
     }
 
+    public function showPayment (HousePayment $payment) {
+        $payment = $payment->load('apartment.landlord');
+        return inertia('Apartments/Payment', [
+            'payment' => $payment,
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(StoreApartmentRequest $request)
     {
-        // Retrieve validated data and add location attributes
         $data = array_merge(
             $request->validated(),
             [
@@ -71,53 +77,55 @@ class ApartmentController extends Controller
             ]
         );
 
-        // Create the apartment instance
         $apartment = $request->user()->ownedApartments()->create($data);
 
-        // Handle attachments if they exist
+        // Handle attachments
         if ($request->hasFile('attachments')) {
             $files = $request->file('attachments');
-            // dd($files);
             $attachments = [];
 
             foreach ($files as $file) {
-                $path = $this->uploadImg($file);
-                $name = basename($path); // Get the filename
+                // Prepare file details before moving
+                $extension = $file->getClientOriginalExtension();
+                $size = $file->getSize();
+                $originalName = $file->getClientOriginalName();
 
-                // Push each attachment's data to the array
+                // Upload the file and get its relative path
+                $path = $this->uploadImage($file);
+
+                // Add file details to attachments
                 $attachments[] = [
-                    'path' => '/storage/'.$path,
-                    'name' => $name,
-                    'type' => $file->getClientOriginalExtension(),
-                    'size' => $file->getSize(),
-                    'url' => env('APP_URL').'/storage/'.$path,
+                    'path' => $path,
+                    'name' => basename($path),
+                    'type' => $extension,
+                    'size' => $size,
+                    'url' => env('APP_URL') . $path,
                     'main' => false,
                 ];
             }
 
-            // Save all attachments to the apartment's images relationship
+            // Save attachments to the apartment
             $apartment->images()->createMany($attachments);
         }
 
         return redirect()->back()->with('success', 'Apartment created successfully');
     }
 
+
     public function uploadImage($file)
     {
-        // Ensure the directory exists
         $directory = 'images/property_images';
+
         if (!File::exists(public_path($directory))) {
-            File::makeDirectory(public_path($directory), 0755, true);
+            File::makeDirectory(public_path($directory), 0755, true, true); // Recursive creation
         }
 
-        // Generate a unique name for the file
         $name = time() . '_' . $file->getClientOriginalName();
-
-        // Move the file to the specified directory
         $path = $file->move(public_path($directory), $name);
 
-        return '/images/property_images/' . $name; // Return the relative URL to the image
+        return str_replace(public_path(), '', $path); // Relative path
     }
+
     public function uploadImg($file) {
         $path = $file->store('attachments', 'public');
         return $path;

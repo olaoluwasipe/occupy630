@@ -173,6 +173,8 @@ Route::middleware(['auth', 'checksuperadmin'])->group(function () {
     Route::get('/settings', [AdminController::class,'settings'])->name('admin.settings');
 });
 
+Route::get('/show-payment/{payment}', [ApartmentController::class, 'showPayment'])->name('payment.show');
+
 Route::middleware(['auth', 'checkuser'])->group(function () {
 
     Route::get('/staff', function (Request $request) {
