@@ -29,7 +29,7 @@ class RegisteredUserController extends Controller
         return Inertia::render('Auth/Register', [
             'code' => request()->code ?? null,
             'email' => request()->email ?? null,
-            'type' => 'employee',
+            'type' => request()->type ?? null,
         ]
         );
     }
@@ -80,6 +80,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'type' => $request->type,
             'password' => Hash::make($request->password),
+            'email_verified_at' => strpos($request->email, '@cghomesltd.com') ? now() : null,
         ]);
     }
 

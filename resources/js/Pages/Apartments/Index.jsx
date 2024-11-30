@@ -65,13 +65,13 @@ const Apartments = ({auth, apartments, newApartments}) => {
 
         // Check if bedrooms match
         const matchesBedroom = () => {
-            if (bedrooms === 0) return true;
+            if (bedrooms === 0 || bedrooms === "") return true;
             return apartment.bedrooms === bedrooms;
         };
 
         // Check if bathrooms match
         const matchesBathroom = () => {
-            if (bathrooms === 0) return true;
+            if (bathrooms === 0 || bathrooms === '') return true;
             return apartment.bathrooms === bathrooms;
         };
 

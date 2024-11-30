@@ -170,7 +170,7 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
                         id="fname"
                         type="text"
                         name="fname"
-                        placeholder="Full Name"
+                        placeholder="First Name"
                         value={data.fname}
                         className="mt-1 block w-full"
                         isFocused={true}
@@ -251,8 +251,8 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
                         onChange={handleUserTypeChange}
                     >
                         <option value="">Select User Type</option>
-                        <option value="learner">Learner</option>
-                        <option value="tutor">Tutor</option>
+                        <option value="employer">Employer</option>
+                        <option value="landlord">Landlord</option>
                         <option value="admin">Admin</option>
                         <option value="superadmin">Super Admin</option>
                     </select>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\MailNotification;
 use App\Models\Apartment;
 use App\Models\ApartmentAttribute;
 use App\Models\ApartmentCategory;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
@@ -142,7 +144,7 @@ class AdminController extends Controller
             'fname' => 'required|string|max:255',
             'lname' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'userType' => 'required|in:learner,tutor,admin,superadmin',
+            'userType' => 'required|in:employer,landlord,admin,superadmin',
             'gender' => 'required|in:Male,Female,Other',
             'phoneNumber' => 'required|string|max:20',
             'nationality' => 'required|string|max:50',
@@ -150,11 +152,13 @@ class AdminController extends Controller
             'permissions' => 'nullable|array',
         ]);
 
+        $generatedPassword = $this->generateRandomString();
+
         $user = User::create([
             'fname' => $validatedData['fname'],
             'lname' => $validatedData['lname'],
             'email' => $validatedData['email'],
-            'password' => Hash::make('password'),
+            'password' => Hash::make($generatedPassword),
             'type' => $validatedData['userType'],
             'gender' => $validatedData['gender'],
             'phonenumber' => $validatedData['phoneNumber'],
@@ -173,6 +177,11 @@ class AdminController extends Controller
         if ($validatedData['userType'] === 'employee') {
             $user->studentcohort()->attach(request('session'));
         }
+
+        $subject = 'Welcome to Occupy630!';
+        $body = 'Your account has been created successfully as a '.$user->type.'. Please use this email and this password to login: ' . $generatedPassword . '.'.PHP_EOL.'And don\'t forget to change your password after login.';
+        $link = route('login');
+        Mail::to($user->email)->send(new MailNotification($subject, $body, $link, $subject));
 
         return redirect()->route('admin.users')->with('success', 'User created successfully.');
     }

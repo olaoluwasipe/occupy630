@@ -168,7 +168,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
       </div>
       <div className='flex flex-row items-center gap-3 mt-3'>
         <div className='mt-3 w-1/2'>
-            <InputLabel htmlFor="price" value="Rent" />
+            <InputLabel htmlFor="price" value="Rent Amount" />
             <TextInput
                 id="price"
                 type="text"
