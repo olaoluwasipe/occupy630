@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 // import { Container, Button, Card, Input, Select } from '@/Components';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SelectInput from '@/Components/SelectInput';
@@ -114,6 +114,7 @@ const Index = ({properties}) => {
 
   return (
     <div className="bg-white">
+        <Head title='Home' />
         {/* Nav Section */}
         <div className="flex mx-15 p-4 justify-between items-center">
             <Link>
@@ -154,7 +155,7 @@ const Index = ({properties}) => {
             Available in Major Cities
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {['Lagos', 'Ibadan', 'Abuja'].map((city) => (
+            {['Lagos', 'Ibadan', 'Port Harcourt'].map((city) => (
               <div key={city} className="text-center p-6">
                 <h3 className="text-xl font-semibold mb-4">{city}</h3>
                 <Link href={`/apartments?location=${city}`}>
@@ -174,7 +175,7 @@ const Index = ({properties}) => {
           </h2>
 
           {/* Filters */}
-          <div className="flex items-center justify-center mb-10 gap-3">
+          <div className="flex flex-wrap items-center justify-center mb-10 gap-3">
             <div className="flex flex-col flex-1 gap-2">
                 <IconTextInput
                     icon={<FaSearch size={17} />}

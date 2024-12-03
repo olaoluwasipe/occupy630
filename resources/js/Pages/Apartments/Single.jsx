@@ -150,7 +150,7 @@ const Single = ({auth, apartment, success, error}) => {
                                 </div> */}
                             </div>
                         </div>
-                        {auth.user.type == 'employer' && (
+                        {auth?.user?.type == 'employer' && (
                         <div className="w-2/6">
                             <div className=" sticky top-20">
                                 <div className="rounded-lg shadow-lg bg-white p-4">
@@ -210,7 +210,7 @@ const Single = ({auth, apartment, success, error}) => {
                                 </div>
                             </div>
 
-                            <ProfilePhoto style={`w-24 h-24 border-green-500 border border-4`} user={auth.user} />
+                            <ProfilePhoto style={`w-24 h-24 border-green-500 border border-4`} user={auth?.user} />
                         </div>
                         <Files openFile={() => setOpenFile(!openFile)} files={apartment.files} />
                     </div>
@@ -292,7 +292,7 @@ const Single = ({auth, apartment, success, error}) => {
     console.log(apartment)
   return (
     <AuthenticatedLayout
-    user={auth.user}>
+    user={auth?.user ?? []}>
 
         <Head title={apartment.title} />
         <Slider {...settings}>
@@ -303,7 +303,7 @@ const Single = ({auth, apartment, success, error}) => {
             ))}
         </Slider>
         <div className="py-12 mb-10">
-            {auth.user.type === 'landlord' || auth.user.type === 'employer' ? (
+            {auth?.user?.type === 'landlord' || auth?.user?.type === 'employer' ? (
                 <div className="max-w-7xl mx-auto sm:px-6 gap-5 lg:px-8">
                     <div className="flex justify-between w-full items-center">
                         <div>
@@ -315,13 +315,13 @@ const Single = ({auth, apartment, success, error}) => {
                         </div>
                         <div>
                             <div className="flex gap-2 items-center">
-                                <h3 className="text-5xl">{formatPrice(auth.user.type === 'landlord' ? apartment.price : apartment.six_months_rent)} </h3>
-                                <p className="text-sm font-light">{auth.user.type === 'landlord' ?  "PER YEAR" : "PER SIX MONTHS"}</p>
+                                <h3 className="text-5xl">{formatPrice(auth?.user?.type === 'landlord' ? apartment.price : apartment.six_months_rent)} </h3>
+                                <p className="text-sm font-light">{auth?.user?.type === 'landlord' ?  "PER YEAR" : "PER SIX MONTHS"}</p>
                             </div>
                             <hr className='my-3' />
                             <div className="flex gap-2 items-center  ">
                                 {/* <div className="bg-blue-200 w-full h-10"></div> */}
-                                <h3 className="text-2xl">{formatPrice(auth.user.type === 'landlord' ? apartment.monthly_rent : apartment.monthly_price)} </h3>
+                                <h3 className="text-2xl">{formatPrice(auth?.user?.type === 'landlord' ? apartment.monthly_rent : apartment.monthly_price)} </h3>
                                 <p className="text-sm font-light">PER MONTH</p>
                             </div>
                         </div>
@@ -405,23 +405,29 @@ const Single = ({auth, apartment, success, error}) => {
                                 <p className="text-sm font-light">PER MONTH</p>
                             </div>
                             <div className="rounded-lg shadow-lg bg-white p-4">
-                                <div className="flex gap-3 items-center justify-between items-center mb-4">
-                                    <SecondaryButton className='w-1/2 flex items-center justify-center'><FaSave/> Save</SecondaryButton>
-                                    <SecondaryButton onClick={modalOpen} className='w-1/2 flex items-center justify-center'>Contact Owner</SecondaryButton>
-                                </div>
-                                {apartment.approval ? (
-                                    apartment.approval.status === "approved" ? (
-                                        <PrimaryButton onClick={modalRent} className='w-full flex items-center justify-center'>Rent Property</PrimaryButton>
-                                    ) : apartment.approval.status === "pending" ? (
-                                        <SecondaryButton onClick={modalRent} disabled className='w-full flex items-center justify-center'>Approval Pending</SecondaryButton>
-                                    ) : apartment.approval.status === "declined" ? (
-                                        <div>
-                                            <DangerButton disabled className='w-full flex items-center justify-center'>You can't get this property</DangerButton>
-                                            <p>{apartment.approval.comment}</p>
+                                {auth?.user ? (
+                                    <>
+                                        <div className="flex gap-3 items-center justify-between items-center mb-4">
+                                            <SecondaryButton className='w-1/2 flex items-center justify-center'><FaSave/> Save</SecondaryButton>
+                                            <SecondaryButton onClick={modalOpen} className='w-1/2 flex items-center justify-center'>Contact Owner</SecondaryButton>
                                         </div>
-                                    ) : null
+                                        {apartment.approval ? (
+                                            apartment.approval.status === "approved" ? (
+                                                <PrimaryButton onClick={modalRent} className='w-full flex items-center justify-center'>Rent Property</PrimaryButton>
+                                            ) : apartment.approval.status === "pending" ? (
+                                                <SecondaryButton onClick={modalRent} disabled className='w-full flex items-center justify-center'>Approval Pending</SecondaryButton>
+                                            ) : apartment.approval.status === "declined" ? (
+                                                <div>
+                                                    <DangerButton disabled className='w-full flex items-center justify-center'>You can't get this property</DangerButton>
+                                                    <p>{apartment.approval.comment}</p>
+                                                </div>
+                                            ) : null
+                                        ) : (
+                                            <PrimaryButton onClick={handleSubmit} className='w-full flex items-center justify-center'>Request Approval</PrimaryButton>
+                                        )}
+                                    </>
                                 ) : (
-                                    <PrimaryButton onClick={handleSubmit} className='w-full flex items-center justify-center'>Request Approval</PrimaryButton>
+                                    <PrimaryButton onClick={() => window.location.href = route('login')} className='w-full flex items-center justify-center'>Login to Rent</PrimaryButton>
                                 )}
                                 <div className="mt-3 p-2 rounded-lg shadow-lg bg-blue-100">
                                     <h3 className="text-md font-bold">Initial Payments:</h3>
@@ -454,52 +460,57 @@ const Single = ({auth, apartment, success, error}) => {
             )}
             </div>
 
-            <Modal show={openContact}  >
-                <div className='p-10'>
-                    <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
-                        <p className='text-xl text-blue-800 font-semibold'>Contact Owner</p>
-                        <DangerButton onClick={modalOpen}>Close</DangerButton>
-                    </div>
+            {auth?.user && (
+                <>
 
-                    <ContactOwnerForm apartment={apartment} />
-                </div>
-            </Modal>
+                    <Modal show={openContact}  >
+                        <div className='p-10'>
+                            <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                                <p className='text-xl text-blue-800 font-semibold'>Contact Owner</p>
+                                <DangerButton onClick={modalOpen}>Close</DangerButton>
+                            </div>
 
-            <Modal show={openApproval}  >
-                <div className='p-10'>
-                    <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
-                        <p className='text-xl text-blue-800 font-semibold'>Give Approval to {apartment?.user?.fname} {apartment?.user?.lname}</p>
-                        <DangerButton onClick={modalApproval}>Close</DangerButton>
-                    </div>
+                            <ContactOwnerForm apartment={apartment} />
+                        </div>
+                    </Modal>
+
+                    <Modal show={openApproval}  >
+                        <div className='p-10'>
+                            <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                                <p className='text-xl text-blue-800 font-semibold'>Give Approval to {apartment?.user?.fname} {apartment?.user?.lname}</p>
+                                <DangerButton onClick={modalApproval}>Close</DangerButton>
+                            </div>
 
 
-                    <ApprovalForm apartment={apartment} openModal={modalApproval} approval={apartment.approval} prices={prices} />
-                </div>
-            </Modal>
+                            <ApprovalForm apartment={apartment} openModal={modalApproval} approval={apartment.approval} prices={prices} />
+                        </div>
+                    </Modal>
 
-            <Modal show={openRent}  >
-                <div className='p-10'>
-                    <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
-                        <p className='text-xl text-blue-800 font-semibold'>Rent {apartment.title}</p>
-                        <DangerButton onClick={modalRent}>Close</DangerButton>
-                    </div>
+                    <Modal show={openRent}  >
+                        <div className='p-10'>
+                            <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                                <p className='text-xl text-blue-800 font-semibold'>Rent {apartment.title}</p>
+                                <DangerButton onClick={modalRent}>Close</DangerButton>
+                            </div>
 
-                    {auth.user.type === 'employer' && <AssignStaffToRentForm apartment={apartment} user={auth.user} />}
-                    {auth.user.type === 'employee' && <RentForm apartment={apartment} prices={prices} openModal={modalRent} user={auth.user} />}
-                    {/* <AssignStaffToRentForm apartment={apartment} user={auth.user} /> */}
-                </div>
-            </Modal>
+                            {auth?.user?.type === 'employer' && <AssignStaffToRentForm apartment={apartment} user={auth?.user} />}
+                            {auth?.user?.type === 'employee' && <RentForm apartment={apartment} prices={prices} openModal={modalRent} user={auth?.user} />}
+                            {/* <AssignStaffToRentForm apartment={apartment} user={auth?.user} /> */}
+                        </div>
+                    </Modal>
 
-            <Modal show={openFile}  >
-                <div className='p-10'>
-                    <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
-                        <p className='text-xl text-blue-800 font-semibold'>Upload File</p>
-                        <DangerButton onClick={modalFile}>Close</DangerButton>
-                    </div>
+                    <Modal show={openFile}  >
+                        <div className='p-10'>
+                            <div className='flex flex-row mb-10 flex-nowrap justify-between items-center'>
+                                <p className='text-xl text-blue-800 font-semibold'>Upload File</p>
+                                <DangerButton onClick={modalFile}>Close</DangerButton>
+                            </div>
 
-                    <FileAddForm apartment={apartment} />
-                </div>
-            </Modal>
+                            <FileAddForm apartment={apartment} />
+                        </div>
+                    </Modal>
+                </>
+            )}
     </AuthenticatedLayout>
   )
 }

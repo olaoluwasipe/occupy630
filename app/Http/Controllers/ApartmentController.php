@@ -138,12 +138,14 @@ class ApartmentController extends Controller
     public function show($slug)
     {
         $apartment = Apartment::where('slug', $slug)->with('landlord', 'category', 'images', 'tenant.employedCompany', 'transactions', 'files')->first();
-        if(Auth::user()->type == 'employer') {
-            $employees = Auth::user()->company->users()->orderBy('id','desc')->pluck('id')->toArray();
-            $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('status', 1)->whereIn('user_id', $employees)->with('payment')->latest()->first();
+        if(Auth::check()) {
+            if(Auth::user()?->type == 'employer') {
+                $employees = Auth::user()->company->users()->orderBy('id','desc')->pluck('id')->toArray();
+                $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('status', 1)->whereIn('user_id', $employees)->with('payment')->latest()->first();
 
-        } else {
-            $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('user_id', Auth::id())->with('payment')->latest()->first();
+            } else {
+                $apartment->approval = Approval::where('apartment_id', $apartment->id)->where('user_id', Auth::id())->with('payment')->latest()->first();
+            }
         }
         return Inertia::render('Apartments/Single', [
             'apartment' => $apartment,
@@ -538,14 +540,18 @@ class ApartmentController extends Controller
                         ->filter(fn($image) => is_object($image) && $image instanceof \Illuminate\Http\UploadedFile);
 
                     foreach ($newImages as $image) {
-                        $path = $this->uploadImg($image);
+                        // Prepare file details before moving
+                        $extension = $image->getClientOriginalExtension();
+                        $size = $image->getSize();
+                        $originalName = $image->getClientOriginalName();
+                        $path = $this->uploadImage($image);
                         $name = basename($path); // Get the filename
                         $apartment->images()->create([
-                            'path' => '/storage/'.$path,
+                            'path' => $path,
                             'name' => $name,
-                            'type' => $image->getClientOriginalExtension(),
-                            'size' => $image->getSize(),
-                            'url' => env('APP_URL').'/storage/'.$path,
+                            'type' => $extension,
+                            'size' => $size,
+                            'url' => env('APP_URL') . $path,
                             'main' => false,
                         ]);
                     }

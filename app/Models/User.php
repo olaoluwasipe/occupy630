@@ -87,9 +87,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return "{$this->fname} {$this->lname}";
     }
 
-    public function company () {
+    public function company() {
         return $this->hasOne(Company::class, 'user_id');
     }
+
+    // public function getCompanyInfoAttribute() {
+    //     return $this->company;
+    // }
 
     public function employedCompany() {
         return $this->belongsTo(Company::class, 'company_id');

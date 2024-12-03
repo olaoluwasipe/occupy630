@@ -37,7 +37,8 @@ class RegisterUserRequest extends FormRequest
                 new UniqueIf('users', 'email', 'register_code', null),
                 function ($attribute, $value, $fail) {
                     // Skip CompanyEmail validation if type is landlord
-                    if (request()->input('type') !== 'landlord' && (request()->input('type') !== 'employee' && request()->input('code') != '' && request()->input('code') != null && User::find('register_code', request()->input('code')))) {
+                    if (request()->input('type') === 'employer') {
+
                         $rule = new CompanyEmail;
                         return $rule->validate($attribute, $value, $fail);
                         // $rule->passes($attribute, $value) || $fail($rule->message());

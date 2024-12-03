@@ -111,7 +111,7 @@ export default function Register(props) {
                     >
                         <option value="employer" selected>Employer</option>
                         <option value="employee">Employee</option>
-                        <option value="landlord">LandLord</option>
+                        <option value="landlord">Property Owner</option>
                     </SelectInput>
 
                     <InputError message={errors.type} className="mt-2" />
@@ -119,7 +119,7 @@ export default function Register(props) {
 
                 {data.type === 'employee' && (
                     <div className="mt-4">
-                        <InputLabel htmlFor="code" value="Employee Code (Optional)" />
+                        <InputLabel htmlFor="code" value="Employee Code" />
 
                         <TextInput
                             id="code"

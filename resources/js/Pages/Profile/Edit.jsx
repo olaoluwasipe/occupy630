@@ -3,8 +3,9 @@ import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 import { Head } from '@inertiajs/react';
+import CompanyUpdateForm from './Partials/CompanyUpdateForm';
 
-export default function Edit({ auth, mustVerifyEmail, status }) {
+export default function Edit({ auth, mustVerifyEmail, status, user }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -21,6 +22,12 @@ export default function Edit({ auth, mustVerifyEmail, status }) {
                             className="max-w-xl"
                         />
                     </div>
+
+                    {auth.user.type === 'employer' && (
+                        <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                            <CompanyUpdateForm className="max-w-xl" company={user.company} />
+                        </div>
+                    )}
 
                     <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                         <UpdatePasswordForm className="max-w-xl" />

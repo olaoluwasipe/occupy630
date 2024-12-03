@@ -24,6 +24,7 @@ import ExistingApartmentsLandlord from '@/Pieces/ExistingApartmentsLandlord';
 import ApartmentAddForm from '@/Forms/ApartmentAddForm';
 import FileAddForm from '@/Forms/FileAddForm';
 import Files from '@/Content/Files';
+import CompanyPhoto from '@/Components/CompanyPhoto';
 
 function NextArrow(props) {
     const { className, style, onClick } = props;
@@ -56,7 +57,7 @@ function NextArrow(props) {
     prevArrow: <PrevArrow />
   };
 
-export default function Dashboard({ auth, payments, employees, docs, apartment, approvals, success, error, categories, attributes, files }) {
+export default function Dashboard({ auth, payments, company, employees, docs, apartment, approvals, success, error, categories, attributes, files }) {
     console.log(files)
     const [openNav, setOpenNav] = useState(false)
     const [action, setAction] = useState('')
@@ -132,11 +133,24 @@ export default function Dashboard({ auth, payments, employees, docs, apartment, 
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div style={{boxShadow: '0px 2px 12px #e3e3e3'}} className="bg-white overflow-hidden shadow-xl shadow-gray-200 sm:rounded-lg md:flex flex-row items-center p-6">
                         <div className='w-1/2 flex flex-row gap-3 items-center'>
-                            <ProfilePhoto style={`w-24 h-24 border-green-500 border border-4`} user={auth.user} />
+                            {auth.user.type === 'employer' ? (
+                                <CompanyPhoto style={`w-24 h-24 border-green-500 border border-4`} company={company}/>
+                            ) : (
+                                <ProfilePhoto style={`w-24 h-24 border-green-500 border border-4`} user={auth.user} />
+                            )}
                             <div className='flex flex-col'>
-                                <h2 className='text-2xl font-bold text-blue-900'>{auth.user.fname} {auth.user.lname}</h2>
-                                <p>{auth.user.email} | {auth.user.phonenumber}</p>
-                                <p className={`text-${auth.user.type === 'learner' ? 'blue' : 'green' }-800 font-bold capitalize`}>{auth.user.type || 'Learner'}</p>
+                            {auth.user.type === 'employer' ? (
+                                <div>
+                                    <h2 className='text-2xl font-bold text-blue-900'>{company.name}</h2>
+                                    <p className='text-green-500 font-bold'>{company.address}</p>
+                                </div>
+                                ) : (
+                                <div>
+                                    <h2 className='text-2xl font-bold text-blue-900'>{auth.user.fullname}</h2>
+                                    <p>{auth.user.email} | {auth.user.phonenumber}</p>
+                                    <p className={`text-${auth.user.type === 'Landlord' ? 'blue' : 'green' }-800 font-bold capitalize`}>{auth.user.type === 'Landlord' ? 'Property Owner' : auth.user.type}</p>
+                                </div>
+                            )}
                             </div>
                         </div>
                         {auth.user.type === 'employee' ? (

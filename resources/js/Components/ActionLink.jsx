@@ -11,12 +11,12 @@ const ActionLink = ({ button, row, action, defaultActions }) => {
         view: {
             label: 'View',
             type: 'primary',
-            onClick: (row) => alert(`Viewing ${row.id}`),
+            onClick: (row) => console.log(`Viewing ${row.id}`),
         },
         edit: {
             label: 'Edit',
             type: 'secondary',
-            onClick: (row) => alert(`Editing ${row.id}`),
+            onClick: (row) => console.log(`Editing ${row.id}`),
         },
         delete: {
             label: 'Delete',

@@ -415,7 +415,7 @@ const lgaList = [
       ]
     },
     {
-      "state": "Federal Capital Territory",
+      "state": "Abuja",
       "alias": "abuja",
       "lgas": [
         "Abaji",

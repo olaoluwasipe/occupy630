@@ -84,7 +84,7 @@ Route::get('/dashboard', function () {
             ->first();
         $files = File::where('tenant_id', Auth::user()->id)->with('user')->latest()->get();
     } elseif (Auth::user()->type == 'employer') {
-        $employees = User::where('type', 'employee')->where('company_id', Auth::user()->company_id)->get();
+        $employees = User::where('type', 'employee')->where('company_id', Auth::user()->company_id)->whereNull('register_code')->get();
         $apartment = Apartment::whereIn('tenant_id', $employees->pluck('id'))->with('tenant', 'images', 'approvals', 'transactions')->latest()->get();
         $approvals = Approval::whereIn('user_id', $employees->pluck('id'))->with('apartment', 'user')->latest()->get();
         $payments = HousePayment::whereIn('user_id', $employees->pluck('id'))->with('user', 'apartment')->latest()->get();
@@ -110,6 +110,7 @@ Route::get('/dashboard', function () {
         'employees' => $employees ?? [],
         'apartment' => $apartment,
         'approvals' => $approvals ?? [],
+        'company' => Auth::user()->company ?? Auth::user()->employedCompany,
         'payments' => $payments ?? [],
         'categories' => $categories ?? [],
         'attributes' => $attributes ?? [],
@@ -121,97 +122,6 @@ Route::get('/dashboard', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
-// Route::get('/', function () {
-//     if(!Auth::check()) {
-//         $apartments = Apartment::where('status', 'approved')->with( 'images')->get();
-//         return Inertia::render('Website/Index', [
-//             'properties'=> $apartments,
-//             'canLogin' => Route::has('login'),
-//             'canRegister' => Route::has('register'),
-//             'laravelVersion' => Application::VERSION,
-//             'phpVersion' => PHP_VERSION,
-//         ]);
-//     }
-//     if(Auth::user()->type === 'admin' || Auth::user()->type === 'superadmin') {
-//         return redirect('/admin');
-//     }
-//     $cohorts = User::find(Auth::user()->id)->studentcohort;
-//     $assignments = User::find(Auth::user()->id)->assignments;
-//     $current_time = Carbon::now();
-//     $tasks = $cohorts->flatMap(function ($cohort) use ($current_time) {
-//         // Filter assignments
-//         $filteredAssignments = $cohort->assignments()->with('cohort.course')->where('due_date', '>=', $current_time)->get();
-
-//         // Filter meetings
-//         $filteredMeetings = $cohort->meetings()->with('cohort.course')->where('date', '>=', $current_time)->get();
-
-//         // Combine and sort by date
-//         $combinedTasks = $filteredAssignments->concat($filteredMeetings)->sortBy(function ($task) {
-//             // Standardize date format
-//             $date = isset($task->due_date) ? Carbon::parse($task->due_date) : Carbon::parse($task->date);
-//             return $date;
-//         });
-
-//         return $combinedTasks->values();
-//     });
-
-//     if(Auth::user()->type == 'employee') {
-//         $employees = User::where('company_id', Auth::user()->company_id)->whereNot('id', Auth::id())->get(['fname', 'lname', 'id', 'type']);
-
-//         $apartment = Apartment::where('tenant_id', Auth::user()->id)
-//                     ->with(['images', 'approvals', 'transactions' => function ($query) {
-//                         $query->with('user');
-//                         $query->orderBy('created_at', 'desc'); // Adjust column name if needed
-//                     }])
-//                     ->first();
-//         $files     = File::where('tenant_id', Auth::user()->id)->with('user')->latest()->get();
-//     } else if (Auth::user()->type == 'employer') {
-
-//         $employees = User::where('type', 'employee')->where('company_id', Auth::user()->company_id)->get();
-//         $apartment = Apartment::whereIn('tenant_id', $employees->pluck('id'))->with('tenant', 'images', 'approvals', 'transactions')->latest()->get();
-//         $approvals = Approval::whereIn('user_id', $employees->pluck('id'))->with('apartment', 'user')->latest()->get();
-//         $payments  = HousePayment::whereIn('user_id', $employees->pluck('id'))->with('user', 'apartment')->latest()->get();
-
-//     } else if (Auth::user()->type == 'landlord') {
-//         $apartment = Apartment::where('landlord_id', Auth::id())->with('tenant', 'images', 'approvals', 'transactions')->latest()->get();
-//         $payments = collect();
-//         foreach($apartment as $apart) {
-//             $payments->push($apart->transactions);
-//         }
-//         $payments = $payments->flatten();
-//         foreach($payments as $payment) {
-//             $apart = Apartment::where('id', $payment->apartment_id)->first();
-//             $initial = ($apart->price * 0.3) + ($apart->price * 0.05 * 2);
-//             $payment->landlord_amount = $payment->type == 'rent' ? $apart->monthly_rent : $initial;
-//         }
-//         // $payments = $payments->sortByDesc('created_at');
-//         $categories = ApartmentCategory::all();
-//         $attributes = ApartmentAttribute::all();
-
-//     }
-
-//     // Convert the collection to an array
-//     $tasksArray = $tasks->toArray();
-
-
-
-//     return Inertia::render('Dashboard', [
-//         'employees' => $employees ?? [],
-//         'apartment' => $apartment,
-//         'approvals' => $approvals ?? [],
-//         'payments'=> $payments ?? [],
-//         'categories'=> $categories ?? [],
-//         'attributes'=> $attributes ?? [],
-//         'files'=> $files ?? [],
-//         'docs' => session('docs'),
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-
-// })->name('home');
-// })->middleware(['auth', 'verified'])->name('home');
 
 Route::post('request-rent-pay/{apartment}', [ApartmentController::class, 'requestRentPay'])->name('dashboard.rent.pay');
 Route::post('start-chat/{user}', [ChatController::class, 'startChat'])->name('dashboard.start.chat');
@@ -277,6 +187,7 @@ Route::middleware(['auth', 'checksuperadmin'])->group(function () {
 });
 
 Route::get('/show-payment/{payment}', [ApartmentController::class, 'showPayment'])->name('payment.show');
+Route::get('/apartment/{slug}', [ApartmentController::class,'show'])->name('apartment.show');
 
 Route::middleware(['auth', 'checkuser'])->group(function () {
 
@@ -296,7 +207,7 @@ Route::middleware(['auth', 'checkuser'])->group(function () {
     Route::post('/make-initial-payment', [ApartmentController::class, 'makeInitialPayment'])->name('payment.initial');
     Route::post('/make-rent-payment', [ApartmentController::class, 'makeRentPayment'])->name('payment.rent');
     Route::get('/apartments', [ApartmentController::class, 'index'])->name('apartments');
-    Route::get('/apartment/{slug}', [ApartmentController::class,'show'])->name('apartment.show');
+    // Route::get('/apartment/{slug}', [ApartmentController::class,'show'])->name('apartment.show');
 
     // Assignments
     Route::get('/assignments/{assignment}', [AssignmentController::class,'show'])->name('assignment.show');

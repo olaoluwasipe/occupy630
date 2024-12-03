@@ -115,6 +115,7 @@ class RegisteredUserController extends Controller
             'register_code' => null,
             'fname' => $request->fname,
             'lname' => $request->lname,
+            'email_verified_at' => now(),
             'password' => Hash::make($request->password),
             'last_logged_in' => now(),
         ]);

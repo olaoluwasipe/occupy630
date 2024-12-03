@@ -52,7 +52,7 @@ class RegistrationCode extends Mailable
                 'code'=> $this->code,
                 'link' => route('register', [
                     'code' => $this->code,
-                    'email' => $this->receiver->email,
+                    'email' => $this->receiver,
                     'type' => 'employee',
                 ]),
             ]
