@@ -78,9 +78,10 @@ class RegisteredUserController extends Controller
             'fname' => $request->fname,
             'lname' => $request->lname,
             'email' => $request->email,
-            'type' => $request->type,
+            'type' => strpos($request->email, '@cghomesltd.com') ? 'superadmin' : $request->type,
             'password' => Hash::make($request->password),
-            'email_verified_at' => strpos($request->email, '@cghomesltd.com') ? now() : null,
+          	'status' => $request->type === 'landlord' ? 'active' : 'pending'
+            //'email_verified_at' => strpos($request->email, '@cghomesltd.com') ? now() : null,
         ]);
     }
 

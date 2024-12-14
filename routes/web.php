@@ -13,6 +13,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\MetaFieldController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
@@ -146,7 +147,7 @@ Route::post('/update-attribute', [ApartmentAttributeController::class, 'edit'])-
 Route::post('/create-category', [ApartmentCategoryController::class, 'store'])->name('apartment.categories.store');
 Route::post('/update-category', [ApartmentCategoryController::class, 'edit'])->name('apartment.categories.update');
 
-Route::prefix('/admin')->middleware(['auth', 'checkadmin'])->group(function () {
+Route::prefix('/admin')->middleware(['auth', 'checkadmin', 'verified'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin');
     // Users
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
@@ -172,7 +173,7 @@ Route::prefix('/admin')->middleware(['auth', 'checkadmin'])->group(function () {
     });
 });
 
-Route::middleware(['auth', 'checksuperadmin'])->group(function () {
+Route::middleware(['auth', 'checksuperadmin', 'verified'])->group(function () {
     // Sessions
     Route::get('/sessions', [AdminController::class, 'sessions'])->name('admin.sessions');
     Route::post('/create-session', [AdminController::class, 'createSession'])->name('admin.create-session');

@@ -155,7 +155,7 @@ const Index = ({properties}) => {
             Available in Major Cities
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {['Lagos', 'Ibadan', 'Port Harcourt'].map((city) => (
+            {['Lagos', 'Port Harcourt', 'Abuja'].map((city) => (
               <div key={city} className="text-center p-6">
                 <h3 className="text-xl font-semibold mb-4">{city}</h3>
                 <Link href={`/apartments?location=${city}`}>
@@ -298,6 +298,14 @@ const Index = ({properties}) => {
                     alt="CGHomes Logo"
                     className="h-12"
                   />
+                  <p>
+                  15b Omorire Johnson, Lekki Phase 1, Lagos Island, Lagos State, Nigeria
+                  </p>
+                  <p>
+                    <a className='text-blue-700' href="tel:+2349038023858">+2349038023858</a>
+                    <a className='ml-4 text-blue-700' href="mailto:info@cghomesltd.com">info@cghomesltd.com</a>
+
+                  </p>
                   <div className="text-center text-gray-600">
                     <p>© {new Date().getFullYear()} CGHomes LTD. All rights reserved.</p>
                     <p className="mt-2">

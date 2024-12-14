@@ -118,6 +118,7 @@ class CompanyController extends Controller
             'company_id' => $request->user()->company->id,
             'register_code' => $registerCode,
             'type' => 'employee',
+          	'created_at' => now(),
         ]);
 
         $user->assignRole('employee');
