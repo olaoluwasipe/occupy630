@@ -15,6 +15,7 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\MetaFieldController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TutorController;
@@ -210,6 +211,13 @@ Route::middleware(['auth', 'checkuser'])->group(function () {
     Route::get('/apartments', [ApartmentController::class, 'index'])->name('apartments');
     // Route::get('/apartment/{slug}', [ApartmentController::class,'show'])->name('apartment.show');
 
+    // Payments
+    Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
+    Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+    Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/history', [PaymentController::class, 'history'])->name('payment.history');
+    Route::get('/payment/receipt/{id}', [PaymentController::class, 'receipt'])->name('payment.receipt');
+
     // Assignments
     Route::get('/assignments/{assignment}', [AssignmentController::class,'show'])->name('assignment.show');
     Route::post('/assignment', [AssignmentController::class,'store'])->name('assignment.store');
@@ -241,6 +249,13 @@ Route::middleware(['auth', 'checkuser'])->group(function () {
 
     // Tasks
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 // Profile
 Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -248,5 +263,12 @@ Route::post('/profile', [ProfileController::class, 'update'])->name('profile.upd
 Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments')->middleware(['auth', 'checktype:tutor']);
+
+Route::get('/unauthorized', function () {
+    return Inertia::render('Unauthorized');
+})->name('unauthorized');
+
+// Payment webhook (no auth required for Paystack)
+Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->name('payment.webhook');
 
 require __DIR__.'/auth.php';

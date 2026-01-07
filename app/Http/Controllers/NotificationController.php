@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Notification;
 use App\Http\Requests\StoreNotificationRequest;
 use App\Http\Requests\UpdateNotificationRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class NotificationController extends Controller
 {
@@ -13,8 +16,20 @@ class NotificationController extends Controller
      */
     public function index()
     {
-        $notifications = Notification::orderBy("created_at","desc")->with('notifiable')->paginate(10);
-        return response()->json($notifications);
+        $user = Auth::user();
+        
+        $notifications = Notification::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        $unreadCount = Notification::where('user_id', $user->id)
+            ->whereNull('read_at')
+            ->count();
+
+        return Inertia::render('Notifications/Index', [
+            'notifications' => $notifications,
+            'unreadCount' => $unreadCount,
+        ]);
     }
 
     /**
@@ -50,6 +65,44 @@ class NotificationController extends Controller
     }
 
     /**
+     * Mark notification as read.
+     */
+    public function markAsRead(Notification $notification)
+    {
+        if ($notification->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $notification->update(['read_at' => now()]);
+
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Mark all notifications as read.
+     */
+    public function markAllAsRead()
+    {
+        Notification::where('user_id', Auth::id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Get unread notifications count.
+     */
+    public function unreadCount()
+    {
+        $count = Notification::where('user_id', Auth::id())
+            ->whereNull('read_at')
+            ->count();
+
+        return response()->json(['count' => $count]);
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(UpdateNotificationRequest $request, Notification $notification)
@@ -62,6 +115,12 @@ class NotificationController extends Controller
      */
     public function destroy(Notification $notification)
     {
-        //
+        if ($notification->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $notification->delete();
+
+        return response()->json(['status' => 'success']);
     }
 }

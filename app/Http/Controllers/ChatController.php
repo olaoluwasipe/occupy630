@@ -66,12 +66,20 @@ class ChatController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'receiver_id' => 'required|exists:users,id',
+            'message' => 'required|string',
+            'quote_id' => 'nullable|exists:chats,id',
+            'attachments' => 'nullable|array',
+        ]);
+
         $chat = Chat::create([
             'sender_id' => Auth::user()->id,
             'receiver_id' => $request->receiver_id,
             'message' => $request->message,
             'quote_id' => $request->quote_id,
-            'attachments' => $request->attachments,
+            'attachments' => $request->attachments ?? [],
+            'read' => 0,
         ]);
         $sender = User::find(Auth::user()->id);
         $receiver = User::find($request->receiver_id);
@@ -93,15 +101,31 @@ class ChatController extends Controller
             ]
         ]);
 
-        return redirect()->back();
+        // Broadcast the message
+        broadcast(new \App\Events\MessageSent($chat))->toOthers();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $chat->load(['sent', 'received']),
+        ]);
     }
 
     public function readMessage (Chat $chat) {
-        if($chat->read == 0){
+        $user = Auth::user();
+        
+        // Only mark as read if current user is the receiver
+        if ($chat->receiver_id === $user->id && $chat->read == 0) {
             $chat->read = 1;
             $chat->save();
+            
+            // Broadcast read receipt
+            broadcast(new \App\Events\MessageRead($chat))->toOthers();
         }
-        return response()->json(['status' => 'it worked', $chat]);
+        
+        return response()->json([
+            'status' => 'success',
+            'chat' => $chat,
+        ]);
     }
 
     /**
