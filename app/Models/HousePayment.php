@@ -27,6 +27,9 @@ class HousePayment extends Model
 
     protected $casts = [
         'meta' => 'array',
+        'date' => 'date',
+        'due_date' => 'date',
+        'amount' => 'decimal:2',
     ];
 
     public static function boot() {
@@ -63,10 +66,4 @@ class HousePayment extends Model
     public function notifications () {
         return $this->morphMany(Notification::class,'notifiable');
     }
-    protected $casts = [
-        'meta' => 'array',
-        'date' => 'date',
-        'due_date' => 'date',
-        'amount' => 'decimal:2',
-    ];
 }

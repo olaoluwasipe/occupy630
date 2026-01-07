@@ -12,17 +12,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('files', function (Blueprint $table) {
-            // $table->dropForeign('files_assignment_id_foreign');
-            // $table->dropForeign('files_cohort_id_foreign');
-            // $table->dropForeign('files_tenant_id_foreign');
-            // $table->dropForeign('files_apartment_id_foreign');
-            // $table->dropColumn('apartment_id');
+            // Check if tenant_id exists before trying to drop it
+            if (Schema::hasColumn('files', 'tenant_id')) {
+                $table->dropColumn('tenant_id');
+            }
+            
+            // Check if apartment_id exists before trying to drop it
+            if (Schema::hasColumn('files', 'apartment_id')) {
+                // Drop foreign key first if it exists
+                if (Schema::hasColumn('files', 'apartment_id')) {
+                    $table->dropForeign(['apartment_id']);
+                }
+                $table->dropColumn('apartment_id');
+            }
+        });
 
-            // $table->dropColumn('assignment_id');
-            $table->dropColumn('tenant_id');
-            // $table->dropColumn('cohort_id');
-            $table->foreignId('tenant_id')->constrained('users')->nullable()->after('user_id');
-            $table->foreignId('apartment_id')->references('id')->on('apartments')->onDelete('cascade');
+        // Now add the columns
+        Schema::table('files', function (Blueprint $table) {
+            if (!Schema::hasColumn('files', 'tenant_id')) {
+                $table->foreignId('tenant_id')->nullable()->constrained('users')->after('user_id');
+            }
+            if (!Schema::hasColumn('files', 'apartment_id')) {
+                $table->foreignId('apartment_id')->nullable()->references('id')->on('apartments')->onDelete('cascade');
+            }
         });
     }
 
@@ -32,7 +44,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('files', function (Blueprint $table) {
-            $table->dropColumn('tenant_id');
+            if (Schema::hasColumn('files', 'tenant_id')) {
+                $table->dropForeign(['tenant_id']);
+                $table->dropColumn('tenant_id');
+            }
+            if (Schema::hasColumn('files', 'apartment_id')) {
+                $table->dropForeign(['apartment_id']);
+                $table->dropColumn('apartment_id');
+            }
         });
     }
 };

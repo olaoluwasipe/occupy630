@@ -41,8 +41,10 @@ return new class extends Migration
 
         Schema::table('notifications', function (Blueprint $table) {
             $table->index('user_id');
-            $table->index('read_at');
-            $table->index(['user_id', 'read_at']);
+            // Note: read_at is TEXT, cannot be indexed directly
+            // Will be fixed in a separate migration to change column type
+            // $table->index('read_at');
+            // $table->index(['user_id', 'read_at']);
         });
 
         Schema::table('assignments', function (Blueprint $table) {
@@ -103,8 +105,8 @@ return new class extends Migration
 
         Schema::table('notifications', function (Blueprint $table) {
             $table->dropIndex(['user_id']);
-            $table->dropIndex(['read_at']);
-            $table->dropIndex(['user_id', 'read_at']);
+            // $table->dropIndex(['read_at']);
+            // $table->dropIndex(['user_id', 'read_at']);
         });
 
         Schema::table('assignments', function (Blueprint $table) {
