@@ -10,7 +10,6 @@ import CourseOverview from './CourseOverview';
 import Table from '@/Components/Table';
 
 const CourseContent = ({ course, editButton }) => {
-    console.log(course)
   const tabsData = [
     {
       label: 'Overview',

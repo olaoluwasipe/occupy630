@@ -15,7 +15,6 @@ export default function Authenticated({ user, header, children, docslink='', ope
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [openSideNav, setOpenSideNav] = useState(openNav)
     const [action, setAction] = useState(prevAction)
-    console.log(action, openSideNav, user)
 
     useEffect(() => {
         // If openNav or prevAction prop changes, update the state
@@ -49,24 +48,12 @@ export default function Authenticated({ user, header, children, docslink='', ope
                                         <NavLink href={route('apartments')} active={route().current('apartments')}>
                                             Apartments
                                         </NavLink>
-                                        <NavLink href={route('tutors')} active={route().current('tutors')}>
-                                            My Tutors
-                                        </NavLink>
-                                        <NavLink href={route('tasks')} active={route().current('tasks')}>
-                                            My Tasks
-                                        </NavLink>
                                     </>
                                 )}
                                 {user.type == 'employer' && (
                                     <>
                                     <NavLink href={route('apartments')} active={route().current('apartments')}>
                                         Apartments
-                                    </NavLink>
-                                    <NavLink href={route('assignments')} active={route().current('assignments')}>
-                                        Assignments
-                                    </NavLink>
-                                    <NavLink href={route('tasks')} active={route().current('tasks')}>
-                                        Schedule
                                     </NavLink>
                                     </>
                                 )}
@@ -154,15 +141,6 @@ export default function Authenticated({ user, header, children, docslink='', ope
                     <div className="pt-2 pb-3 space-y-1">
                         <ResponsiveNavLink href={route('home')} active={route().current('home')}>
                             Home
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('courses')} active={route().current('courses')}>
-                            My Courses
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('tutors')} active={route().current('tutors')}>
-                            My Tutors
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('tasks')} active={route().current('tasks')}>
-                            My Tasks
                         </ResponsiveNavLink>
                     </div>
 

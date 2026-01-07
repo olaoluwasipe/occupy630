@@ -15,9 +15,6 @@ import { FaPlus } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
 
 const Users = ({auth, users, apartments, attributes, categories, error, success}) => {
-    // console.log(users, learners, tutors, admins)
-    console.log(apartments)
-
     const [currentTab, setCurrentTab] = useState(null);
     const [createApartment, setCreateApartment] = useState(false)
     const [createAttribute, setCreateAttribute] = useState(false)
@@ -35,7 +32,6 @@ const Users = ({auth, users, apartments, attributes, categories, error, success}
 
     const handleChangeTab = (label) => {
         setCurrentTab(label)
-        console.log(label)
     }
 
     useEffect(() => {
@@ -128,7 +124,7 @@ const Users = ({auth, users, apartments, attributes, categories, error, success}
                   {
                       label: 'Edit',
                       type: 'secondary',
-                      onClick: (apartment) => {setCreateApartment(true); setEditApartment(true); setApartment(apartment); console.log(apartment)},
+                      onClick: (apartment) => {setCreateApartment(true); setEditApartment(true); setApartment(apartment);},
                   },
                   {
                       label: 'Approve/Disapprove',
@@ -162,7 +158,7 @@ const Users = ({auth, users, apartments, attributes, categories, error, success}
           val: attributes.length,
           content: <Table data={attributes} actions={{
             type: 'attributes',
-            editFunction: (attribute) => {setCreateAttribute(true); setEditAttribute(true); setAttribute(attribute); console.log(attribute)},
+            editFunction: (attribute) => {setCreateAttribute(true); setEditAttribute(true); setAttribute(attribute);},
             // deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId)},
             active: ['view', 'edit', 'delete']
           }}
@@ -174,7 +170,7 @@ const Users = ({auth, users, apartments, attributes, categories, error, success}
             val: categories.length,
             content: <Table data={categories} actions={{
               type: 'categories',
-              editFunction: (category) => {setCreateCategory(true); setEditCategory(true); setCategory(category); console.log(category)},
+              editFunction: (category) => {setCreateCategory(true); setEditCategory(true); setCategory(category);},
             //   deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId)},
               active: ['view', 'edit', 'delete']
             }}
@@ -244,7 +240,6 @@ const Users = ({auth, users, apartments, attributes, categories, error, success}
                         method='delete'>
                         <DangerButton
                             onClick={() => {
-                            console.log(user)
                             setTimeout(setDeleteUser(false), 2000)
                         }}>Delete</DangerButton>
                     </Link>

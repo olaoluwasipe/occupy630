@@ -6,7 +6,6 @@ import GradeSubmission from '@/Forms/GradeSubmission'
 
 const SubmissionList = ({ submissions, showAll, showSubmitted, showNotSubmitted }) => {
   const [selectedSubmission, setSelectedSubmission] = useState(null)
-  console.log(submissions)
 
   const openModal = submission => {
     setSelectedSubmission(submission)

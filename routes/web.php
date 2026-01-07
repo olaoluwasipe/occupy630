@@ -56,24 +56,24 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', function () {
-    $cohorts = User::find(Auth::user()->id)->studentcohort;
-    $assignments = User::find(Auth::user()->id)->assignments;
+    // $cohorts = User::find(Auth::user()->id)->studentcohort;
+    // $assignments = User::find(Auth::user()->id)->assignments;
     $current_time = Carbon::now();
 
-    $tasks = $cohorts->flatMap(function ($cohort) use ($current_time) {
-        $filteredAssignments = $cohort->assignments()->with('cohort.course')
-            ->where('due_date', '>=', $current_time)->get();
+    // $tasks = $cohorts->flatMap(function ($cohort) use ($current_time) {
+    //     $filteredAssignments = $cohort->assignments()->with('cohort.course')
+    //         ->where('due_date', '>=', $current_time)->get();
 
-        $filteredMeetings = $cohort->meetings()->with('cohort.course')
-            ->where('date', '>=', $current_time)->get();
+    //     $filteredMeetings = $cohort->meetings()->with('cohort.course')
+    //         ->where('date', '>=', $current_time)->get();
 
-        $combinedTasks = $filteredAssignments->concat($filteredMeetings)->sortBy(function ($task) {
-            $date = isset($task->due_date) ? Carbon::parse($task->due_date) : Carbon::parse($task->date);
-            return $date;
-        });
+    //     $combinedTasks = $filteredAssignments->concat($filteredMeetings)->sortBy(function ($task) {
+    //         $date = isset($task->due_date) ? Carbon::parse($task->due_date) : Carbon::parse($task->date);
+    //         return $date;
+    //     });
 
-        return $combinedTasks->values();
-    });
+    //     return $combinedTasks->values();
+    // });
 
     if (Auth::user()->type == 'employee') {
         $employees = User::where('company_id', Auth::user()->company_id)->whereNot('id', Auth::id())->get(['fname', 'lname', 'id', 'type']);
@@ -106,7 +106,7 @@ Route::get('/dashboard', function () {
         $attributes = ApartmentAttribute::all();
     }
 
-    $tasksArray = $tasks->toArray();
+    // $tasksArray = $tasks->toArray();
 
     return Inertia::render('Dashboard', [
         'employees' => $employees ?? [],
@@ -165,21 +165,21 @@ Route::prefix('/admin')->middleware(['auth', 'checkadmin', 'verified'])->group(f
     });
 
     // Courses
-    Route::group(['middleware' => ['can:manage all data']], function () {
-        Route::get('/courses', [AdminController::class, 'courses'])->name('admin.courses');
-        // Route::get('/course/view/{course}', [AdminController::class, 'viewCourse'])->name('admin.view-course');
-        Route::post('/create-course', [AdminController::class, 'createCourse'])->name('admin.create-course');
-        Route::post('/update-course/{course}', [AdminController::class, 'updateCourse'])->name('admin.update-course');
-        Route::delete('/course/{course}', [AdminController::class, 'deleteCourse'])->name('admin.delete-course');
-    });
+    // Route::group(['middleware' => ['can:manage all data']], function () {
+    //     Route::get('/courses', [AdminController::class, 'courses'])->name('admin.courses');
+    //     // Route::get('/course/view/{course}', [AdminController::class, 'viewCourse'])->name('admin.view-course');
+    //     Route::post('/create-course', [AdminController::class, 'createCourse'])->name('admin.create-course');
+    //     Route::post('/update-course/{course}', [AdminController::class, 'updateCourse'])->name('admin.update-course');
+    //     Route::delete('/course/{course}', [AdminController::class, 'deleteCourse'])->name('admin.delete-course');
+    // });
 });
 
 Route::middleware(['auth', 'checksuperadmin', 'verified'])->group(function () {
     // Sessions
-    Route::get('/sessions', [AdminController::class, 'sessions'])->name('admin.sessions');
-    Route::post('/create-session', [AdminController::class, 'createSession'])->name('admin.create-session');
-    Route::post('/update-session/{session}', [AdminController::class, 'updateSession'])->name('admin.update-session');
-    Route::delete('/session/{session}', [AdminController::class, 'deleteSession'])->name('admin.delete-session');
+    // Route::get('/sessions', [AdminController::class, 'sessions'])->name('admin.sessions');
+    // Route::post('/create-session', [AdminController::class, 'createSession'])->name('admin.create-session');
+    // Route::post('/update-session/{session}', [AdminController::class, 'updateSession'])->name('admin.update-session');
+    // Route::delete('/session/{session}', [AdminController::class, 'deleteSession'])->name('admin.delete-session');
 
     // Communications
     Route::get('/communications', [AdminController::class, 'communications'])->name('admin.communications');
@@ -202,8 +202,8 @@ Route::middleware(['auth', 'checkuser'])->group(function () {
     Route::post('/register-staff', [CompanyController::class, 'registerStaff'])->name('company.register-staff');
 
     // Courses
-    Route::get('/courses', [CourseController::class, 'index'])->name('courses');
-    Route::get('/course/{slug}', [CourseController::class,'show'])->name('course.show');
+    // Route::get('/courses', [CourseController::class, 'index'])->name('courses');
+    // Route::get('/course/{slug}', [CourseController::class,'show'])->name('course.show');
 
     // Apartments
     Route::post('/make-initial-payment', [ApartmentController::class, 'makeInitialPayment'])->name('payment.initial');
@@ -219,11 +219,11 @@ Route::middleware(['auth', 'checkuser'])->group(function () {
     Route::get('/payment/receipt/{id}', [PaymentController::class, 'receipt'])->name('payment.receipt');
 
     // Assignments
-    Route::get('/assignments/{assignment}', [AssignmentController::class,'show'])->name('assignment.show');
-    Route::post('/assignment', [AssignmentController::class,'store'])->name('assignment.store');
-    Route::post('/submission', [AssignmentSubmissionController::class, 'store'])->name('submission.store');
-    Route::post('/feedback', [AssignmentSubmissionController::class, 'feedback'])->name('feedback.store');
-    Route::patch('/submission/{assignmentSubmission}', [AssignmentSubmissionController::class, 'update'])->name('submission.update');
+    // Route::get('/assignments/{assignment}', [AssignmentController::class,'show'])->name('assignment.show');
+    // Route::post('/assignment', [AssignmentController::class,'store'])->name('assignment.store');
+    // Route::post('/submission', [AssignmentSubmissionController::class, 'store'])->name('submission.store');
+    // Route::post('/feedback', [AssignmentSubmissionController::class, 'feedback'])->name('feedback.store');
+    // Route::patch('/submission/{assignmentSubmission}', [AssignmentSubmissionController::class, 'update'])->name('submission.update');
 
     // Chats
     Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');
@@ -234,21 +234,21 @@ Route::middleware(['auth', 'checkuser'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
 
     // Forum
-    Route::post('/forum', [ForumController::class, 'store'])->name('forum.store');
-    Route::get('/forums/{cohort}', [ForumController::class, 'index'])->name('forum.index');
+    // Route::post('/forum', [ForumController::class, 'store'])->name('forum.store');
+    // Route::get('/forums/{cohort}', [ForumController::class, 'index'])->name('forum.index');
 
     // File
     Route::post('/file', [FileController::class, 'store'])->name('file.store');
 
     // Meetings
-    Route::post('/meeting', [MeetingController::class,'store'])->name('meeting.store');
-    Route::post('/attendance', [MeetingController::class, 'takeAttendance'])->name('take-attendance');
+    // Route::post('/meeting', [MeetingController::class,'store'])->name('meeting.store');
+    // Route::post('/attendance', [MeetingController::class, 'takeAttendance'])->name('take-attendance');
 
     // Tutors
-    Route::get('/tutors', [TutorController::class, 'index'])->name('tutors');
+    // Route::get('/tutors', [TutorController::class, 'index'])->name('tutors');
 
-    // Tasks
-    Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
+    // // Tasks
+    // Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
 
     // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -262,7 +262,7 @@ Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit')
 Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments')->middleware(['auth', 'checktype:tutor']);
+// Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments')->middleware(['auth', 'checktype:tutor']);
 
 Route::get('/unauthorized', function () {
     return Inertia::render('Unauthorized');

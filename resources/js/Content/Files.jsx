@@ -27,8 +27,6 @@ const downloadFile = (filePath) => {
 };
 
 const Files = ({ showAction = true, files, openFile }) => {
-
-    console.log(files)
     const [searchQuery, setSearchQuery] = useState('');
 
     const handleSearch = (e) => {

@@ -64,8 +64,8 @@ class AdminController extends Controller
         foreach($admins as $user) {
             $user->permissions = $user->getDirectPermissions()->pluck('name');
         }
-        $courses = $user->can('manage courses') ? Course::all() : [];
-        $cohorts = $user->can('manage courses') ? Cohort::all() : [];
+        // $courses = $user->can('manage courses') ? Course::all() : [];
+        // $cohorts = $user->can('manage courses') ? Cohort::all() : [];
         $permissions = Permission::all();
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
@@ -73,7 +73,7 @@ class AdminController extends Controller
             // 'tutors' => $tutors,
             'admins' => $admins,
             'courses' => $courses,
-            'cohorts' => $cohorts,
+            // 'cohorts' => $cohorts,
             'permissions' => $permissions
         ]);
     }
@@ -90,37 +90,37 @@ class AdminController extends Controller
         ]);
     }
 
-    public function courses () {
-        $courses = Course::with('cohorts.assignments', 'cohorts.tutor', 'cohorts.students', 'cohorts.files.user', 'modules')->get();
-        return Inertia::render('Admin/Courses/Index', [
-            'courses' => $courses,
-        ]);
-    }
+    // public function courses () {
+    //     $courses = Course::with('cohorts.assignments', 'cohorts.tutor', 'cohorts.students', 'cohorts.files.user', 'modules')->get();
+    //     return Inertia::render('Admin/Courses/Index', [
+    //         'courses' => $courses,
+    //     ]);
+    // }
 
-    public function sessions () {
-        $sessions = Cohort::with('course', 'tutor','students')->get();
-        $courses = Course::all();
-        $tutors = User::where('type', 'tutor')->get();
-        return Inertia::render('Admin/Sessions/Index', [
-            'sessions' => $sessions,
-            'courses' => $courses,
-            'tutors' => $tutors,
-        ]);
-    }
+    // public function sessions () {
+    //     $sessions = Cohort::with('course', 'tutor','students')->get();
+    //     $courses = Course::all();
+    //     $tutors = User::where('type', 'tutor')->get();
+    //     return Inertia::render('Admin/Sessions/Index', [
+    //         'sessions' => $sessions,
+    //         'courses' => $courses,
+    //         'tutors' => $tutors,
+    //     ]);
+    // }
 
-    public function communications () {
-        $notifyId = DB::table('notifications')
-                        ->select('notifiable_id', 'type')
-                        ->groupBy('notifiable_id', 'type')
-                        ->get();
-        $notifications = $notifyId->map(function($notif) {
-            return Notification::where('notifiable_id', $notif->notifiable_id)->where('type', $notif->type)->with('notifiable.user', 'notifiable.cohort.course', 'notifiable.cohort.tutor')->latest('id')->first();
-        });
-        // $notifications = Notification::with('user', 'notifiable')->whereIn('notifiable_id', $notifyId)->get();
-        return Inertia::render('Admin/Communications/Index', [
-            'notifications' => $notifications,
-        ]);
-    }
+    // public function communications () {
+    //     $notifyId = DB::table('notifications')
+    //                     ->select('notifiable_id', 'type')
+    //                     ->groupBy('notifiable_id', 'type')
+    //                     ->get();
+    //     $notifications = $notifyId->map(function($notif) {
+    //         return Notification::where('notifiable_id', $notif->notifiable_id)->where('type', $notif->type)->with('notifiable.user', 'notifiable.cohort.course', 'notifiable.cohort.tutor')->latest('id')->first();
+    //     });
+    //     // $notifications = Notification::with('user', 'notifiable')->whereIn('notifiable_id', $notifyId)->get();
+    //     return Inertia::render('Admin/Communications/Index', [
+    //         'notifications' => $notifications,
+    //     ]);
+    // }
 
     public function settings () {
         $settings = SystemSetting::all();
@@ -174,9 +174,9 @@ class AdminController extends Controller
             if($permission['status'] === true) $user->givePermissionTo($permission['permission_id']);
         }
 
-        if ($validatedData['userType'] === 'employee') {
-            $user->studentcohort()->attach(request('session'));
-        }
+        // if ($validatedData['userType'] === 'employee') {
+        //     $user->studentcohort()->attach(request('session'));
+        // }
 
         $subject = 'Welcome to Occupy630!';
         $body = 'Your account has been created successfully as a '.$user->type.'. Please use this email and this password to login: ' . $generatedPassword . '.'.PHP_EOL.'And don\'t forget to change your password after login.';
@@ -226,148 +226,148 @@ class AdminController extends Controller
         return redirect()->route('admin.users')->with('success', 'User updated successfully.');
     }
 
-    public function viewUser (User $user) {
-        $user = $user->load('studentcohort')->load('tutorcohort');
-        if($user->type === 'learner') {
-            $user->courses = $user->studentcohort->map(function ($cohort) {
-                return $cohort->course;
-            });
-        }else {
-            $user->courses = $user->tutorcohort->map(function ($cohort) {
-                return $cohort->course;
-            });
-        }
-        $user->session = DB::table('sessions')->where('id', $user->id)->latest('id')->first()?->last_activity;
-        $user->assignments = $user->studentcohort->map(function ($cohort) {
-            $cohort->assignments = $cohort->assignments->map(function ($assignment) {
-                $submissions = $assignment->submissions->map(function ($submission) {
-                    $submission->user = $submission->user->load('studentcohort');
+    // public function viewUser (User $user) {
+    //     $user = $user->load('studentcohort')->load('tutorcohort');
+    //     if($user->type === 'learner') {
+    //         $user->courses = $user->studentcohort->map(function ($cohort) {
+    //             return $cohort->course;
+    //         });
+    //     }else {
+    //         $user->courses = $user->tutorcohort->map(function ($cohort) {
+    //             return $cohort->course;
+    //         });
+    //     }
+    //     $user->session = DB::table('sessions')->where('id', $user->id)->latest('id')->first()?->last_activity;
+    //     $user->assignments = $user->studentcohort->map(function ($cohort) {
+    //         $cohort->assignments = $cohort->assignments->map(function ($assignment) {
+    //             $submissions = $assignment->submissions->map(function ($submission) {
+    //                 $submission->user = $submission->user->load('studentcohort');
 
-                    return $submission;
-                });
-                return $assignment;
-            });
-            return $cohort->assignments;
-        });
-        return Inertia::render('Admin/Users/View', [
-            'user' => $user,
-        ]);
-    }
+    //                 return $submission;
+    //             });
+    //             return $assignment;
+    //         });
+    //         return $cohort->assignments;
+    //     });
+    //     return Inertia::render('Admin/Users/View', [
+    //         'user' => $user,
+    //     ]);
+    // }
 
-    public function deleteUser (User $user) {
-        $user->delete();
-        return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
-    }
+    // public function deleteUser (User $user) {
+    //     $user->delete();
+    //     return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
+    // }
 
-    public function createCourse (Request $request) {
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'objectives' => 'required|string',
-        ]);
+    // public function createCourse (Request $request) {
+    //     $validatedData = $request->validate([
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'required|string',
+    //         'objectives' => 'required|string',
+    //     ]);
 
-        $course = Course::create([
-            'title' => $validatedData['title'],
-            'description' => $validatedData['description'],
-            'outline' => $validatedData['objectives'],
-            'objectives' => $validatedData['objectives'],
-        ]);
+    //     $course = Course::create([
+    //         'title' => $validatedData['title'],
+    //         'description' => $validatedData['description'],
+    //         'outline' => $validatedData['objectives'],
+    //         'objectives' => $validatedData['objectives'],
+    //     ]);
 
-        if($request->has('modules')) {
-            foreach ($request->modules as $module) {
-                CourseModule::create([
-                    'title' => $module['title'],
-                    'description' => $module['description'],
-                    'course_id' => $course->id,
-                ]);
-            }
-        }
+    //     if($request->has('modules')) {
+    //         foreach ($request->modules as $module) {
+    //             CourseModule::create([
+    //                 'title' => $module['title'],
+    //                 'description' => $module['description'],
+    //                 'course_id' => $course->id,
+    //             ]);
+    //         }
+    //     }
 
-        return redirect()->route('admin.courses')->with('success', 'Course created successfully.');
+    //     return redirect()->route('admin.courses')->with('success', 'Course created successfully.');
 
-    }
+    // }
 
-    public function updateCourse (Request $request, Course $course) {
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'objectives' => 'required|string',
-        ]);
+    // public function updateCourse (Request $request, Course $course) {
+    //     $validatedData = $request->validate([
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'required|string',
+    //         'objectives' => 'required|string',
+    //     ]);
 
-        $course->update([
-            'title' => $validatedData['title'],
-            'description' => $validatedData['description'],
-            'objectives' => $validatedData['objectives'],
-        ]);
+    //     $course->update([
+    //         'title' => $validatedData['title'],
+    //         'description' => $validatedData['description'],
+    //         'objectives' => $validatedData['objectives'],
+    //     ]);
 
-        if($request->has('modules')) {
-            foreach ($request->modules as $module) {
-                if(isset($module['id'])) {
-                    $moduleUp = CourseModule::find($module['id']);
-                    $moduleUp->update([
-                        'title' => $module['title'],
-                        'description' => $module['description'],
-                    ]);
-                }else {
-                    CourseModule::create([
-                        'title' => $module['title'],
-                        'description' => $module['description'],
-                        'course_id' => $course->id,
-                    ]);
-                }
-            }
-        }
+    //     if($request->has('modules')) {
+    //         foreach ($request->modules as $module) {
+    //             if(isset($module['id'])) {
+    //                 $moduleUp = CourseModule::find($module['id']);
+    //                 $moduleUp->update([
+    //                     'title' => $module['title'],
+    //                     'description' => $module['description'],
+    //                 ]);
+    //             }else {
+    //                 CourseModule::create([
+    //                     'title' => $module['title'],
+    //                     'description' => $module['description'],
+    //                     'course_id' => $course->id,
+    //                 ]);
+    //             }
+    //         }
+    //     }
 
-        return redirect()->route('admin.courses')->with('success', 'Course updated successfully.');
-    }
+    //     return redirect()->route('admin.courses')->with('success', 'Course updated successfully.');
+    // }
 
-    public function deleteCourse (Course $course) {
-        $course->delete();
-        return redirect()->route('admin.courses')->with('success', 'Course deleted successfully.');
-    }
+    // public function deleteCourse (Course $course) {
+    //     $course->delete();
+    //     return redirect()->route('admin.courses')->with('success', 'Course deleted successfully.');
+    // }
 
-    public function createSession (Request $request) {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'startDate' => 'required|string',
-            'endDate' => 'required|string',
-            'course' => 'required|integer',
-            'tutor' => 'required|integer',
-        ]);
-        $session = Cohort::create([
-            'name' => $validatedData['name'],
-            'start_date' => $validatedData['startDate'],
-            'end_date' => $validatedData['endDate'],
-            'course_id' => $validatedData['course'],
-        ]);
+    // public function createSession (Request $request) {
+    //     $validatedData = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'startDate' => 'required|string',
+    //         'endDate' => 'required|string',
+    //         'course' => 'required|integer',
+    //         'tutor' => 'required|integer',
+    //     ]);
+    //     $session = Cohort::create([
+    //         'name' => $validatedData['name'],
+    //         'start_date' => $validatedData['startDate'],
+    //         'end_date' => $validatedData['endDate'],
+    //         'course_id' => $validatedData['course'],
+    //     ]);
 
-        $session->tutor()->attach(request('tutor'));
+    //     $session->tutor()->attach(request('tutor'));
 
-        return redirect()->route('admin.sessions')->with('success', 'Session created successfully.');
-    }
+    //     return redirect()->route('admin.sessions')->with('success', 'Session created successfully.');
+    // }
 
-    public function updateSession (Request $request, Cohort $session) {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'startDate' => 'required|string',
-            'endDate' => 'required|string',
-            'course' => 'required|integer',
-            'tutor' => 'required|integer',
-        ]);
-        $session->update([
-            'name' => $validatedData['name'],
-            'start_date' => $validatedData['startDate'],
-            'end_date' => $validatedData['endDate'],
-            'course_id' => $validatedData['course'],
-        ]);
+    // public function updateSession (Request $request, Cohort $session) {
+    //     $validatedData = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'startDate' => 'required|string',
+    //         'endDate' => 'required|string',
+    //         'course' => 'required|integer',
+    //         'tutor' => 'required|integer',
+    //     ]);
+    //     $session->update([
+    //         'name' => $validatedData['name'],
+    //         'start_date' => $validatedData['startDate'],
+    //         'end_date' => $validatedData['endDate'],
+    //         'course_id' => $validatedData['course'],
+    //     ]);
 
-        $session->tutor()->sync(request('tutor'));
+    //     $session->tutor()->sync(request('tutor'));
 
-        return redirect()->route('admin.sessions')->with('success', 'Session updated successfully.');
-    }
+    //     return redirect()->route('admin.sessions')->with('success', 'Session updated successfully.');
+    // }
 
-    public function deleteSession (Cohort $session) {
-        $session->delete();
-        return redirect()->route('admin.sessions')->with('success', 'Session deleted successfully.');
-    }
+    // public function deleteSession (Cohort $session) {
+    //     $session->delete();
+    //     return redirect()->route('admin.sessions')->with('success', 'Session deleted successfully.');
+    // }
 }

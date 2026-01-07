@@ -7,13 +7,11 @@ const ChatArea = ({ chatData, user, selectChat }) => {
     const [chat, setChatData] = useState(chatData);
 
     const chatuser = chatData?.received.id !== user.id ? chatData?.received : chatData?.sent ;
-    // console.log(chatuser)
 
     selectChat(chatuser?.id)
 
     useEffect(() => {
         setChatData(chatData);
-        // console.log(chat)
     }, [chatData]);
 
   return (

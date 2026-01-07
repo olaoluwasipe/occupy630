@@ -10,7 +10,6 @@ import 'react-phone-input-2/lib/bootstrap.css'
 import Checkbox from '@/Components/Checkbox';
 
 const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => {
-    // console.log(permissions)
     const [dataToSend, setDataToSend] = useState(user?.permissions || []);
     const [allChecked, setAllChecked] = useState(false);
 
@@ -32,7 +31,6 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
                 permission.permission_id === permissionId ? { ...permission, status: newStatus } : permission
             )
         );
-        console.log(permissions)
     };
 
     const updateAll = (val) => {
@@ -83,7 +81,6 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
         modalClose()
     }
 
-    console.log(data.course, cohorts)
     const filteredCohorts = cohorts.length > 0 ? cohorts?.filter((cohort) => cohort.course_id == data.course) : cohorts
 
     React.useEffect(() => {
@@ -107,9 +104,7 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
     }
 
     const handlePhoneNumberChange = (phoneNum, country) => {
-        console.log(phoneNum, country)
         const { isValid, phoneNumber } = phone(phoneNum, {country: country.countryCode});
-        console.log(isValid, phoneNumber);
         setData('phoneNumber', phoneNum);
         if (!isValid) {
             errors.phoneNumber = 'Invalid phone number';
@@ -144,15 +139,6 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        // Handle form submission logic here
-        console.log('Full Name:', data.name)
-        console.log('Email:', data.email)
-        console.log('Phone Number:', data.phoneNumber)
-        console.log('User Type:', data.userType)
-        console.log('Nationality:', data.nationality)
-        console.log('Address:', data.address)
-        console.log('Course:', data.course)
-        console.log('Session:', data.session)
 
         if(user.name) {
             post(route('admin.update-user', user.id))

@@ -14,7 +14,6 @@ import Checkbox from '@/Components/Checkbox';
 import formatPrice from '@/functions';
 
 const ApartmentAddForm = ({ categories, attributes, apartment }) => {
-    console.log(apartment)
     attributes = ['parking', 'wifi', 'tv', 'ac', 'gym', 'pool', 'laundry', 'security']
     const { data, setData, post, processing, errors, reset } = useForm({
         title: apartment?.title,
@@ -46,11 +45,6 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
         }));
     };
 
-    // If you want to log the updated value, use a separate useEffect
-    useEffect(() => {
-        console.log(data.amenities);
-    }, [data.amenities]);
-
     useEffect(() => {
         // Set last step count after the wizard ref initializes
         if (wizardRef.current) {
@@ -67,7 +61,6 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
 
     const handleNext = (e) => {
         e.preventDefault()
-        console.log(currentStep, wizardRef.current.state.classes.length)
         wizardRef.current.nextStep();
     };
     const handlePrev = (e) => {
@@ -93,7 +86,6 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
         //     ...files.map(file => file.url || file) // Ensure consistency
         // ];
         setData('attachments', files);
-        console.log(files);
     };
 
   const handlePriceChange = (e) => {
@@ -115,10 +107,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
 
 
   const handleStateChange = (location) => {
-    console.log(location)
     setData('location', location)
-    console.log(location.state);
-    // setData('dueDate', e.target.value)
   }
 
   const handleSubmit = (e) => {

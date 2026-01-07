@@ -130,15 +130,6 @@ export default function Admin({ user, title, children }) {
                         <ResponsiveNavLink href={route('home')} active={route().current('home')}>
                             Home
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('courses')} active={route().current('courses')}>
-                            My Courses
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('tutors')} active={route().current('tutors')}>
-                            My Tutors
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('tasks')} active={route().current('tasks')}>
-                            My Tasks
-                        </ResponsiveNavLink>
                     </div>
 
                     <div className="pt-4 pb-1 border-t border-gray-200">

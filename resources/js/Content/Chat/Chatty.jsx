@@ -14,7 +14,6 @@ const Chatty = ({ setChat, chat, user, selectChat }) => {
     const [message, setMessage] = useState('')
 
     const chatuser = chatData?.received.id !== user.id ? chatData?.received : chatData?.sent ;
-    // console.log(chatuser)
     const { data, setData, post, processing, recentlySuccessful, errors, reset } = useForm({
         receiver_id: chatuser?.id || '',
         message: '',
@@ -36,12 +35,10 @@ const Chatty = ({ setChat, chat, user, selectChat }) => {
 
     useEffect(() => {
         reset();
-        // console.log(chat)
     }, [recentlySuccessful]);
 
     useEffect(() => {
         setChatData(chat);
-        // console.log(chat)
     }, [chat]);
 
     useEffect(() => {

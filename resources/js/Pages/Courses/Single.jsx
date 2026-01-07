@@ -85,7 +85,7 @@ const Single = ({auth, course}) => {
                                     <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M7.82364 6.17636C8.27919 6.63191 8.27919 7.37173 7.82364 7.82728L1.99258 13.6583C1.53703 14.1139 0.797215 14.1139 0.341663 13.6583C-0.113888 13.2028 -0.113888 12.463 0.341663 12.0074L5.34908 7L0.345308 1.99258C-0.110243 1.53703 -0.110243 0.797215 0.345308 0.341663C0.800859 -0.113888 1.54067 -0.113888 1.99622 0.341663L7.82728 6.17272L7.82364 6.17636Z" fill="#717171"/>
                                     </svg>
-                                    <a href="#" className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">My Courses</a>
+                                    <a href={route('dashboard')} className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">Dashboard</a>
                                 </div>
                             </li>
                             <li>

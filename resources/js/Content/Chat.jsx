@@ -54,7 +54,6 @@ const Chat = ({ user, close }) => {
     const selectChat = (chatId) => {
         const chatData = fetchedChats.find(msg => msg.sent.id === chatId || msg.received.id === chatId);
         setChat(chatData);
-        // console.log(chatData)
     };
 
     return (

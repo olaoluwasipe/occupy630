@@ -107,18 +107,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Apartment::class, 'tenant_id');
     }
 
-    public function studentcohort() {
-        return $this->belongsToMany(Cohort::class, 'cohort_student', 'user_id', 'cohort_id');
-    }
-
-    public function tutorcohort() {
-        return $this->belongsToMany(Cohort::class, 'cohort_tutor', 'user_id', 'cohort_id');
-    }
-
-    public function assignments() {
-        return $this->hasMany(Assignment::class, 'user_id');
-    }
-
     public function notifications()
     {
         return $this->hasMany(Notification::class, 'user_id');
@@ -126,10 +114,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function activities() {
         return $this->hasMany(Activity::class, 'user_id');
-    }
-
-    public function forums() {
-        return $this->hasMany(Forum::class, 'user_id');
     }
 
     public function files () {

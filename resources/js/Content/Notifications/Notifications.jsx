@@ -34,7 +34,6 @@ const Notifications = () => {
         };
 
         const intervalId = setInterval(fetchedNotifications, 1000);
-        console.log(notifications)
 
         return () => clearInterval(intervalId);
     }, []);

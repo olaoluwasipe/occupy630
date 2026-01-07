@@ -11,7 +11,6 @@ import React, {useState} from 'react'
 import { FaSearch } from 'react-icons/fa'
 
 const Notifications = ({notifications}) => {
-    console.log(notifications)
     const [searchQuery, setSearchQuery] = useState('')
     const [session, setSession] = useState({id: 0})
     const [createSession, setCreateSession] = useState(false)

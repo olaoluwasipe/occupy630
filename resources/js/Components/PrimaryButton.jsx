@@ -1,13 +1,32 @@
-export default function PrimaryButton({ className = '', disabled, children, ...props }) {
+export default function PrimaryButton({ 
+    className = '', 
+    disabled, 
+    children, 
+    variant = 'default',
+    size = 'md',
+    ...props 
+}) {
+    const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    
+    const variantClasses = {
+        default: 'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 focus:ring-primary-500 shadow-sm hover:shadow-md',
+        outline: 'bg-transparent border-2 border-primary-500 text-primary-500 hover:bg-primary-50 active:bg-primary-100 focus:ring-primary-500',
+        ghost: 'bg-transparent text-primary-500 hover:bg-primary-50 active:bg-primary-100 focus:ring-primary-500',
+    };
+    
+    const sizeClasses = {
+        sm: 'px-3 py-1.5 text-sm',
+        md: 'px-4 py-2.5 text-sm',
+        lg: 'px-6 py-3 text-base',
+        xl: 'px-8 py-4 text-lg',
+    };
+    
     return (
         <button
             {...props}
-            className={
-                `inline-flex items-center px-4 py-4 bg-[#003366] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 ${
-                    disabled && 'opacity-25'
-                } ` + className
-            }
+            className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
             disabled={disabled}
+            aria-disabled={disabled}
         >
             {children}
         </button>

@@ -21,13 +21,13 @@ class File extends Model
         'apartment_id',
     ];
 
-    public function assignment () {
-        return $this->belongsTo(Assignment::class);
-    }
+    // public function assignment () {
+    //     return $this->belongsTo(Assignment::class);
+    // }
 
-    public function cohort () {
-        return $this->belongsTo(Cohort::class);
-    }
+    // public function cohort () {
+    //     return $this->belongsTo(Cohort::class);
+    // }
 
     public function user () {
         return $this->belongsTo(User::class);

@@ -6,7 +6,6 @@ import { FaSearch } from 'react-icons/fa';
 import { FaX } from 'react-icons/fa6';
 
 const Body = ({ close, chats, setChat, user }) => {
-    console.log(chats);
     const [searchQuery, setSearchQuery] = useState('')
 
     const handleSearch = (e) => {

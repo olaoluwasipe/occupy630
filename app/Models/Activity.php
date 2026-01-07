@@ -30,26 +30,26 @@ class Activity extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function addActivity($description, $type, $class, $data)
-    {
-        // Fetch students enrolled in the course associated with this meeting
-        $students = $this->cohort->students;
+    // public function addActivity($description, $type, $class, $data)
+    // {
+    //     // Fetch students enrolled in the course associated with this meeting
+    //     $students = $this->cohort->students;
 
-        $notifications = [];
+    //     $notifications = [];
 
-        foreach ($students as $student) {
-            $notifications[] = [
-                'subject_id' => $this->id,
-                'subject_type' => $class,
-                'type' => $type,
-                'data' => $data,
-                'user_id' => $student->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
+    //     foreach ($students as $student) {
+    //         $notifications[] = [
+    //             'subject_id' => $this->id,
+    //             'subject_type' => $class,
+    //             'type' => $type,
+    //             'data' => $data,
+    //             'user_id' => $student->id,
+    //             'created_at' => now(),
+    //             'updated_at' => now(),
+    //         ];
+    //     }
 
-        // Insert notifications in bulk
-        DB::table('activities')->insert($notifications);
-    }
+    //     // Insert notifications in bulk
+    //     DB::table('activities')->insert($notifications);
+    // }
 }

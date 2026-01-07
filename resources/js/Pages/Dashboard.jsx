@@ -58,7 +58,6 @@ function NextArrow(props) {
   };
 
 export default function Dashboard({ auth, payments, company, employees, docs, apartment, approvals, success, error, categories, attributes, files }) {
-    console.log(files)
     const [openNav, setOpenNav] = useState(false)
     const [action, setAction] = useState('')
     const [openFiles, setOpenFiles] = useState(false)
@@ -118,7 +117,7 @@ export default function Dashboard({ auth, payments, company, employees, docs, ap
         'booked': 'bg-pink-500',
         'assigned': 'bg-indigo-500',
     }
-    // console.log(tasks)
+    
     return (
         <AuthenticatedLayout
             user={auth.user}

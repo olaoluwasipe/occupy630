@@ -1,7 +1,6 @@
 import React from 'react'
 
 const Activities = ({activities}) => {
-    console.log(activities)
     function formatDate(dateString) {
         const date = new Date(dateString);
     
