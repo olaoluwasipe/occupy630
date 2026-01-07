@@ -107,7 +107,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function notifications()
     {
-        return $this->hasMany(Notification::class, 'notifiable');
+        return $this->hasMany(Notification::class, 'user_id');
     }
 
     public function activities() {
@@ -116,5 +116,33 @@ class User extends Authenticatable implements JWTSubject
 
     public function forums() {
         return $this->hasMany(Forum::class, 'user_id');
+    }
+
+    public function assignmentSubmissions() {
+        return $this->hasMany(AssignmentSubmission::class, 'user_id');
+    }
+
+    public function chatsSent() {
+        return $this->hasMany(Chat::class, 'sender_id');
+    }
+
+    public function chatsReceived() {
+        return $this->hasMany(Chat::class, 'receiver_id');
+    }
+
+    public function attendances() {
+        return $this->hasMany(Attendance::class, 'user_id');
+    }
+
+    public function meetings() {
+        return $this->hasMany(Meeting::class, 'user_id');
+    }
+
+    public function inquiries() {
+        return $this->hasMany(Inquiry::class, 'user_id');
+    }
+
+    public function housePayments() {
+        return $this->hasMany(HousePayment::class, 'user_id');
     }
 }

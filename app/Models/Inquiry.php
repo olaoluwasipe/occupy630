@@ -14,6 +14,10 @@ class Inquiry extends Model
     ];
 
     public function apartment(){
-        $this->belongsTo(Apartment::class, 'apartment_id');
+        return $this->belongsTo(Apartment::class, 'apartment_id');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

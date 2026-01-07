@@ -1,26 +1,90 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import ProfilePhoto from '@/Components/ProfilePhoto';
 import Update from '@/Components/Update';
 import SendInviteForm from '@/Forms/SendInviteForm';
 import DangerButton from '@/Components/DangerButton';
 import Modal from '@/Components/Modal';
+import PrimaryButton from '@/Components/PrimaryButton';
+import SecondaryButton from '@/Components/SecondaryButton';
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { FaLocationDot } from 'react-icons/fa6';
+import formatPrice from '@/functions';
+import { format } from 'date-fns';
 
-export default function Dashboard({ auth, courses, tasks, docs }) {
+function NextArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, display: "block", right: 20, zIndex: 100 }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  function PrevArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, display: "block", left: 20, zIndex: 100, width: 40 }}
+        onClick={onClick}
+      />
+    );
+  }
+
+export default function Dashboard({ auth, courses, tasks, docs, apartment }) {
     console.log(docs)
     const [openModal, setOpenModal] = useState(false);
 
     const modalOpen = () => {
         setOpenModal(!openModal);
     }
+
+    const settings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        nextArrow: <NextArrow />,
+        prevArrow: <PrevArrow />
+    };
+
+    const statusKeys = {
+        'pending': 'bg-yellow-500',
+        'approved': 'bg-green-500',
+        'booked': 'bg-blue-500',
+        'rejected': 'bg-red-500',
+        'completed': 'bg-green-600',
+        'processing': 'bg-yellow-600',
+        'failed': 'bg-red-600'
+    };
+
+    const formatDate = (dateString, formatStr = 'd MMM, y') => {
+        if (!dateString) return '';
+        try {
+            return format(new Date(dateString), formatStr);
+        } catch (error) {
+            return dateString;
+        }
+    };
+
+    const requestRentPay = (e) => {
+        e.preventDefault();
+        if (apartment) {
+            router.post(route('dashboard.rent.pay', apartment.id));
+        }
+    };
     // console.log(tasks)
     return (
         <AuthenticatedLayout
             user={auth.user}
             docslink = {docs}
-            openNav={openNav}
-            prevAction={action}
             // header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
         >
 

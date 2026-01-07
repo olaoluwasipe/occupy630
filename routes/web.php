@@ -27,12 +27,24 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    if(Auth::user()->type === 'admin' || Auth::user()->type === 'superadmin') {
+    $user = Auth::user();
+    
+    // Ensure user is authenticated (middleware should handle this, but adding safety check)
+    if (!$user) {
+        return redirect()->route('login');
+    }
+
+    // Redirect admin users to admin dashboard
+    if ($user->type === 'admin' || $user->type === 'superadmin') {
         return redirect('/admin');
     }
-    $cohorts = User::find(Auth::user()->id)->studentcohort;
-    $assignments = User::find(Auth::user()->id)->assignments;
+
+    // Get user's cohorts and assignments
+    $cohorts = $user->studentcohort;
+    $assignments = $user->assignments;
     $current_time = Carbon::now();
+    
+    // Get tasks from cohorts
     $tasks = $cohorts->flatMap(function ($cohort) use ($current_time) {
         // Filter assignments
         $filteredAssignments = $cohort->assignments()->with('cohort.course')->where('due_date', '>=', $current_time)->get();
@@ -50,10 +62,11 @@ Route::get('/', function () {
         return $combinedTasks->values();
     });
 
-    $apartment = Apartment::where('tenant_id', Auth::user()->id)
+    // Get user's apartment if they are a tenant
+    $apartment = Apartment::where('tenant_id', $user->id)
                 ->with(['images', 'transactions' => function ($query) {
                     $query->with('user');
-                    $query->orderBy('created_at', 'desc'); // Adjust column name if needed
+                    $query->orderBy('created_at', 'desc');
                 }])
                 ->first();
 
@@ -133,7 +146,13 @@ Route::middleware(['auth', 'checksuperadmin'])->group(function () {
 Route::middleware(['auth', 'checkuser'])->group(function () {
 
     Route::get('/staff', function (Request $request) {
-        $company =  Auth::user()->company;
+        $user = Auth::user();
+        
+        if (!$user || !$user->company) {
+            return response()->json(['error' => 'User or company not found'], 404);
+        }
+        
+        $company = $user->company;
         $staff = $company->users()->where('type', 'employee')->get();
         return $staff;
     })->name('api.staff.index');
@@ -184,5 +203,9 @@ Route::post('/profile', [ProfileController::class, 'update'])->name('profile.upd
 Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments')->middleware(['auth', 'checktype:tutor']);
+
+Route::get('/unauthorized', function () {
+    return Inertia::render('Unauthorized');
+})->name('unauthorized');
 
 require __DIR__.'/auth.php';
