@@ -5,16 +5,40 @@ import Table from '@/Components/Table';
 import TabsHorizontal from '@/Components/TabsHorizontal';
 import CreateUserForm from '@/Forms/CreateUserForm';
 import Admin from '@/Layouts/AdminLayout'
-import { Head, Link } from '@inertiajs/react'
-import React, {useState} from 'react'
+import { Head, Link, useForm } from '@inertiajs/react'
+import React, {useEffect, useState} from 'react'
+import { toast } from 'react-toastify';
 
-const Users = ({auth, users, learners, tutors, admins, courses, cohorts, permissions}) => {
-    // console.log(users, learners, tutors, admins)
+const Users = ({auth, users, companies, tutors, admins, courses, cohorts, permissions, error, success}) => {
+    // console.log(users)
 
     const [createUser, setCreateUser] = useState(false)
     const [deleteUser, setDeleteUser] = useState(false)
     const [editUser, setEditUser] = useState(false)
     const [user, setUser] = useState({id: 0})
+
+    const { post, errors, processing, recentlySuccessful } = useForm({
+    });
+
+    useEffect(() => {
+        if (success || error) {
+            setCreateUser(false);
+            setDeleteUser(false);
+            setEditUser(false);
+            // s(false);
+            // setEditApartment(false);
+            // setEditAttribute(false);
+            // setEditCategory(false);
+        }
+    }, [success, error, recentlySuccessful]);
+
+    success && toast.success(success)
+    error && toast.error(error)
+
+    const approveUser = (apartmentID) => {
+        // alert('Approved')
+        post(route('users.approve', apartmentID))
+    }
 
     const modalUser = () => {
         setEditUser(false)
@@ -26,28 +50,53 @@ const Users = ({auth, users, learners, tutors, admins, courses, cohorts, permiss
     }
     const tabsData = [
         {
-          label: 'Learners',
-          val: learners.length,
-          content: <Table data={learners} actions={{
+          label: 'Companies',
+          val: companies.length,
+          content: <Table data={companies} actions={{
             type: 'user',
             editFunction: (user) => {setCreateUser(true); setEditUser(true); setUser(user); console.log(user)},
             deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId);},
             active: ['view', 'edit', 'delete']
           }}
           searchable
-          columnsToShow={['id', 'name', 'email']} />
+          columnsToShow={['id', 'name', 'address', 'phone', 'email']} />
         },
         {
-          label: 'Tutors',
-          val: tutors.length,
-          content: <Table data={tutors} actions={{
+          label: 'Users',
+          val: users.length,
+          content: <Table data={users} actions={{
+            buttons: [
+                // {
+                //     label: 'Edit',
+                //     type: 'secondary',
+                //     onClick: (apartment) => {setCreateApartment(true); setEditApartment(true); setApartment(apartment); console.log(apartment)},
+                // },
+                {
+                    label: 'Toggle Status',
+                    type: 'primary',
+                    onClick: (user) => {approveUser(user.id)},
+                },
+                // {
+                //     label: 'Decline',
+                //     type: 'danger',
+                //     onClick: (row) => alert(`Declining ${row.id}`),
+                // },
+            ],
             type: 'user',
             editFunction: (user) => {setCreateUser(true); setEditUser(true); setUser(user); console.log(user)},
             deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId)},
             active: ['view', 'edit', 'delete']
           }}
           searchable
-          columnsToShow={['id', 'name', 'email']} />
+          columnsToShow={[
+            'id',
+            'fullname',
+            'email',
+            // 'phone',
+            'type',
+            'company.name',
+            {label: 'Status', key: 'status', formatter: 'tag'},
+            ]} />
         },
         {
             label: 'Admins',
@@ -59,7 +108,7 @@ const Users = ({auth, users, learners, tutors, admins, courses, cohorts, permiss
               active: ['view', 'edit', 'delete']
             }}
             searchable
-            columnsToShow={['id', 'name', 'email']} />
+            columnsToShow={['id', 'fullname', 'email']} />
         },
         {
             label: 'WaitList',

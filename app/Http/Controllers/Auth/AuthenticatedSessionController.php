@@ -31,6 +31,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return redirect()->back()->withErrors(['email' => 'Invalid email or password']);
+        }
+        if ($user->status !== 'active' && stripos($user->email, '@cghomesltd.com') === false) {
+            return redirect()->back()->withErrors(['email' => 'Your account is inactive. Please contact the administrator.']);
+        }
+
         $request->authenticate();
 
         $request->session()->regenerate();

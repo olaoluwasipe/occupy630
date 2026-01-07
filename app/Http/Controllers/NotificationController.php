@@ -13,7 +13,8 @@ class NotificationController extends Controller
      */
     public function index()
     {
-        //
+        $notifications = Notification::orderBy("created_at","desc")->with('notifiable')->paginate(10);
+        return response()->json($notifications);
     }
 
     /**

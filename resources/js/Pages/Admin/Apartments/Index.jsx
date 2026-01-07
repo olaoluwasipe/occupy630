@@ -7,13 +7,16 @@ import ApartmentAddForm from '@/Forms/ApartmentAddForm';
 import AttributeAddForm from '@/Forms/AttributeAddForm';
 import CategoryAddForm from '@/Forms/CategoryAddForm';
 import CreateUserForm from '@/Forms/CreateUserForm';
+import axios from 'axios';
 import Admin from '@/Layouts/AdminLayout'
-import { Head, Link } from '@inertiajs/react'
-import React, {useState} from 'react'
+import { Head, Link, useForm } from '@inertiajs/react'
+import React, {useState, useEffect} from 'react'
 import { FaPlus } from 'react-icons/fa6';
+import { toast } from 'react-toastify';
 
-const Users = ({auth, users, apartments, attributes, categories,}) => {
+const Users = ({auth, users, apartments, attributes, categories, error, success}) => {
     // console.log(users, learners, tutors, admins)
+    console.log(apartments)
 
     const [currentTab, setCurrentTab] = useState(null);
     const [createApartment, setCreateApartment] = useState(false)
@@ -27,10 +30,33 @@ const Users = ({auth, users, apartments, attributes, categories,}) => {
     const [attribute, setAttribute] = useState({id: 0})
     const [category, setCategory] = useState({id: 0})
 
+    const { post, errors, processing, recentlySuccessful } = useForm({
+    });
+
     const handleChangeTab = (label) => {
         setCurrentTab(label)
         console.log(label)
     }
+
+    useEffect(() => {
+        if (success || error) {
+            setCreateApartment(false);
+            setCreateAttribute(false);
+            setCreateCategory(false);
+            setDeleteApartment(false);
+            setEditApartment(false);
+            setEditAttribute(false);
+            setEditCategory(false);
+        }
+    }, [success, error, recentlySuccessful]);
+
+    success && toast.success(success)
+    error && toast.error(error)
+
+    const approveApartment = (apartmentID) => {
+        post(route('apartment.approve', apartmentID))
+    }
+
 
     const buttonSwitch = (label) => {
         label = label ? label.toLowerCase() : '';
@@ -96,14 +122,40 @@ const Users = ({auth, users, apartments, attributes, categories,}) => {
         {
           label: 'Apartments',
           val: apartments.length,
-          content: <Table data={apartments} actions={{
-            type: 'apartments',
-            editFunction: (apartment) => {setCreateApartment(true); setEditApartment(true); setApartment(apartment); console.log(apartment)},
-            // deleteWithValidation: (userId) => {setDeleteUser(true); setUser(userId);},
-            active: ['view', 'edit', 'delete']
+          content: <Table data={apartments}
+          actions={{
+              buttons: [
+                  {
+                      label: 'Edit',
+                      type: 'secondary',
+                      onClick: (apartment) => {setCreateApartment(true); setEditApartment(true); setApartment(apartment); console.log(apartment)},
+                  },
+                  {
+                      label: 'Approve/Disapprove',
+                      type: 'primary',
+                      onClick: (apartment) => {approveApartment(apartment.id)},
+                  },
+                  // {
+                  //     label: 'Decline',
+                  //     type: 'danger',
+                  //     onClick: (row) => alert(`Declining ${row.id}`),
+                  // },
+              ],
+            //   defaultActions: ['delete'], // Specify default actions
+              onDelete: (row) => alert(`Deleting ${row.id}`), // Optional override for delete
           }}
           searchable
-          columnsToShow={['id', 'title', 'slug', 'cg_price']} />
+          completed={false}
+          columnsToShow={[
+            {key: 'id', label: 'ID'},
+            {key: 'title', label: 'Title'},
+            {key: 'slug', label: 'Slug'},
+            {key: 'cg_price', label: 'CG Price', formatter: 'money'},
+            {key: 'six_months_rent', label: 'Six Months Rent', formatter: 'money'},
+            {key: 'landlord.fullname', label: 'Uploaded By'},
+            {key: 'created_at', label: 'Date Added', formatter: 'date'},
+            {key: 'status', label: 'Status', formatter: 'tag'},
+            ]} />
         },
         {
           label: 'Attributes',

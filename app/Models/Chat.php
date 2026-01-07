@@ -32,4 +32,12 @@ class Chat extends Model
     public function quote () {
         return $this->belongsTo(Chat::class, 'quote_id');
     }
+
+    public function attachments () {
+        return $this->hasMany(Chat::class, 'quote_id');
+    }
+
+    public function notifications () {
+        return $this->morphMany(Notification::class, 'notifiable');
+    }
 }

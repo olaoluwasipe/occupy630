@@ -1,11 +1,113 @@
-import React from 'react'
+import React, {useState} from 'react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import { Head, Link } from '@inertiajs/react'
 import parse from 'html-react-parser'
 import { FaLocationDot, FaLocationPin } from 'react-icons/fa6'
+import IconTextInput from '@/Components/IconTextInput'
+import { FaSearch } from 'react-icons/fa'
+import LgaSelect from '@/Components/LgaSelect'
+import TextInput from '@/Components/TextInput'
+import SelectInput from '@/Components/SelectInput'
 
 const Apartments = ({auth, apartments, newApartments}) => {
     console.log(apartments)
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const [bedrooms, setBedrooms] = useState(0);
+    const [bathrooms, setBathrooms] = useState(0);
+    const [state, setCity] = useState({
+        state: '',
+        lga: '',
+    });
+    const [selectedPriceRange, setSelectedPriceRange] = useState('');
+
+    const handlePriceRangeChange = (e) => {
+        setSelectedPriceRange(e.target.value);
+    };
+
+    const handleSearch = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    const handleCityChange = (newState) => {
+        setCity(newState);
+    };
+
+    const handleBedroomsChange = (e) => {
+        setBedrooms(e.target.value);
+    };
+
+    const handleBathroomChange = (e) => {
+        setBathrooms(e.target.value);
+    };
+
+    const filteredApartments = apartments?.filter((apartment) => {
+        // Convert apartment values to strings and check for searchQuery match
+        const matchesSearchQuery = Object.values(apartment).some((col) =>
+            String(col).toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        // Check if the state matches
+        const matchesState = () => {
+            if (state.state === '') return true;
+            return apartment.state
+                ?.toLowerCase()
+                .includes(state.state?.toLowerCase());
+        };
+
+        // Check if the city matches
+        const matchesCity = () => {
+            if (state.lga === '') return true;
+            return apartment.city
+                ?.toLowerCase()
+                .includes(state.lga?.toLowerCase());
+        };
+
+        // Check if bedrooms match
+        const matchesBedroom = () => {
+            if (bedrooms === 0 || bedrooms === "") return true;
+            return apartment.bedrooms === bedrooms;
+        };
+
+        // Check if bathrooms match
+        const matchesBathroom = () => {
+            if (bathrooms === 0 || bathrooms === '') return true;
+            return apartment.bathrooms === bathrooms;
+        };
+
+        // Check if price range matches
+        const matchesPriceRange = () => {
+            if (!selectedPriceRange) return true; // No filtering if no range is selected
+
+            var monthlyPrice = parseInt(apartment.monthly_price, 10);
+
+            const [min, max] = selectedPriceRange
+                .split(' - ') // Split the range into min and max
+                .map((val) => parseInt(val, 10)); // Convert to integers
+
+            if (!max) {
+                // Handle cases where the range is '< 300,000' or '> 1,000,000'
+                return min > 1000000
+                    ? monthlyPrice > min
+                    : monthlyPrice < min;
+            }
+
+            return (
+                monthlyPrice >= min && monthlyPrice <= max
+            );
+        };
+
+        // Combine all conditions
+        return (
+            matchesSearchQuery &&
+            matchesState() &&
+            matchesCity() &&
+            matchesBedroom() &&
+            matchesBathroom() &&
+            matchesPriceRange()
+        );
+    });
+
 
     const formatPrice = (price) => {
         if (!price) return '';
@@ -44,9 +146,44 @@ const Apartments = ({auth, apartments, newApartments}) => {
                     </nav>
 
                     <div style={{boxShadow: '0px 2px 12px #e3e3e3'}} className="bg-white overflow-hidden shadow-xl shadow-gray-200 sm:rounded-lg flex flex-row items-center p-6">
-                        <div className='w-1/2 flex flex-row gap-3 items-center'>
+                        <div className='w-full flex flex-row gap-3 items-center justify-between'>
                             <div className='flex flex-col'>
                                 <h2 className='text-2xl font-bold text-blue-900'>{auth.user.type === 'employee' ? 'My Apartments' : 'Apartments'} </h2>
+                            </div>
+                            <div className="flex items-center justify-center gap-3">
+                                <div className="flex flex-col gap-2">
+                                    <IconTextInput
+                                        icon={<FaSearch size={17} />}
+                                        rounded="rounded-full"
+                                        className="border border-gray-400 bg-slate-50 h-10 rounded-md"
+                                        placeholder="Search..."
+                                        value={searchQuery}
+                                        onChange={handleSearch}
+                                    />
+                                    <SelectInput
+                                        onChange={handlePriceRangeChange}
+                                    >
+                                        <option value="">Select Price Range</option>
+                                        <option value="300000">{'< 300,000'}</option>
+                                        <option value="300000 - 500000">{'300,000 - 500,000'}</option>
+                                        <option value="500000 - 1000000">{'500,000 - 1,000,000'}</option>
+                                        <option value="1000000">{'> 1,000,000'}</option>
+                                    </SelectInput>
+                                </div>
+                                <LgaSelect
+                                    onChange={handleCityChange} />
+                                <div className="flex flex-col gap-2">
+                                    <TextInput
+                                        type="number"
+                                        placeholder="bedrooms"
+                                        onChange={handleBedroomsChange}
+                                    />
+                                    <TextInput
+                                        type="number"
+                                        placeholder="bathrooms"
+                                        onChange={handleBathroomChange}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -54,38 +191,40 @@ const Apartments = ({auth, apartments, newApartments}) => {
                     <div className='flex flex-col gap-6 py-12 mx-auto'>
                         <div className='actions flex flex-col gap-3 w-full items-center' >
                             <div className='grid grid-cols-3 gap-3 w-full'>
-                            {apartments.map((item, i) => (
-                                <Link key={i} href={`/apartment/${item.slug}`} className='action flex flex-col shadow-lg items-start h-full rounded-2xl overflow-hidden justify-center'>
-                                    <div className="h-1/2 overflow-none course-heading flex text-white bg-gray-400 w-full flex-col gap-3">
-                                        <img src={`${item?.images[0]?.path}`} alt="" />
-                                    </div>
-                                    {auth.user.type == 'learner' ? (
-                                    <div className='p-6 w-full'>
-                                        <p className='text-bold'>Pending tasks</p>
-                                        <p className='p-2 bg-green-200 text-green-800 rounded'>Assignment due in 2 days</p>
-                                        <p className='text-bold mt-3'>Scheduled meetings</p>
-                                        <p className='p-2 bg-gray-200 text-gray-800 rounded'>No scheduled meetings</p>
-                                    </div>
-                                    ) : (
-                                    <div className='p-6 w-full'>
-                                        <div className="flex row items-center space-between gap-2">
-                                            <FaLocationDot color='red' />
-                                            <p>{item?.address}</p>
-                                        </div>
-                                        <div className="h-1/4 course-heading flex text-black w-full flex-col gap-3">
-                                            <h4 className='text-2xl font-bold'>{item.title}</h4>
-                                            <p className='tutor text-base mb-20'>Landlord: {item.landlord.fname}</p>
-                                        </div>
-                                        <hr className='mt-4' />
-                                        <p className='text-bold mt-3'>Price:</p>
-                                        <p className='p-2 bg-sky-200 text-sky-800 rounded flex items-center gap-4'>
+                                {filteredApartments?.length > 0 ? (
+                                    filteredApartments.map((item, i) => (
+                                        <Link key={i} href={`/apartment/${item.slug}`} className='action flex flex-col shadow-lg items-start h-full rounded-2xl overflow-hidden justify-center'>
+                                            <div className="h-72 overflow-hidden course-heading flex text-white bg-gray-400 w-full flex-col gap-3">
+                                                <img src={`${item?.images[0]?.path}`} alt="" />
+                                            </div>
+                                            {auth.user.type == 'learner' ? (
+                                            <div className='p-6 w-full'>
+                                                <p className='text-bold'>Pending tasks</p>
+                                                <p className='p-2 bg-green-200 text-green-800 rounded'>Assignment due in 2 days</p>
+                                                <p className='text-bold mt-3'>Scheduled meetings</p>
+                                                <p className='p-2 bg-gray-200 text-gray-800 rounded'>No scheduled meetings</p>
+                                            </div>
+                                            ) : (
+                                            <div className='p-6 w-full'>
+                                                <div className="flex row items-center space-between gap-2">
+                                                    <FaLocationDot color='red' />
+                                                    <p>{item?.address}</p>
+                                                </div>
+                                                <div className="h-1/4 course-heading flex text-black w-full flex-col gap-3">
+                                                    <h4 className='text-2xl font-bold'>{item.title}</h4>
+                                                    <p className='tutor text-base mb-20'>Landlord: {item.landlord.fullname}</p>
+                                                </div>
+                                                <hr className='mt-4' />
+                                                <p className='text-bold mt-3'>Price:</p>
+                                                <p className='p-2 bg-sky-200 text-sky-800 rounded flex items-center gap-4'>
 
-                                            {formatPrice(item?.monthly_price) } / month
-                                        </p>
-                                    </div>
-                                    )}
-                                </Link>
-                            ))}
+                                                    {formatPrice(item?.monthly_price) } / month
+                                                </p>
+                                            </div>
+                                            )}
+                                        </Link>
+                                    ))
+                                ) : <div className='col-span-3 text-center'>There are no properties available</div>}
 
 
                             </div>

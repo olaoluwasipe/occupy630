@@ -46,7 +46,7 @@ const Sessions = ({auth, sessions, tutors, courses}) => {
             // header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
         >
         <Head title='Session Management' />
-        
+
         <div className="container mx-auto mt-4">
             <div className='bg-white rounded p-4 mb-5'>
                 <PrimaryButton onClick={modalSession} className='mb-4'>Create New Session</PrimaryButton>
@@ -126,7 +126,7 @@ const Sessions = ({auth, sessions, tutors, courses}) => {
                             </td>
                         </tr>
                     ))}
-                        
+
                     </tbody>
                 </table>
             </div>
@@ -184,7 +184,7 @@ const Sessions = ({auth, sessions, tutors, courses}) => {
                             </td>
                         </tr>
                     ))}
-                        
+
                     </tbody>
                 </table>
             </div>
@@ -212,7 +212,7 @@ const Sessions = ({auth, sessions, tutors, courses}) => {
                     <Link
                         href={route('admin.delete-session', session?.id)}
                         method='delete'>
-                        <DangerButton 
+                        <DangerButton
                             onClick={() => {
                             console.log(session)
                             setTimeout(setDeleteSession(false), 2000)

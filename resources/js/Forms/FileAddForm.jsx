@@ -6,12 +6,13 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import EditorComponent from '@/Components/Editor';
 import PrimaryButton from '@/Components/PrimaryButton';
 
-const FileAddForm = ({ cohort }) => {
+const FileAddForm = ({ apartment }) => {
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         description: '',
         attachments: '',
-        cohort_id: cohort
+        apartment_id: apartment.id,
+        tenant_id: apartment.tenant_id
     });
 
   const handleTitleChange = (e) => {
@@ -30,7 +31,7 @@ const FileAddForm = ({ cohort }) => {
     e.preventDefault()
     // Handle form submission logic here
     console.log('Title:', data.title)
-    console.log('Cohort:', data.cohort_id)
+    console.log('Cohort:', data.apartment_id)
     console.log('Description:', data.description)
     console.log('Attachments:', data.attachments)
 

@@ -17,6 +17,11 @@ class Notification extends Model
         'user_id'
     ];
 
+    protected $casts = [
+        'data' => 'array',
+        'read_at' => 'datetime',
+    ];
+
     public function notifiable()
     {
         return $this->morphTo();

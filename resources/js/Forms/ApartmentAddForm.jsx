@@ -11,9 +11,10 @@ import SecondaryButton from '@/Components/SecondaryButton';
 import SelectInput from '@/Components/SelectInput';
 import LgaSelect from '@/Components/LgaSelect';
 import Checkbox from '@/Components/Checkbox';
+import formatPrice from '@/functions';
 
 const ApartmentAddForm = ({ categories, attributes, apartment }) => {
-    // console.log(apartment)
+    console.log(apartment)
     attributes = ['parking', 'wifi', 'tv', 'ac', 'gym', 'pool', 'laundry', 'security']
     const { data, setData, post, processing, errors, reset } = useForm({
         title: apartment?.title,
@@ -22,7 +23,7 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
         address: apartment?.address,
         price: apartment?.price,
         category: apartment?.category_id,
-        location: {state: apartment?.state, city: apartment?.lga},
+        location: {state: apartment?.state, city: apartment?.city},
         // city: '',
         bathrooms: apartment?.bathrooms,
         bedrooms: apartment?.bedrooms,
@@ -40,12 +41,15 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
         setData((prevData) => ({
             ...prevData,
             amenities: checked
-                ? [...prevData?.amenities, value]
-                : prevData.amenities.filter((amenity) => amenity !== value),
+                ? [...(prevData.amenities || []), value] // Ensure amenities is not undefined
+                : (prevData.amenities || []).filter((amenity) => amenity !== value),
         }));
-
-        console.log(data.amenities)
     };
+
+    // If you want to log the updated value, use a separate useEffect
+    useEffect(() => {
+        console.log(data.amenities);
+    }, [data.amenities]);
 
     useEffect(() => {
         // Set last step count after the wizard ref initializes
@@ -54,6 +58,12 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
             setCurrentStep(wizardRef.current.state.activeStep);
         }
     }, [wizardRef.current]);
+
+    useEffect(() => {
+        if (apartment?.images) {
+            setData('attachments', apartment.images.map(img => img.url || img));
+        }
+    }, [apartment]);
 
     const handleNext = (e) => {
         e.preventDefault()
@@ -78,9 +88,13 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
   }
 
   const handleImagesChange = (files) => {
-    setData('attachments', files)
-    console.log(files);
-  }
+        // const updatedAttachments = [
+        //     ...(data.attachments || []),
+        //     ...files.map(file => file.url || file) // Ensure consistency
+        // ];
+        setData('attachments', files);
+        console.log(files);
+    };
 
   const handlePriceChange = (e) => {
     var price = e.target.value
@@ -98,16 +112,6 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
       setData('price', '');
     }
   }
-
-  const formatPrice = (price) => {
-      if (!price) return '';
-      return new Intl.NumberFormat('en-NG', {
-        style: 'currency',
-        currency: 'NGN',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(price);
-    }
 
 
   const handleStateChange = (location) => {
@@ -132,7 +136,11 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
     <form onSubmit={handleSubmit}>
 
         <div>
-            <MultipleImageInput title={`Images`} preselected={data.attachments} onFileChange={handleImagesChange} />
+        <MultipleImageInput
+            title="Images"
+            preselected={data.attachments?.map(att => att.url || att)}
+            onFileChange={handleImagesChange}
+        />
 
             <InputError message={errors?.attachments} className='mt-2' />
         </div>
@@ -160,14 +168,14 @@ const ApartmentAddForm = ({ categories, attributes, apartment }) => {
       </div>
       <div className='flex flex-row items-center gap-3 mt-3'>
         <div className='mt-3 w-1/2'>
-            <InputLabel htmlFor="price" value="Rent" />
+            <InputLabel htmlFor="price" value="Rent Amount" />
             <TextInput
                 id="price"
                 type="text"
                 name="price"
                 multiple
                 placeholder="Rent"
-                value={data.price}
+                value={formatPrice(data.price)}
                 className="mt-1 block w-full"
                 onChange={handlePriceChange}
             />

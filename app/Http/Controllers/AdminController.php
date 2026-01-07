@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\MailNotification;
 use App\Models\Apartment;
 use App\Models\ApartmentAttribute;
 use App\Models\ApartmentCategory;
 use App\Models\Cohort;
+use App\Models\Company;
 use App\Models\Course;
 use App\Models\CourseModule;
 use App\Models\Notification;
@@ -17,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
@@ -24,14 +27,15 @@ use Spatie\Permission\Models\Permission;
 class AdminController extends Controller
 {
     public function index () {
-        $courses = Course::count();
-        $tutors = User::where('type', 'tutor')->count();
-        $students = User::where('type','learner')->count();
+        $companies = Company::count();
+        $employees = User::where('type', 'employee')->count();
+        $employers = User::where('type','employer')->count();
+        // $companies = User::where('type','employer')->count();
         $admin = User::where('type', 'admin')->count();
         return Inertia::render('Admin/Dashboard', [
-            'courses' => $courses,
-            'tutors' => $tutors,
-            'students' => $students,
+            'companies' => $companies,
+            'employees' => $employees,
+            'employers' => $employers,
             'admins' => $admin,
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
@@ -42,9 +46,20 @@ class AdminController extends Controller
 
     public function users () {
         $user = Auth::user();
-        $users = User::all();
-        $learners = $user->can('manage learners') ? User::where('type', 'learner')->get() : [];
-        $tutors = $user->can('manage tutors') ? User::where('type', 'tutor')->get() : [];
+        // $users = User::all();
+        if ($user->can('manage users')) {
+            $users = User::where('type', '!=', 'superadmin')
+                ->where('type', '!=', 'admin')
+                ->orderByDesc('created_at')
+                ->get()
+                ->map(function ($user) {
+                    $user->company = $user->employedCompany ?? $user->company;
+                    return $user;
+                });
+        } else {
+            $users = collect(); // Use an empty collection for consistency
+        }
+        $companies = $user->can('manage companies') ? Company::all() : [];
         $admins = User::where('type', 'admin')->get();
         foreach($admins as $user) {
             $user->permissions = $user->getDirectPermissions()->pluck('name');
@@ -54,8 +69,8 @@ class AdminController extends Controller
         $permissions = Permission::all();
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
-            'learners' => $learners,
-            'tutors' => $tutors,
+            'companies' => $companies,
+            // 'tutors' => $tutors,
             'admins' => $admins,
             'courses' => $courses,
             'cohorts' => $cohorts,
@@ -67,7 +82,7 @@ class AdminController extends Controller
         $apartments = Apartment::orderBy('id', 'desc');
         $apartmentAttributes = ApartmentAttribute::all();
         $apartmentCategories = ApartmentCategory::all();
-        $apartments = $apartments->with('images', 'category')->get();
+        $apartments = $apartments->with('images', 'category', 'landlord')->get();
         return Inertia::render('Admin/Apartments/Index', [
             'apartments' => $apartments,
             'attributes' => $apartmentAttributes,
@@ -126,9 +141,10 @@ class AdminController extends Controller
 
     public function createUser () {
         $validatedData = request()->validate([
-            'name' => 'required|string|max:255',
+            'fname' => 'required|string|max:255',
+            'lname' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'userType' => 'required|in:learner,tutor,admin,superadmin',
+            'userType' => 'required|in:employer,landlord,admin,superadmin',
             'gender' => 'required|in:Male,Female,Other',
             'phoneNumber' => 'required|string|max:20',
             'nationality' => 'required|string|max:50',
@@ -136,10 +152,13 @@ class AdminController extends Controller
             'permissions' => 'nullable|array',
         ]);
 
+        $generatedPassword = $this->generateRandomString();
+
         $user = User::create([
-            'name' => $validatedData['name'],
+            'fname' => $validatedData['fname'],
+            'lname' => $validatedData['lname'],
             'email' => $validatedData['email'],
-            'password' => Hash::make('password'),
+            'password' => Hash::make($generatedPassword),
             'type' => $validatedData['userType'],
             'gender' => $validatedData['gender'],
             'phonenumber' => $validatedData['phoneNumber'],
@@ -155,9 +174,14 @@ class AdminController extends Controller
             if($permission['status'] === true) $user->givePermissionTo($permission['permission_id']);
         }
 
-        if ($validatedData['userType'] === 'learner') {
+        if ($validatedData['userType'] === 'employee') {
             $user->studentcohort()->attach(request('session'));
         }
+
+        $subject = 'Welcome to Occupy630!';
+        $body = 'Your account has been created successfully as a '.$user->type.'. Please use this email and this password to login: ' . $generatedPassword . '.'.PHP_EOL.'And don\'t forget to change your password after login.';
+        $link = route('login');
+        Mail::to($user->email)->send(new MailNotification($subject, $body, $link, $subject));
 
         return redirect()->route('admin.users')->with('success', 'User created successfully.');
     }

@@ -16,9 +16,9 @@ class File extends Model
         'file_type',
         'file_size',
         'file_path',
-        'cohort_id',
+        'tenant_id',
         'user_id',
-        'assignment_id',
+        'apartment_id',
     ];
 
     public function assignment () {

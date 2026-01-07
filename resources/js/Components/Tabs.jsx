@@ -29,7 +29,7 @@ const Tabs = ({ tabs, container=true }) => {
       <div style={boxShadow} className={"bg-white overflow-hidden gap-3 mb-10" + containerStyles}>
         {tabs.map((tab) =>
           activeTab === tab.label ? (
-            <div key={tab.label} className="p-4">
+            <div key={tab.label} className="">
               {tab.content}
             </div>
           ) : null

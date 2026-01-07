@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
+use App\Mail\RegistrationCode;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -78,7 +80,7 @@ class CompanyController extends Controller
         // Save changes
         $company->save();
 
-        return Redirect::route('company.dashboard');
+        return Redirect::route('home');
     }
 
     /**
@@ -116,9 +118,12 @@ class CompanyController extends Controller
             'company_id' => $request->user()->company->id,
             'register_code' => $registerCode,
             'type' => 'employee',
+          	'created_at' => now(),
         ]);
 
         $user->assignRole('employee');
+
+        Mail::to($request->email)->send(new RegistrationCode($request->user(), $request->email, $registerCode));
 
         return redirect()->back()->with('success', 'Request sent successfully');
     }

@@ -19,7 +19,17 @@ class Company extends Model
         'user_id',
     ];
 
+    protected $appends = ['owner'];
+
+    public function getOwnerAttribute() {
+        return $this->owner()->first();
+    }
+
     public function users(){
         return $this->hasMany(User::class, 'company_id');
+    }
+
+    public function owner () {
+        return $this->belongsTo(User::class,'user_id');
     }
 }

@@ -50,16 +50,16 @@ export default function Admin({ user, title, children }) {
 
                                         Property Management
                                     </NavLink>
-                                    <NavLink style={{margin: 0, marginLeft: '10px', padding: '15px', justifyContent: 'start'}} className='border-b-gray-300 gap-5 m-l-3 border-2' href={route('admin.courses')} active={route().current('admin.courses')}>
+                                    {/* <NavLink style={{margin: 0, marginLeft: '10px', padding: '15px', justifyContent: 'start'}} className='border-b-gray-300 gap-5 m-l-3 border-2' href={route('admin.courses')} active={route().current('admin.courses')}>
                                         <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M8.66667 15.6134C9.04167 15.7454 9.44444 15.4711 9.44444 15.0753V1.97108C9.44444 1.82525 9.38889 1.67942 9.27083 1.58914C8.59028 1.04747 7.02778 0.353027 5 0.353027C3.24653 0.353027 1.60764 0.814833 0.628472 1.18983C0.236111 1.34261 0 1.7315 0 2.15164V15.0093C0 15.4225 0.444444 15.7107 0.836806 15.5822C1.93056 15.2176 3.66319 14.7975 5 14.7975C6.17708 14.7975 7.74306 15.2836 8.66667 15.6134ZM11.3333 15.6134C12.2569 15.2836 13.8229 14.7975 15 14.7975C16.3368 14.7975 18.0694 15.2176 19.1632 15.5822C19.5556 15.7141 20 15.4225 20 15.0093V2.15164C20 1.7315 19.7639 1.34261 19.3715 1.19331C18.3924 0.814833 16.7535 0.353027 15 0.353027C12.9722 0.353027 11.4097 1.04747 10.7292 1.58914C10.6146 1.67942 10.5556 1.82525 10.5556 1.97108V15.0753C10.5556 15.4711 10.9618 15.7454 11.3333 15.6134Z" fill={route().current('admin.courses') ? `#343C6A` : '#888888'}/>
                                         </svg>
                                         Course Management
-                                    </NavLink>
+                                    </NavLink> */}
 
                                     {user.type === 'superadmin' && (
                                         <>
-                                        <NavLink style={{margin: 0, marginLeft: '10px', padding: '15px', justifyContent: 'start'}} className='border-b-gray-300 gap-5 m-l-3 border-2' href={route('admin.sessions')} active={route().current('admin.sessions')}>
+                                        {/* <NavLink style={{margin: 0, marginLeft: '10px', padding: '15px', justifyContent: 'start'}} className='border-b-gray-300 gap-5 m-l-3 border-2' href={route('admin.sessions')} active={route().current('admin.sessions')}>
                                             <svg width="20" height="27" viewBox="0 0 20 27" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M3.33333 0C1.49479 0 0 1.49479 0 3.33333V23.3333C0 25.1719 1.49479 26.6667 3.33333 26.6667H16.6667C18.5052 26.6667 20 25.1719 20 23.3333V8.33333H13.3333C12.4115 8.33333 11.6667 7.58854 11.6667 6.66667V0H3.33333ZM13.3333 0V6.66667H20L13.3333 0ZM5.83333 13.3333H14.1667C14.625 13.3333 15 13.7083 15 14.1667C15 14.625 14.625 15 14.1667 15H5.83333C5.375 15 5 14.625 5 14.1667C5 13.7083 5.375 13.3333 5.83333 13.3333ZM5.83333 16.6667H14.1667C14.625 16.6667 15 17.0417 15 17.5C15 17.9583 14.625 18.3333 14.1667 18.3333H5.83333C5.375 18.3333 5 17.9583 5 17.5C5 17.0417 5.375 16.6667 5.83333 16.6667ZM5.83333 20H14.1667C14.625 20 15 20.375 15 20.8333C15 21.2917 14.625 21.6667 14.1667 21.6667H5.83333C5.375 21.6667 5 21.2917 5 20.8333C5 20.375 5.375 20 5.83333 20Z" fill={route().current('admin.sessions') ? `#343C6A` : '#888888'}/>
                                             </svg>
@@ -72,7 +72,7 @@ export default function Admin({ user, title, children }) {
                                             </svg>
 
                                             Communications
-                                        </NavLink>
+                                        </NavLink> */}
                                         </>
                                     )}
                                 </div>

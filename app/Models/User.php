@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+// use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,7 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, HasApiTokens, HasRoles;
 
@@ -43,6 +46,8 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'remember_token',
     ];
+
+    protected $appends = ['fullname'];
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -77,9 +82,18 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
-    public function company () {
+    public function getFullnameAttribute()
+    {
+        return "{$this->fname} {$this->lname}";
+    }
+
+    public function company() {
         return $this->hasOne(Company::class, 'user_id');
     }
+
+    // public function getCompanyInfoAttribute() {
+    //     return $this->company;
+    // }
 
     public function employedCompany() {
         return $this->belongsTo(Company::class, 'company_id');
@@ -118,31 +132,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Forum::class, 'user_id');
     }
 
-    public function assignmentSubmissions() {
-        return $this->hasMany(AssignmentSubmission::class, 'user_id');
+    public function files () {
+        return $this->hasMany(File::class);
     }
 
-    public function chatsSent() {
-        return $this->hasMany(Chat::class, 'sender_id');
-    }
-
-    public function chatsReceived() {
-        return $this->hasMany(Chat::class, 'receiver_id');
-    }
-
-    public function attendances() {
-        return $this->hasMany(Attendance::class, 'user_id');
-    }
-
-    public function meetings() {
-        return $this->hasMany(Meeting::class, 'user_id');
-    }
-
-    public function inquiries() {
-        return $this->hasMany(Inquiry::class, 'user_id');
-    }
-
-    public function housePayments() {
-        return $this->hasMany(HousePayment::class, 'user_id');
+    public function tenantFiles () {
+        return $this->hasMany(File::class, 'tenant_id');
     }
 }

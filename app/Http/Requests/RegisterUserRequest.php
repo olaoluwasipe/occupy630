@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use App\Rules\CompanyEmail;
 use App\Rules\UniqueIf;
 use Illuminate\Foundation\Http\FormRequest;
@@ -34,7 +35,15 @@ class RegisterUserRequest extends FormRequest
                 'email',
                 'max:255',
                 new UniqueIf('users', 'email', 'register_code', null),
-                new CompanyEmail,
+                function ($attribute, $value, $fail) {
+                    // Skip CompanyEmail validation if type is landlord
+                    if (request()->input('type') === 'employer') {
+
+                        $rule = new CompanyEmail;
+                        return $rule->validate($attribute, $value, $fail);
+                        // $rule->passes($attribute, $value) || $fail($rule->message());
+                    }
+                },
             ],
             'type' => 'required|string|max:255|in:landlord,employer,employee',
             'password' => ['required', 'confirmed', Password::defaults()],

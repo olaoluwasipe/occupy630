@@ -14,6 +14,9 @@ class Apartment extends Model
         'description',
         'price',
         'cg_price',
+        'monthly_rent',
+        'six_months_rent',
+        'service_charge',
         'monthly_price',
         'address',
         'city',
@@ -85,7 +88,19 @@ class Apartment extends Model
         return $this->hasMany(HousePayment::class, 'apartment_id');
     }
 
+    public function approvals() {
+        return $this->hasMany(Approval::class);
+    }
+
+    public function files () {
+        return $this->hasMany(File::class);
+    }
+
     // public function rentalHistory() {
     //     return $this->hasMany(RentalHistory::class);
     // }
+
+    public function notifications () {
+        return $this->morphMany(Notification::class,'notifiable');
+    }
 }

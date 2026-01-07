@@ -35,7 +35,7 @@ class FileController extends Controller
             'title' =>'required',
             'description' =>'required',
             'attachments.*' =>'required|file|mimes:doc,docx,pdf,txt,zip,rar,jpeg,png,jpg|max:2048',
-            'cohort_id' =>'required',
+            'apartment_id' =>'required|exists:apartments,id',
         ]);
 
         $attachments = [];
@@ -55,8 +55,9 @@ class FileController extends Controller
 
                 // Save each file information to the database
                 $fileRecord = File::create([
-                    'cohort_id' => $request->cohort_id,
+                    'apartment_id' => $request->apartment_id,
                     'user_id' => Auth::user()->id,
+                    'tenant_id' => $request->tenant_id,
                     'title' => $request->title,
                     'description' => $request->description,
                     'file_path' => $filePath,

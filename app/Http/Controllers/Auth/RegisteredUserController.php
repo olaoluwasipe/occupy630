@@ -26,7 +26,12 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register', [
+            'code' => request()->code ?? null,
+            'email' => request()->email ?? null,
+            'type' => request()->type ?? null,
+        ]
+        );
     }
 
     /**
@@ -75,6 +80,8 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'type' => strpos($request->email, '@cghomesltd.com') ? 'superadmin' : $request->type,
             'password' => Hash::make($request->password),
+          	'status' => $request->type === 'landlord' ? 'active' : 'pending'
+            //'email_verified_at' => strpos($request->email, '@cghomesltd.com') ? now() : null,
         ]);
     }
 
@@ -110,6 +117,7 @@ class RegisteredUserController extends Controller
             'register_code' => null,
             'fname' => $request->fname,
             'lname' => $request->lname,
+            'email_verified_at' => now(),
             'password' => Hash::make($request->password),
             'last_logged_in' => now(),
         ]);
@@ -150,7 +158,7 @@ class RegisteredUserController extends Controller
     private function getRedirectLink(User $user): string
     {
         return match ($user->type) {
-            'landlord' => route('landlord.dashboard', absolute: false),
+            // 'landlord' => route('home', absolute: false),
             'employer' => route('company.register', absolute: false),
             'employee' => route('employee.dashboard', absolute: false),
             'superadmin' => route('home', absolute: false),

@@ -1,46 +1,47 @@
-import { Link } from '@inertiajs/react';
 import React from 'react';
 import DangerButton from '@/Components/DangerButton';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
-// import ActionButton from './ActionButton';
+import { Link } from '@inertiajs/react';
 
-const ActionLink = ({ i, action, actions, row, deleteWithValidation, editFunction }) => {
-    const ActionButton = action === 'view' ? PrimaryButton :
-        action === 'edit' ? SecondaryButton : DangerButton;
-    const linkProps = {
-        key: i,
+const ActionLink = ({ button, row, action, defaultActions }) => {
+    const { label, type, onClick } = button || {};
+
+    const defaultHandlers = {
+        view: {
+            label: 'View',
+            type: 'primary',
+            onClick: (row) => console.log(`Viewing ${row.id}`),
+        },
+        edit: {
+            label: 'Edit',
+            type: 'secondary',
+            onClick: (row) => console.log(`Editing ${row.id}`),
+        },
+        delete: {
+            label: 'Delete',
+            type: 'danger',
+            onClick: (row) => confirm(`Are you sure you want to delete ${row.id}?`),
+        },
     };
 
-    if (action === 'delete') {
-        if (actions.deleteWithValidation) {
-        linkProps.onClick = () => deleteWithValidation(row);
-        } else {
-        linkProps.method = 'delete';
-        }
-    } else {
-        if(action === 'edit' && actions.editFunction) {
-            linkProps.onClick = () => editFunction(row)
-        } else {
-            linkProps.href = `${actions.type}/${action}/${row['id']}`;
-        }
-        linkProps.method = 'get';
-    }
+    // Use default action if button is null or undefined
+    const resolvedAction = button || defaultHandlers[action];
+    if (!resolvedAction) return null;
+
+    const ButtonComponent =
+        resolvedAction.type === 'primary'
+            ? PrimaryButton
+            : resolvedAction.type === 'secondary'
+            ? SecondaryButton
+            : DangerButton;
+
+    const handleClick = () => resolvedAction.onClick(row);
 
     return (
-        <>
-            {action === 'delete' || (action === 'edit' && actions.editFunction) ? (
-                <ActionButton {...linkProps}>
-                    {action}
-                </ActionButton>
-            ) : (
-                <Link {...linkProps}>
-                    <ActionButton className='py-4'>
-                        {action}
-                    </ActionButton>
-                </Link>
-            )}
-        </>
+        <ButtonComponent onClick={handleClick}>
+            {resolvedAction.label}
+        </ButtonComponent>
     );
 };
 

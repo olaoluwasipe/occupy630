@@ -25,7 +25,7 @@ class UpdateCompanyRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'business_number' => ['required', 'string'],
+            'business_number' => ['nullable', 'string'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(Company::class)->ignore($this->user()->company->id)],
             'phone' => ['nullable', 'numeric'],
             'website' => ['nullable', 'string', 'max:255'],

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-const TabsHorizontal = ({ tabs, actions=[], title, loadItem, zeActive }) => {
+const TabsHorizontal = ({ tabs, actions=[], title, loadItem, zeActive=false }) => {
   const [activeTab, setActiveTab] = useState(tabs[0].label);
 
   const handleTabClick = (label) => {
     setActiveTab(label);
-    zeActive(label)
+    zeActive ?? zeActive(label)
   };
   useEffect(() => {
     tabs.map((tab) => {

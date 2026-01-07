@@ -29,7 +29,7 @@ class StoreApartmentRequest extends FormRequest
 
             // Attachments array, each file within it must meet specific requirements
             'attachments' => 'required|array',
-            'attachments.*' => 'file|mimes:pdf,doc,docx,jpg,jpeg,png,gif|max:2048',
+            'attachments.*' => 'file|mimes:pdf,doc,docx,jpg,jpeg,png,gif,webp|max:2048',
 
             'address' => 'required|string',
 

@@ -66,7 +66,8 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
     }
 
     const { data, setData, post, processing, errors, reset, recentlySuccessful } = useForm({
-        name: user?.name || '',
+        fname: user?.fname || '',
+        lname: user?.lname || '',
         email: user?.email || '',
         phoneNumber: user?.phonenumber || '',
         userType: user?.type || '',
@@ -92,9 +93,14 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
         }
     }, [recentlySuccessful, reset])
 
-    const handleFullNameChange = (e) => {
-        setData('name', e.target.value)
+    const handleFirstNameChange = (e) => {
+        setData('fname', e.target.value)
     }
+
+    const handleLastNameChange = (e) => {
+        setData('lname', e.target.value)
+    }
+
 
     const handleEmailChange = (e) => {
         setData('email', e.target.value)
@@ -157,20 +163,37 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
 
     return (
         <form onSubmit={handleSubmit}>
-            <div>
-                <InputLabel htmlFor="name" value="Full Name" />
-                <TextInput
-                    id="name"
-                    type="text"
-                    name="name"
-                    placeholder="Full Name"
-                    value={data.name}
-                    className="mt-1 block w-full"
-                    isFocused={true}
-                    onChange={handleFullNameChange}
-                />
+            <div className="flex gap-3">
+                <div className='w-1/2'>
+                    <InputLabel htmlFor="fname" value="First Name" />
+                    <TextInput
+                        id="fname"
+                        type="text"
+                        name="fname"
+                        placeholder="First Name"
+                        value={data.fname}
+                        className="mt-1 block w-full"
+                        isFocused={true}
+                        onChange={handleFirstNameChange}
+                    />
 
-                <InputError message={errors?.name} className='mt-2' />
+                    <InputError message={errors?.fname} className='mt-2' />
+                </div>
+                <div className='w-1/2'>
+                    <InputLabel htmlFor="lname" value="Last Name" />
+                    <TextInput
+                        id="lname"
+                        type="text"
+                        name="lname"
+                        placeholder="Last Name"
+                        value={data.lname}
+                        className="mt-1 block w-full"
+                        isFocused={false}
+                        onChange={handleLastNameChange}
+                    />
+
+                    <InputError message={errors?.lname} className='mt-2' />
+                </div>
             </div>
             <div className='flex gap-3'>
                 <div className='mt-3 w-1/2'>
@@ -228,8 +251,8 @@ const CreateUserForm = ({ modalClose, courses, cohorts, user, permissions }) => 
                         onChange={handleUserTypeChange}
                     >
                         <option value="">Select User Type</option>
-                        <option value="learner">Learner</option>
-                        <option value="tutor">Tutor</option>
+                        <option value="employer">Employer</option>
+                        <option value="landlord">Landlord</option>
                         <option value="admin">Admin</option>
                         <option value="superadmin">Super Admin</option>
                     </select>
