@@ -42,14 +42,41 @@ const Chat = ({ user, close }) => {
                 const lastMessages = groupMessages(data);
                 setFetchedChats(lastMessages);
             } catch (error) {
-                console.error('Error fetching chats:', error);
+                // Error handling - could show toast notification
             }
         };
 
-        const intervalId = setInterval(fetchChats, 1000);
+        // Initial fetch
+        fetchChats();
 
-        return () => clearInterval(intervalId);
-    }, []);
+        // Set up real-time updates with Echo
+        if (window.Echo && user) {
+            // Listen for new messages on user's private channel
+            window.Echo.private(`user.${user.id}`)
+                .listen('.MessageSent', (e) => {
+                    if (e.message) {
+                        setMessages((prev) => [...prev, e.message]);
+                        const updatedMessages = [...messages, e.message];
+                        const lastMessages = groupMessages(updatedMessages);
+                        setFetchedChats(lastMessages);
+                    }
+                });
+
+            // Listen for message read receipts
+            window.Echo.private(`user.${user.id}`)
+                .listen('.MessageRead', (e) => {
+                    setMessages((prev) =>
+                        prev.map((msg) =>
+                            msg.id === e.messageId ? { ...msg, read_at: e.readAt } : msg
+                        )
+                    );
+                });
+
+            return () => {
+                window.Echo.leave(`user.${user.id}`);
+            };
+        }
+    }, [user]);
 
     const selectChat = (chatId) => {
         const chatData = fetchedChats.find(msg => msg.sent.id === chatId || msg.received.id === chatId);

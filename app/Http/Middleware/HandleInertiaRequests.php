@@ -29,14 +29,21 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
+        $shared = parent::share($request);
+        
+        // Ensure translations is always an object/array to prevent RegisterClientLocalizationsError
+        // Inertia expects translations to be an object (associative array), not a list
+        if (!isset($shared['translations']) || !is_array($shared['translations'])) {
+            $shared['translations'] = [];
+        }
+        
+        return array_merge($shared, [
             'auth' => [
                 'user' => $request->user(),
             ],
             'success' => session('success'),
             'error' => session('error'),
             'status' => session('status'),
-        ];
+        ]);
     }
 }

@@ -14,17 +14,35 @@ class NotificationController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         
-        $notifications = Notification::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        $query = Notification::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc');
+
+        // Apply filter if provided
+        if ($request->has('filter')) {
+            if ($request->filter === 'unread') {
+                $query->whereNull('read_at');
+            } elseif ($request->filter === 'read') {
+                $query->whereNotNull('read_at');
+            }
+        }
+
+        $notifications = $query->paginate(20);
 
         $unreadCount = Notification::where('user_id', $user->id)
             ->whereNull('read_at')
             ->count();
+
+        // Return JSON for API requests (from NotificationCenter)
+        if ($request->wantsJson() || $request->expectsJson()) {
+            return response()->json([
+                'data' => $notifications->items(),
+                'unread_count' => $unreadCount,
+            ]);
+        }
 
         return Inertia::render('Notifications/Index', [
             'notifications' => $notifications,

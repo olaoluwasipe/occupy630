@@ -36,7 +36,15 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     if (!Auth::check()) {
-        $apartments = Apartment::where('status', 'approved')->with('images')->get();
+        // Cache approved apartments for 10 minutes
+        $apartments = cache()->remember('approved_apartments', 600, function () {
+            return Apartment::where('status', 'approved')
+                ->with('images')
+                ->latest()
+                ->limit(12)
+                ->get();
+        });
+        
         return Inertia::render('Website/Index', [
             'properties' => $apartments,
             'canLogin' => Route::has('login'),
@@ -97,10 +105,18 @@ Route::get('/dashboard', function () {
             $payments->push($apart->transactions);
         }
         $payments = $payments->flatten();
+        // Eager load apartments to prevent N+1 queries
+        $apartmentIds = $payments->pluck('apartment_id')->unique();
+        $apartmentsMap = Apartment::whereIn('id', $apartmentIds)
+            ->get()
+            ->keyBy('id');
+        
         foreach ($payments as $payment) {
-            $apart = Apartment::where('id', $payment->apartment_id)->first();
-            $initial = ($apart->price * 0.3) + ($apart->price * 0.05 * 2);
-            $payment->landlord_amount = $payment->type == 'rent' ? $apart->monthly_rent : $initial;
+            $apart = $apartmentsMap->get($payment->apartment_id);
+            if ($apart) {
+                $initial = ($apart->price * 0.3) + ($apart->price * 0.05 * 2);
+                $payment->landlord_amount = $payment->type == 'rent' ? $apart->monthly_rent : $initial;
+            }
         }
         $categories = ApartmentCategory::all();
         $attributes = ApartmentAttribute::all();
@@ -230,8 +246,6 @@ Route::middleware(['auth', 'checkuser'])->group(function () {
     Route::post('/message', [ChatController::class, 'store'])->name('message.send');
     Route::get('/read/{chat}', [ChatController::class, 'readMessage'])->name('message.read');
 
-    // Notifications
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
 
     // Forum
     // Route::post('/forum', [ForumController::class, 'store'])->name('forum.store');

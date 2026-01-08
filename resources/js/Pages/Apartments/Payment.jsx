@@ -4,7 +4,6 @@ import React from 'react';
 import { PaystackButton } from 'react-paystack';
 
 const Payment = ({ payment }) => {
-    console.log(payment)
   const handlePay = () => {
     // Add your payment processing logic here
     alert(`Redirecting to payment for Invoice #${payment.id}`);

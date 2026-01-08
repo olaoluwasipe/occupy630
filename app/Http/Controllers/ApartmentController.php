@@ -16,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -28,17 +29,59 @@ class ApartmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $company = Auth::user()->company;
-        // $employees = User::where('type', 'employee')->where('company_id', $company->id)->pluck('id');
-        $apartments = Apartment::whereNull('tenant_id')
-                        ->where('status',  'approved')
-                        ->with('landlord','images', 'category')->get();
-        // $newApartments = Apartment::whereIn('tenant_id', $employees)->with('tenant','images', 'category')->get();
+        $perPage = $request->get('per_page', 15);
+        $page = $request->get('page', 1);
+        
+        $query = Apartment::whereNull('tenant_id')
+            ->where('status', 'approved')
+            ->with(['landlord', 'images', 'category']); // Eager loading to prevent N+1
+        
+        // Apply filters
+        if ($request->has('state')) {
+            $query->where('state', 'like', '%' . $request->state . '%');
+        }
+        
+        if ($request->has('city')) {
+            $query->where('city', 'like', '%' . $request->city . '%');
+        }
+        
+        if ($request->has('bedrooms')) {
+            $query->where('bedrooms', $request->bedrooms);
+        }
+        
+        if ($request->has('bathrooms')) {
+            $query->where('bathrooms', $request->bathrooms);
+        }
+        
+        if ($request->has('min_price')) {
+            $query->where('monthly_price', '>=', $request->min_price);
+        }
+        
+        if ($request->has('max_price')) {
+            $query->where('monthly_price', '<=', $request->max_price);
+        }
+        
+        // Apply sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+        
+        // Cache the query result for 5 minutes
+        $cacheKey = 'apartments_' . md5(json_encode($request->all()) . $page);
+        $apartments = cache()->remember($cacheKey, 300, function () use ($query, $perPage) {
+            return $query->paginate($perPage);
+        });
+        
         return inertia('Apartments/Index', [
-            'apartments' => $apartments,
-            // 'newApartments' => $newApartments,
+            'apartments' => $apartments->items(),
+            'pagination' => [
+                'current_page' => $apartments->currentPage(),
+                'last_page' => $apartments->lastPage(),
+                'per_page' => $apartments->perPage(),
+                'total' => $apartments->total(),
+            ],
         ]);
     }
 

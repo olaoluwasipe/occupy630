@@ -8,9 +8,11 @@ import { FaSearch } from 'react-icons/fa'
 import LgaSelect from '@/Components/LgaSelect'
 import TextInput from '@/Components/TextInput'
 import SelectInput from '@/Components/SelectInput'
+import EmptyState from '@/Components/EmptyState'
+import ApartmentListSkeleton from '@/Components/ApartmentListSkeleton'
+import { FiHome } from 'react-icons/fi'
 
 const Apartments = ({auth, apartments, newApartments}) => {
-    console.log(apartments)
 
     const [searchQuery, setSearchQuery] = useState('');
     const [bedrooms, setBedrooms] = useState(0);
@@ -145,23 +147,24 @@ const Apartments = ({auth, apartments, newApartments}) => {
                         </ol>
                     </nav>
 
-                    <div style={{boxShadow: '0px 2px 12px #e3e3e3'}} className="bg-white overflow-hidden shadow-xl shadow-gray-200 sm:rounded-lg flex flex-row items-center p-6">
-                        <div className='w-full flex flex-row gap-3 items-center justify-between'>
+                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-soft sm:rounded-lg p-4 sm:p-6 transition-colors duration-200">
+                        <div className='w-full flex flex-col lg:flex-row gap-4 lg:gap-6 items-start lg:items-center justify-between'>
                             <div className='flex flex-col'>
-                                <h2 className='text-2xl font-bold text-blue-900'>{auth.user.type === 'employee' ? 'My Apartments' : 'Apartments'} </h2>
+                                <h2 className='text-xl sm:text-2xl font-bold text-blue-900 dark:text-blue-100'>{auth.user.type === 'employee' ? 'My Apartments' : 'Apartments'} </h2>
                             </div>
-                            <div className="flex items-center justify-center gap-3">
-                                <div className="flex flex-col gap-2">
+                            <div className="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+                                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                                     <IconTextInput
                                         icon={<FaSearch size={17} />}
                                         rounded="rounded-full"
-                                        className="border border-gray-400 bg-slate-50 h-10 rounded-md"
+                                        className="border border-gray-400 dark:border-gray-600 bg-slate-50 dark:bg-gray-700 h-10 sm:h-auto rounded-md w-full sm:w-auto min-w-[200px]"
                                         placeholder="Search..."
                                         value={searchQuery}
                                         onChange={handleSearch}
                                     />
                                     <SelectInput
                                         onChange={handlePriceRangeChange}
+                                        className="w-full sm:w-auto min-w-[180px]"
                                     >
                                         <option value="">Select Price Range</option>
                                         <option value="300000">{'< 300,000'}</option>
@@ -170,18 +173,24 @@ const Apartments = ({auth, apartments, newApartments}) => {
                                         <option value="1000000">{'> 1,000,000'}</option>
                                     </SelectInput>
                                 </div>
-                                <LgaSelect
-                                    onChange={handleCityChange} />
-                                <div className="flex flex-col gap-2">
+                                <div className="w-full sm:w-auto">
+                                    <LgaSelect
+                                        onChange={handleCityChange}
+                                        className="w-full sm:w-auto"
+                                    />
+                                </div>
+                                <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
                                     <TextInput
                                         type="number"
-                                        placeholder="bedrooms"
+                                        placeholder="Bedrooms"
                                         onChange={handleBedroomsChange}
+                                        className="w-full sm:w-24"
                                     />
                                     <TextInput
                                         type="number"
-                                        placeholder="bathrooms"
+                                        placeholder="Bathrooms"
                                         onChange={handleBathroomChange}
+                                        className="w-full sm:w-24"
                                     />
                                 </div>
                             </div>
@@ -190,12 +199,20 @@ const Apartments = ({auth, apartments, newApartments}) => {
 
                     <div className='flex flex-col gap-6 py-12 mx-auto'>
                         <div className='actions flex flex-col gap-3 w-full items-center' >
-                            <div className='grid grid-cols-3 gap-3 w-full'>
+                            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full'>
                                 {filteredApartments?.length > 0 ? (
                                     filteredApartments.map((item, i) => (
-                                        <Link key={i} href={`/apartment/${item.slug}`} className='action flex flex-col shadow-lg items-start h-full rounded-2xl overflow-hidden justify-center'>
-                                            <div className="h-72 overflow-hidden course-heading flex text-white bg-gray-400 w-full flex-col gap-3">
-                                                <img src={`${item?.images[0]?.path}`} alt="" />
+                                        <Link 
+                                            key={i} 
+                                            href={`/apartment/${item.slug}`} 
+                                            className='action flex flex-col shadow-soft hover:shadow-medium items-start h-full rounded-2xl overflow-hidden justify-center bg-white dark:bg-gray-800 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1'
+                                        >
+                                            <div className="h-48 sm:h-72 overflow-hidden course-heading flex text-white bg-gray-400 w-full flex-col gap-3">
+                                                <img 
+                                                    src={`${item?.images[0]?.path}`} 
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                                                />
                                             </div>
                                             {auth.user.type == 'learner' ? (
                                             <div className='p-6 w-full'>
@@ -205,18 +222,18 @@ const Apartments = ({auth, apartments, newApartments}) => {
                                                 <p className='p-2 bg-gray-200 text-gray-800 rounded'>No scheduled meetings</p>
                                             </div>
                                             ) : (
-                                            <div className='p-6 w-full'>
-                                                <div className="flex row items-center space-between gap-2">
-                                                    <FaLocationDot color='red' />
-                                                    <p>{item?.address}</p>
+                                            <div className='p-4 sm:p-6 w-full'>
+                                                <div className="flex row items-center space-between gap-2 mb-2">
+                                                    <FaLocationDot className="text-red-500 flex-shrink-0" />
+                                                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 truncate">{item?.address}</p>
                                                 </div>
-                                                <div className="h-1/4 course-heading flex text-black w-full flex-col gap-3">
-                                                    <h4 className='text-2xl font-bold'>{item.title}</h4>
-                                                    <p className='tutor text-base mb-20'>Landlord: {item.landlord.fullname}</p>
+                                                <div className="h-1/4 course-heading flex text-black dark:text-white w-full flex-col gap-3 mb-4">
+                                                    <h4 className='text-lg sm:text-2xl font-bold line-clamp-2'>{item.title}</h4>
+                                                    <p className='tutor text-sm sm:text-base text-gray-600 dark:text-gray-400'>Landlord: {item.landlord.fullname}</p>
                                                 </div>
-                                                <hr className='mt-4' />
-                                                <p className='text-bold mt-3'>Price:</p>
-                                                <p className='p-2 bg-sky-200 text-sky-800 rounded flex items-center gap-4'>
+                                                <hr className='mt-4 border-gray-200 dark:border-gray-700' />
+                                                <p className='text-sm font-semibold mt-3 text-gray-700 dark:text-gray-300'>Price:</p>
+                                                <p className='p-2 bg-sky-200 dark:bg-sky-900/30 text-sky-800 dark:text-sky-200 rounded flex items-center gap-4 text-sm sm:text-base font-semibold'>
 
                                                     {formatPrice(item?.monthly_price) } / month
                                                 </p>
@@ -224,7 +241,23 @@ const Apartments = ({auth, apartments, newApartments}) => {
                                             )}
                                         </Link>
                                     ))
-                                ) : <div className='col-span-3 text-center'>There are no properties available</div>}
+                                ) : (
+                                    <div className='col-span-1 md:col-span-2 lg:col-span-3'>
+                                        <EmptyState
+                                            icon={FiHome}
+                                            title="No Apartments Found"
+                                            description="We couldn't find any apartments matching your search criteria. Try adjusting your filters or search terms."
+                                            actionLabel="Clear Filters"
+                                            action={() => {
+                                                setSearchQuery('');
+                                                setBedrooms(0);
+                                                setBathrooms(0);
+                                                setCity({ state: '', lga: '' });
+                                                setSelectedPriceRange('');
+                                            }}
+                                        />
+                                    </div>
+                                )}
 
 
                             </div>

@@ -10,4 +10,21 @@ export default defineConfig({
         }),
         react(),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor-react': ['react', 'react-dom'],
+                    'vendor-inertia': ['@inertiajs/react'],
+                    'vendor-ui': ['@headlessui/react'],
+                    'vendor-icons': ['react-icons'],
+                    'vendor-forms': ['react-phone-input-2', 'react-step-wizard'],
+                },
+            },
+        },
+        chunkSizeWarningLimit: 1000,
+    },
+    optimizeDeps: {
+        include: ['react', 'react-dom', '@inertiajs/react'],
+    },
 });

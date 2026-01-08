@@ -17,6 +17,7 @@ use Illuminate\Contracts\Session\Session;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -78,13 +79,31 @@ class AdminController extends Controller
         ]);
     }
 
-    public function apartments () {
-        $apartments = Apartment::orderBy('id', 'desc');
-        $apartmentAttributes = ApartmentAttribute::all();
-        $apartmentCategories = ApartmentCategory::all();
-        $apartments = $apartments->with('images', 'category', 'landlord')->get();
+    public function apartments (Request $request) {
+        $perPage = $request->get('per_page', 15);
+        
+        $query = Apartment::orderBy('id', 'desc')
+            ->with(['images', 'category', 'landlord']); // Eager loading to prevent N+1
+        
+        // Cache attributes and categories as they don't change frequently
+        $apartmentAttributes = Cache::remember('apartment_attributes', 3600, function () {
+            return ApartmentAttribute::all();
+        });
+        
+        $apartmentCategories = Cache::remember('apartment_categories', 3600, function () {
+            return ApartmentCategory::all();
+        });
+        
+        $apartments = $query->paginate($perPage);
+        
         return Inertia::render('Admin/Apartments/Index', [
-            'apartments' => $apartments,
+            'apartments' => $apartments->items(),
+            'pagination' => [
+                'current_page' => $apartments->currentPage(),
+                'last_page' => $apartments->lastPage(),
+                'per_page' => $apartments->perPage(),
+                'total' => $apartments->total(),
+            ],
             'attributes' => $apartmentAttributes,
             'categories' => $apartmentCategories,
         ]);

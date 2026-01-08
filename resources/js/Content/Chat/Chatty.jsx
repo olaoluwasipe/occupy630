@@ -2,18 +2,23 @@ import PrimaryButton from '@/Components/PrimaryButton'
 import ProfilePhoto from '@/Components/ProfilePhoto'
 import TextInput from '@/Components/TextInput'
 import { Head, Link, useForm } from '@inertiajs/react';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import ChatArea from './ChatArea';
 import { RiMailSendFill, RiSendPlaneFill } from "react-icons/ri";
 import { FaImage } from 'react-icons/fa';
 import { IoDocumentAttach } from "react-icons/io5";
+import TypingIndicator from '@/Components/TypingIndicator';
+import MessageStatus from '@/Components/MessageStatus';
 
 const Chatty = ({ setChat, chat, user, selectChat }) => {
-
     const [chatData, setChatData] = useState(chat);
-    const [message, setMessage] = useState('')
+    const [message, setMessage] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
+    const [typingUsers, setTypingUsers] = useState([]);
+    const typingTimeoutRef = useRef(null);
+    const lastTypingTimeRef = useRef(0);
 
-    const chatuser = chatData?.received.id !== user.id ? chatData?.received : chatData?.sent ;
+    const chatuser = chatData?.received.id !== user.id ? chatData?.received : chatData?.sent;
     const { data, setData, post, processing, recentlySuccessful, errors, reset } = useForm({
         receiver_id: chatuser?.id || '',
         message: '',
@@ -47,6 +52,85 @@ const Chatty = ({ setChat, chat, user, selectChat }) => {
         }
     }, [chatuser]);
 
+    // Set up Laravel Echo for real-time updates
+    useEffect(() => {
+        if (window.Echo && chatuser) {
+            const channelName = `chat.${[user.id, chatuser.id].sort().join('-')}`;
+            
+            // Listen for new messages
+            window.Echo.private(channelName)
+                .listen('.MessageSent', (e) => {
+                    if (e.message) {
+                        setChatData((prev) => ({
+                            ...prev,
+                            all_messages: [...(prev.all_messages || []), e.message],
+                        }));
+                    }
+                });
+
+            // Listen for typing indicators
+            window.Echo.private(channelName)
+                .listenForWhisper('typing', (e) => {
+                    if (e.userId !== user.id) {
+                        setTypingUsers((prev) => {
+                            if (!prev.includes(e.userId)) {
+                                return [...prev, e.userId];
+                            }
+                            return prev;
+                        });
+
+                        // Clear typing indicator after 3 seconds
+                        setTimeout(() => {
+                            setTypingUsers((prev) => prev.filter((id) => id !== e.userId));
+                        }, 3000);
+                    }
+                });
+
+            // Listen for message read receipts
+            window.Echo.private(channelName)
+                .listen('.MessageRead', (e) => {
+                    setChatData((prev) => ({
+                        ...prev,
+                        all_messages: (prev.all_messages || []).map((msg) =>
+                            msg.id === e.messageId ? { ...msg, read_at: e.readAt } : msg
+                        ),
+                    }));
+                });
+
+            return () => {
+                window.Echo.leave(channelName);
+            };
+        }
+    }, [user.id, chatuser?.id]);
+
+    // Handle typing indicator
+    const handleTyping = (e) => {
+        setData('message', e.target.value);
+        
+        const now = Date.now();
+        if (now - lastTypingTimeRef.current > 1000) {
+            // Broadcast typing indicator
+            if (window.Echo && chatuser) {
+                const channelName = `chat.${[user.id, chatuser.id].sort().join('-')}`;
+                window.Echo.private(channelName).whisper('typing', {
+                    userId: user.id,
+                    userName: user.name,
+                });
+            }
+            lastTypingTimeRef.current = now;
+        }
+
+        // Clear existing timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Set timeout to stop typing indicator
+        typingTimeoutRef.current = setTimeout(() => {
+            setIsTyping(false);
+        }, 1000);
+    };
+
     const handleKeyPress = () => {
         post(route('message.send'))
     }
@@ -77,12 +161,19 @@ const Chatty = ({ setChat, chat, user, selectChat }) => {
                     </div>
 
                     <ChatArea chatData={chatData} user={user} chatuser={chatuser} selectChat={selectChat} />
+                    
+                    {/* Typing Indicator */}
+                    {typingUsers.length > 0 && (
+                        <div className="px-4 py-2">
+                            <TypingIndicator />
+                        </div>
+                    )}
 
                     <div className='messageBox w-full flex gap-3'>
                         <div className='mt-2 rounded p-3 border flex cursor-pointer flex-1 justify-between'>
                             <TextInput
                                 placeholder='Type in a message'
-                                onChange={(e) => setData('message', e.target.value)}
+                                onChange={handleTyping}
                                 value={data.message}
                                 className='p-0 border-0 mr-1 outline-none focus:outline-none text-wrap overflow'
                             />

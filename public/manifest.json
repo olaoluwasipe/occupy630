@@ -1,0 +1,28 @@
+{
+  "name": "Occupy630",
+  "short_name": "Occupy630",
+  "description": "Modern apartment rental platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#003366",
+  "orientation": "portrait-primary",
+  "icons": [],
+  "screenshots": [],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Go to dashboard",
+      "url": "/dashboard"
+    },
+    {
+      "name": "Apartments",
+      "short_name": "Apartments",
+      "description": "Browse apartments",
+      "url": "/apartments"
+    }
+  ]
+}
+

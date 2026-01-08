@@ -106,7 +106,7 @@ Build notification center UI: notification bell with unread count, notification 
 
 ### Advanced Search
 ```
-Implement global search across apartments, courses, users, assignments, and forums. Add search filters, sorting, result highlighting, search history, and saved searches. Use Laravel Scout or Algolia.
+Implement global search across apartments, users, assignments, and forums. Add search filters, sorting, result highlighting, search history, and saved searches. Use Laravel Scout or Algolia.
 ```
 
 ### Calendar & Scheduling
@@ -116,12 +116,12 @@ Create calendar view for meetings, assignments, and tasks using FullCalendar.js.
 
 ### Analytics Dashboard
 ```
-Create admin analytics dashboard with key metrics: user engagement, course completion, apartment bookings, revenue, user activity. Use Chart.js or Recharts. Add date filters and export functionality.
+Create admin analytics dashboard with key metrics: user engagement, apartment bookings, revenue, user activity. Use Chart.js or Recharts. Add date filters and export functionality.
 ```
 
 ### Email Templates
 ```
-Create beautiful, responsive email templates for: welcome emails, course enrollment, assignment reminders, payment receipts, booking confirmations, password resets. Use Laravel Mail with Markdown/Blade.
+Create beautiful, responsive email templates for: welcome emails, payment receipts, booking confirmations, password resets. Use Laravel Mail with Markdown/Blade.
 ```
 
 ### Multi-language
@@ -285,4 +285,6 @@ Conduct final security audit. Review OWASP Top 10 compliance, run security scann
 ---
 
 **Usage:** Copy any prompt above and paste it into your AI assistant or task management system. Work through them systematically for best results.
+
+
 

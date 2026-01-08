@@ -10,6 +10,8 @@ import { FaSearch } from 'react-icons/fa';
 import { FiBell, FiMessageSquare, FiSearch } from "react-icons/fi";
 import { FaMessage, FaRegMessage } from 'react-icons/fa6';
 import Notifications from '@/Content/Notifications/Notifications';
+import ThemeToggle from '@/Components/ThemeToggle';
+import NotificationCenter from '@/Components/NotificationCenter';
 
 export default function Authenticated({ user, header, children, docslink='', openNav=false, prevAction='' }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -28,8 +30,8 @@ export default function Authenticated({ user, header, children, docslink='', ope
         setOpenSideNav(true);
     };
     return (
-        <div className="min-h-screen bg-white">
-            <nav className="bg-white border-b border-gray-100">
+        <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
+            <nav className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 transition-colors duration-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex">
@@ -64,15 +66,14 @@ export default function Authenticated({ user, header, children, docslink='', ope
 
                         <div className="hidden sm:flex sm:items-center sm:ms-6">
                             <div className='flex gap-2 items-center'>
-                                <div onClick={() => sideNav('search')} className='cursor-pointer px-3'>
+                                <ThemeToggle />
+                                <div onClick={() => sideNav('search')} className='cursor-pointer px-3 text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors'>
                                     <FiSearch size={25} />
                                 </div>
-                                <div onClick={() => sideNav('chat')} className='cursor-pointer px-3'>
+                                <div onClick={() => sideNav('chat')} className='cursor-pointer px-3 text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors'>
                                     <FiMessageSquare size={25} />
                                 </div>
-                                <div onClick={() => sideNav('notification')} className='cursor-pointer px-3'>
-                                    <FiBell size={25} />
-                                </div>
+                                <NotificationCenter user={user} />
                             </div>
                             <div className="ms-3 relative">
                                 <Dropdown>

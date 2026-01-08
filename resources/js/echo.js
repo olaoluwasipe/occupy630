@@ -1,21 +1,66 @@
-// import Echo from 'laravel-echo';
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
 
-// import Pusher from 'pusher-js';
-// window.Pusher = Pusher;
+// Only initialize Echo if Pusher key is configured
+const pusherKey = import.meta.env.VITE_PUSHER_APP_KEY;
 
-// // window.Echo = new Echo({
-// //     broadcaster: 'reverb',
-// //     key: import.meta.env.VITE_REVERB_APP_KEY,
-// //     wsHost: import.meta.env.VITE_REVERB_HOST,
-// //     wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
-// //     wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-// //     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
-// //     enabledTransports: ['ws', 'wss'],
-// // });
+if (pusherKey) {
+    window.Pusher = Pusher;
 
-// window.Echo = new Echo({
-//     broadcaster: 'pusher',
-//     key: import.meta.env.MIX_PUSHER_APP_KEY,
-//     cluster: import.meta.env.MIX_PUSHER_APP_CLUSTER,
-//     encrypted: true,
-// });
+    window.Echo = new Echo({
+        broadcaster: 'pusher',
+        key: pusherKey,
+        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1',
+        wsHost: import.meta.env.VITE_PUSHER_HOST || `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1'}.pusher.com`,
+        wsPort: import.meta.env.VITE_PUSHER_PORT || 80,
+        wssPort: import.meta.env.VITE_PUSHER_PORT || 443,
+        forceTLS: (import.meta.env.VITE_PUSHER_SCHEME || 'https') === 'https',
+        enabledTransports: ['ws', 'wss'],
+        encrypted: true,
+        authEndpoint: '/broadcasting/auth',
+        auth: {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+            },
+        },
+    });
+} else {
+    // Create a mock Echo object to prevent errors when Echo is accessed
+    const createMockChannel = () => ({
+        listen: (event, callback) => {
+            // Return an object with stop method for cleanup
+            return { stop: () => {} };
+        },
+        notification: (callback) => {
+            // Return an object with stop method for cleanup
+            return { stop: () => {} };
+        },
+        whisper: (event, data) => {
+            // Mock whisper method - does nothing
+        },
+        listenForWhisper: (event, callback) => {
+            // Return an object with stop method for cleanup
+            return { stop: () => {} };
+        },
+        subscribed: (callback) => {
+            // Mock subscribed callback
+        },
+        unsubscribe: () => {
+            // Mock unsubscribe
+        },
+    });
+
+    window.Echo = {
+        channel: createMockChannel,
+        private: createMockChannel,
+        join: () => ({
+            listen: () => ({ stop: () => {} }),
+            here: () => {},
+            joining: () => {},
+            leaving: () => {},
+        }),
+        leave: () => {},
+        disconnect: () => {},
+    };
+    console.warn('Pusher is not configured. Real-time features will be disabled.');
+}
